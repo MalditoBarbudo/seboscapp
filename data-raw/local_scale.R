@@ -63,15 +63,15 @@ r4_erosion <- stars::read_stars('data-raw/local_scale/r4/w001001.adf') %>%
 municipalities <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp'
 ) %>%
-  dplyr::select(municipality_id = CODIMUNI, municipality_name = NOMMUNI, geometry)
+  dplyr::select(municipality_id = CODIMUNI, admin_municipality = NOMMUNI, geometry)
 counties <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpc1_20180101_0.shp'
 ) %>%
-  dplyr::select(county_id = CODICOMAR, county_name = NOMCOMAR, geometry)
+  dplyr::select(county_id = CODICOMAR, admin_region = NOMCOMAR, geometry)
 provinces <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpp1_20180101_0.shp'
 ) %>%
-  dplyr::select(province_id = CODIPROV, province_name = NOMPROV, geometry)
+  dplyr::select(province_id = CODIPROV, admin_province = NOMPROV, geometry)
 
 all_datasets_as_points <- list(
   c1 = c1_animals,
@@ -99,17 +99,17 @@ plot_to_poly_classificator <- function(plots_data, polygons_to_check, names_poly
 all_datasets_classified_by_admin_div <- all_datasets_as_points %>%
   purrr::map(
     .f = ~ plot_to_poly_classificator(
-      .x, municipalities, municipalities$municipality_name, 'admin_municipality'
+      .x, municipalities, municipalities$admin_municipality, 'admin_municipality'
     )
   ) %>%
   purrr::map(
     .f = ~ plot_to_poly_classificator(
-      .x, counties, counties$county_name, 'admin_region'
+      .x, counties, counties$admin_region, 'admin_region'
     )
   ) %>%
   purrr::map(
     .f = ~ plot_to_poly_classificator(
-      .x, provinces, provinces$province_name, 'admin_province'
+      .x, provinces, provinces$admin_province, 'admin_province'
     )
   ) %>%
   purrr::map(
@@ -124,8 +124,18 @@ r2_data <- all_datasets_classified_by_admin_div[['r2']]
 r3_data <- all_datasets_classified_by_admin_div[['r3']]
 r4_data <- all_datasets_classified_by_admin_div[['r4']]
 
+municipalities_simpl <- municipalities %>%
+  rmapshaper::ms_simplify(0.01)
+counties_simpl <- counties %>%
+  rmapshaper::ms_simplify(0.01)
+provinces_simpl <- provinces %>%
+  rmapshaper::ms_simplify(0.01)
+
 usethis::use_data(
   c1_data, p1_data, p2_data, r1_data, r2_data, r3_data, r4_data,
+  municipalities_simpl, counties_simpl, provinces_simpl,
 
   internal = TRUE, overwrite = TRUE
 )
+
+
