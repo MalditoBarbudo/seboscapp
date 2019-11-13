@@ -144,6 +144,13 @@ seboscapp <- function() {
             shiny::selectInput(
               'fixed_scale', 'Select the scale',
               choices = c('local', 'municipalities', 'counties', 'provinces')
+            ),
+
+            shinyjs::hidden(
+              shiny::selectInput(
+                'fixed_metric', 'Select the summary metric',
+                choices = c('mean', 'min', 'max', 'n')
+              )
             )
           ), # end of sidebar panel
 
@@ -168,6 +175,11 @@ seboscapp <- function() {
 
     ## data_reactive ####
     data_fixed <- shiny::reactive({
+
+      shiny::validate(
+        shiny::need(input$fixed_var_sel, 'no inputs'),
+        shiny::need(input$fixed_scale, 'no inputs')
+      )
 
       dataset_fixed <- switch(
         input$fixed_var_sel,
@@ -261,40 +273,60 @@ seboscapp <- function() {
         )
     })
 
-    ## leaflet proxy scale ####
+    ## show the metric when scale is not local ####
     shiny::observeEvent(
       eventExpr = input$fixed_scale,
       handlerExpr = {
-
-        browser()
-
         if (input$fixed_scale == 'local') {
-
-          leaflet::leafletProxy('fixed_map', session, data = data_fixed()) %>%
-            leaflet::clearGroup('poly') %>%
-            leaflet::clearGroup('plot') %>%
-            leaflet::addCircleMarkers(
-              group = 'plot', label = as.character(data_fixed()[[input$fixed_var_sel]])
-            )
-
+          shinyjs::hideElement('fixed_metric')
         } else {
-
-          admin_var <- switch(
-            input$fixed_scale,
-            'municipalities' = 'admin_municipality',
-            'counties' = 'admin_region',
-            'provinces' = 'admin_province'
-          )
-
-          leaflet::leafletProxy('fixed_map', session, data = data_fixed()) %>%
-            leaflet::clearGroup('poly') %>%
-            leaflet::clearGroup('plot') %>%
-            leaflet::addPolygons(
-              group = 'poly', label = glue::glue("{data_fixed()[[admin_var]]} - {data_fixed()[['mean']]}")
-            )
+          shinyjs::showElement('fixed_metric')
         }
       }
     )
+
+    ## leaflet proxy scale ####
+    shiny::observe({
+
+      browser()
+
+      shiny::validate(
+        shiny::need(input$fixed_scale, 'no inputs'),
+        shiny::need(input$fixed_var_sel, 'no inputs'),
+        shiny::need(input$fixed_metric, 'no inputs')
+      )
+
+      data_sel <- data_fixed()
+      scale_sel <- input$fixed_scale
+      var_sel <- input$fixed_var_sel
+      metric_sel <- input$fixed_metric
+
+      if (scale_sel == 'local') {
+
+        leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
+          leaflet::clearGroup('poly') %>%
+          leaflet::clearGroup('plot') %>%
+          leaflet::addCircleMarkers(
+            group = 'plot', label = as.character(data_sel[[var_sel]])
+          )
+
+      } else {
+
+        admin_var <- switch(
+          scale_sel,
+          'municipalities' = 'admin_municipality',
+          'counties' = 'admin_region',
+          'provinces' = 'admin_province'
+        )
+
+        leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
+          leaflet::clearGroup('poly') %>%
+          leaflet::clearGroup('plot') %>%
+          leaflet::addPolygons(
+            group = 'poly', label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}")
+          )
+      }
+    })
 
   } # end of server function
 
