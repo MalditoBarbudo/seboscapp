@@ -243,6 +243,12 @@ seboscapp <- function() {
     output$fixed_table <- DT::renderDT({
 
       data_sel <- data_fixed()
+      columns_to_round <- names(data_sel)[
+        names(data_sel) %in% c(
+          'c1', 'p1', 'p2', 'r1', 'r2', 'r3',
+          'r4', 'mean', 'min', 'max'
+        )
+      ]
 
       data_sel %>%
         tibble::as_tibble() %>%
@@ -250,6 +256,26 @@ seboscapp <- function() {
           dplyr::starts_with('admin_'),
           dplyr::one_of(c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
           dplyr::one_of(c('mean', 'min', 'max', 'n'))
+        ) %>%
+        DT::datatable(
+          rownames = FALSE,
+          class = 'hover order-column stripe nowrap',
+          filter = list(position = 'top', clear = FALSE, plain = FALSE),
+          options = list(
+            pageLength = 15,
+            dom = 'tip',
+            autoWidth = FALSE,
+            initComplete = DT::JS(
+              "function(settings, json) {",
+              "$(this.api().table().header()).css({'font-family': 'Montserrat'});",
+              "$(this.api().table().body()).css({'font-family': 'Hacker'});",
+              "}"
+            )
+          )
+        ) %>%
+        DT::formatRound(
+          columns = columns_to_round,
+          digits = 2
         )
 
     })
