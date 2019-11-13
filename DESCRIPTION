@@ -11,4 +11,8 @@ Imports:
     sf,
     DT,
     shiny,
-    leaflet
+    leaflet,
+    leaflet.extras,
+    dplyr,
+    magrittr
+RoxygenNote: 6.1.1

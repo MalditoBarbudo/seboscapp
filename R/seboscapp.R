@@ -211,7 +211,8 @@ seboscapp <- function() {
           ) %>%
           tibble::as_tibble() %>%
           dplyr::select(-geometry) %>%
-          dplyr::left_join(admin_polys, by = c(admin_var))
+          dplyr::left_join(admin_polys, by = c(admin_var)) %>%
+          sf::st_as_sf(sf_column_name = 'geometry')
 
         return(summarise_fixed)
       }
@@ -222,8 +223,78 @@ seboscapp <- function() {
     output$fixed_table <- DT::renderDT({data_fixed()})
 
     ## fixed map output ####
-    output$fixed_map <- leaflet::renderLeaflet({})
+    output$fixed_map <- leaflet::renderLeaflet({
 
+      leaflet::leaflet() %>%
+        leaflet::setView(1.744, 41.726, zoom = 8) %>%
+        leaflet::addProviderTiles(
+          leaflet::providers$Esri.WorldShadedRelief,
+          group = 'Relief',
+          options = leaflet::providerTileOptions(
+            # zIndex = -1
+          )
+        ) %>%
+        leaflet::addProviderTiles(
+          leaflet::providers$Esri.WorldImagery,
+          group = 'Imaginery',
+          options = leaflet::providerTileOptions(
+            # zIndex = -1
+          )
+        ) %>%
+        leaflet::addLayersControl(
+          baseGroups = c('Relief', 'Imaginery'),
+          options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = FALSE)
+        ) %>%
+        # leaflet.extras plugins
+        leaflet.extras::addDrawToolbar(
+          targetGroup = 'poly',
+          position = 'topleft',
+          polylineOptions = FALSE, circleOptions = FALSE, rectangleOptions = FALSE,
+          markerOptions = FALSE, circleMarkerOptions = FALSE,
+          polygonOptions = leaflet.extras::drawPolygonOptions(
+            shapeOptions = leaflet.extras::drawShapeOptions()
+          ),
+          editOptions = leaflet.extras::editToolbarOptions(
+            edit = TRUE, remove = TRUE
+          ),
+          singleFeature = TRUE
+        )
+    })
+
+    ## leaflet proxy scale ####
+    shiny::observeEvent(
+      eventExpr = input$fixed_scale,
+      handlerExpr = {
+
+        browser()
+
+        if (input$fixed_scale == 'local') {
+
+          leaflet::leafletProxy('fixed_map', session, data = data_fixed()) %>%
+            leaflet::clearGroup('poly') %>%
+            leaflet::clearGroup('plot') %>%
+            leaflet::addCircleMarkers(
+              group = 'plot', label = as.character(data_fixed()[[input$fixed_var_sel]])
+            )
+
+        } else {
+
+          admin_var <- switch(
+            input$fixed_scale,
+            'municipalities' = 'admin_municipality',
+            'counties' = 'admin_region',
+            'provinces' = 'admin_province'
+          )
+
+          leaflet::leafletProxy('fixed_map', session, data = data_fixed()) %>%
+            leaflet::clearGroup('poly') %>%
+            leaflet::clearGroup('plot') %>%
+            leaflet::addPolygons(
+              group = 'poly', label = glue::glue("{data_fixed()[[admin_var]]} - {data_fixed()[['mean']]}")
+            )
+        }
+      }
+    )
 
   } # end of server function
 
