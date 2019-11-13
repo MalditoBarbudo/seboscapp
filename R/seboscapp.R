@@ -126,7 +126,6 @@ seboscapp <- function() {
       # lang
       lang_declared <- lang()
 
-      # proper UI ####
       shiny::fluidPage(
         shiny::sidebarLayout(
 
@@ -151,6 +150,15 @@ seboscapp <- function() {
                 'fixed_metric', 'Select the summary metric',
                 choices = c('mean', 'min', 'max', 'n')
               )
+            ),
+
+            # little spaces
+            shiny::br(),
+            shiny::br(),
+
+            # download
+            shiny::actionButton(
+              'fixed_download_dialogue', 'Download'
             )
           ), # end of sidebar panel
 
@@ -373,6 +381,96 @@ seboscapp <- function() {
           )
       }
     })
+
+    ## download handlers ####
+    # modal for saving the raster data
+    shiny::observeEvent(
+      eventExpr = input$fixed_download_dialogue,
+      handlerExpr = {
+
+        lang_declared = lang()
+
+        shiny::showModal(
+          ui = shiny::modalDialog(
+            shiny::tagList(
+
+              shiny::fluidRow(
+                shiny::column(
+                  12,
+                  # format options
+                  shiny::selectInput(
+                    'fixed_data_format',
+                    'Select the format',
+                    choices = list(
+                      'Map' = c('shp', 'gpkg'),
+                      'Table' = c('excel', 'csv')
+                    ),
+                    selected = 'gpkg'
+                  )
+                )
+              )
+            ),
+            easyClose = TRUE,
+            footer = shiny::tagList(
+              # shiny::modalButton(translate_app('modal_dismiss_label', lang_declared)),
+              shiny::modalButton('Dismiss'),
+              shiny::downloadButton(
+                'fixed_download',
+                label = 'Download',
+                class = 'btn-success'
+              )
+            )
+          )
+        )
+      }
+    ) # end of download dialog handler
+
+    output$fixed_download <- shiny::downloadHandler(
+      filename = function() {
+        file_name <- switch(
+          input$fixed_data_format,
+          'shp' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.zip"),
+          'gpkg' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.gpkg"),
+          'excel' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.xlsx"),
+          'csv' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.csv")
+        )
+        return(file_name)
+      },
+      content = function(file) {
+
+        if (input$fixed_data_format == 'gpkg') {
+          sf::st_write(data_fixed(), dsn = file)
+        } else {
+          if (input$fixed_data_format == 'xlsx') {
+            writexl::write_xlsx(data_fixed(), path = file)
+          } else {
+            if (input$fixed_data_format ==  'csv') {
+              readr::write_csv(data_fixed(), path = file)
+            } else {
+              tmp_dir <- tempdir()
+              sf::st_write(
+                data_fixed(),
+                file.path(
+                  tmp_dir,
+                  glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.shp")
+                )
+              )
+              shp_files <- list.files(
+                tmp_dir,
+                glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static"),
+                full.names = TRUE
+              )
+              utils::zip(
+                file.path(tmp_dir, 'shp_files.zip'),
+                shp_files
+              )
+              file.copy(file.path(tmp_dir, 'shp_files.zip'), file)
+              file.remove(file.path(tmp_dir, 'shp_files.zip'), shp_files)
+            }
+          }
+        }
+      }
+    )
 
   } # end of server function
 

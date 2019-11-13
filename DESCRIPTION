@@ -16,5 +16,6 @@ Imports:
     dplyr,
     magrittr,
     shinyjs,
-    tibble
+    tibble,
+    glue
 RoxygenNote: 6.1.1
