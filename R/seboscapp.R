@@ -131,7 +131,7 @@ seboscapp <- function() {
         shiny::sidebarLayout(
 
           sidebarPanel = shiny::sidebarPanel(
-            width = 4,
+            width = 3,
             # title
             # shiny::h4(translate_app('sidebar_h4_title', lang_declared)),
             shiny::h4('Settings'),
@@ -155,7 +155,7 @@ seboscapp <- function() {
           ), # end of sidebar panel
 
           mainPanel = shiny::mainPanel(
-            width = 8,
+            width = 9,
             shiny::tabsetPanel(
               shiny::tabPanel(
                 title = 'Map',
@@ -207,7 +207,7 @@ seboscapp <- function() {
 
         admin_polys <- switch(
           scale_sel,
-          'municipalities' = muncipalities_simpl,
+          'municipalities' = municipalities_simpl,
           'counties' = counties_simpl,
           'provinces' = provinces_simpl
         )
@@ -288,30 +288,46 @@ seboscapp <- function() {
     ## leaflet proxy scale ####
     shiny::observe({
 
-      browser()
-
+      # needed inputs
       shiny::validate(
         shiny::need(input$fixed_scale, 'no inputs'),
         shiny::need(input$fixed_var_sel, 'no inputs'),
         shiny::need(input$fixed_metric, 'no inputs')
       )
 
+      # triggers observer (inputs)
       data_sel <- data_fixed()
       scale_sel <- input$fixed_scale
       var_sel <- input$fixed_var_sel
       metric_sel <- input$fixed_metric
 
+      # local scale, markers
       if (scale_sel == 'local') {
+
+        # palettes
+        palette_map <- leaflet::colorBin(
+          palette = 'viridis',
+          domain = c(
+            min(data_sel[[var_sel]], na.rm = TRUE),
+            max(data_sel[[var_sel]], na.rm = TRUE)
+          ),
+          bins = 6
+        )
 
         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
           leaflet::clearGroup('poly') %>%
           leaflet::clearGroup('plot') %>%
           leaflet::addCircleMarkers(
-            group = 'plot', label = as.character(data_sel[[var_sel]])
+            group = 'plot', label = as.character(data_sel[[var_sel]]),
+            stroke = FALSE, fillOpacity = 0.7,
+            fillColor = ~palette_map(data_sel[[var_sel]]), radius = 5
+          ) %>%
+          leaflet::addLegend(
+            position = 'bottomright', pal = palette_map, values = data_sel[[var_sel]],
+            layerId = 'color_palette', title = var_sel
           )
-
       } else {
-
+        # bigger scale, polygons
         admin_var <- switch(
           scale_sel,
           'municipalities' = 'admin_municipality',
@@ -319,11 +335,29 @@ seboscapp <- function() {
           'provinces' = 'admin_province'
         )
 
+        # palettes
+        palette_map <- leaflet::colorBin(
+          palette = 'viridis',
+          domain = c(
+            min(data_sel[[metric_sel]], na.rm = TRUE),
+            max(data_sel[[metric_sel]], na.rm = TRUE)
+          ),
+          bins = 6
+        )
+
         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
           leaflet::clearGroup('poly') %>%
           leaflet::clearGroup('plot') %>%
           leaflet::addPolygons(
-            group = 'poly', label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}")
+            group = 'poly',
+            label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}"),
+            fillColor = ~palette_map(data_sel[[metric_sel]]),
+            fillOpacity = 0.9, stroke = FALSE,
+            color = ~palette_map(data_sel[[metric_sel]])
+          ) %>%
+          leaflet::addLegend(
+            position = 'bottomright', pal = palette_map, values = data_sel[[metric_sel]],
+            layerId = 'color_palette', title = var_sel
           )
       }
     })
