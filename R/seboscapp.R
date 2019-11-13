@@ -142,7 +142,7 @@ seboscapp <- function() {
 
             shiny::selectInput(
               'fixed_scale', 'Select the scale',
-              choices = c('local', 'municipalities', 'counties', 'provinces')
+              choices = c('local', 'municipalities', 'counties', 'provinces', 'drawed_poly')
             ),
 
             shinyjs::hidden(
@@ -206,35 +206,64 @@ seboscapp <- function() {
       if (scale_sel == 'local') {
         return(dataset_fixed)
       } else {
-        admin_var <- switch(
-          scale_sel,
-          'municipalities' = 'admin_municipality',
-          'counties' = 'admin_region',
-          'provinces' = 'admin_province'
-        )
+        if (scale_sel %in% c('municipalities', 'counties', 'provinces')) {
+          admin_var <- switch(
+            scale_sel,
+            'municipalities' = 'admin_municipality',
+            'counties' = 'admin_region',
+            'provinces' = 'admin_province'
+          )
 
-        admin_polys <- switch(
-          scale_sel,
-          'municipalities' = municipalities_simpl,
-          'counties' = counties_simpl,
-          'provinces' = provinces_simpl
-        )
+          admin_polys <- switch(
+            scale_sel,
+            'municipalities' = municipalities_simpl,
+            'counties' = counties_simpl,
+            'provinces' = provinces_simpl
+          )
 
-        # calculate the scale
-        summarise_fixed <- dataset_fixed %>%
-          dplyr::group_by(.data[[admin_var]]) %>%
-          dplyr::summarise(
-            mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
-            max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
-            min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
-            n = n()
+          # calculate the scale
+          summarise_fixed <- dataset_fixed %>%
+            dplyr::group_by(.data[[admin_var]]) %>%
+            dplyr::summarise(
+              mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              n = n()
+            ) %>%
+            tibble::as_tibble() %>%
+            dplyr::select(-geometry) %>%
+            dplyr::left_join(admin_polys, by = c(admin_var)) %>%
+            sf::st_as_sf(sf_column_name = 'geometry')
+
+          return(summarise_fixed)
+        } else {
+
+          shiny::validate(
+            shiny::need(input$fixed_map_draw_all_features, 'no drawed poly'),
+            shiny::need(
+              !rlang::is_empty(input$fixed_map_draw_all_features[['features']]),
+              'removed poly'
+            )
+          )
+
+          # here the data for custom poly
+          custom_poly_data <- drawed_poly(
+            custom_polygon = input$fixed_map_draw_all_features,
+            points_data = dataset_fixed,
+            lang()
           ) %>%
-          tibble::as_tibble() %>%
-          dplyr::select(-geometry) %>%
-          dplyr::left_join(admin_polys, by = c(admin_var)) %>%
-          sf::st_as_sf(sf_column_name = 'geometry')
+            dplyr::group_by(poly_id) %>%
+            dplyr::summarise(
+              mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              n = n(),
+              geometry = unique(geometry)
+            ) %>%
+            sf::st_as_sf(sf_column_name = 'geometry')
 
-        return(summarise_fixed)
+          return(custom_poly_data)
+        }
       }
 
     })
@@ -253,7 +282,7 @@ seboscapp <- function() {
       data_sel %>%
         tibble::as_tibble() %>%
         dplyr::select(
-          dplyr::starts_with('admin_'),
+          dplyr::starts_with('admin_'), 'poly_id',
           dplyr::one_of(c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
           dplyr::one_of(c('mean', 'min', 'max', 'n'))
         ) %>%
@@ -331,7 +360,7 @@ seboscapp <- function() {
       }
     )
 
-    ## leaflet proxy scale ####
+    ## leaflet proxy map ####
     shiny::observe({
 
       # needed inputs
@@ -378,7 +407,8 @@ seboscapp <- function() {
           scale_sel,
           'municipalities' = 'admin_municipality',
           'counties' = 'admin_region',
-          'provinces' = 'admin_province'
+          'provinces' = 'admin_province',
+          'drawed_poly' = 'poly_id'
         )
 
         # palettes
