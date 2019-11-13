@@ -132,13 +132,13 @@ r3_data <- all_datasets_classified_by_admin_div[['r3']]
 r4_data <- all_datasets_classified_by_admin_div[['r4']]
 
 municipalities_simpl <- municipalities %>%
-  rmapshaper::ms_simplify(0.01) %>%
+  rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 counties_simpl <- counties %>%
-  rmapshaper::ms_simplify(0.01) %>%
+  rmapshaper::ms_simplify(0.1) %>%
 sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 provinces_simpl <- provinces %>%
-  rmapshaper::ms_simplify(0.01) %>%
+  rmapshaper::ms_simplify(0.1) %>%
 sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 
 usethis::use_data(

@@ -337,10 +337,10 @@ seboscapp <- function() {
         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
           leaflet::clearGroup('poly') %>%
           leaflet::clearGroup('plot') %>%
-          leaflet::addCircleMarkers(
+          leaflet::addCircles(
             group = 'plot', label = as.character(data_sel[[var_sel]]),
             stroke = FALSE, fillOpacity = 0.7,
-            fillColor = ~palette_map(data_sel[[var_sel]]), radius = 5
+            fillColor = ~palette_map(data_sel[[var_sel]]), radius = 750
           ) %>%
           leaflet::addLegend(
             position = 'bottomright', pal = palette_map, values = data_sel[[var_sel]],
@@ -357,7 +357,7 @@ seboscapp <- function() {
 
         # palettes
         palette_map <- leaflet::colorBin(
-          palette = 'viridis',
+          palette = 'plasma',
           domain = c(
             min(data_sel[[metric_sel]], na.rm = TRUE),
             max(data_sel[[metric_sel]], na.rm = TRUE)
@@ -372,8 +372,12 @@ seboscapp <- function() {
             group = 'poly',
             label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}"),
             fillColor = ~palette_map(data_sel[[metric_sel]]),
-            fillOpacity = 0.9, stroke = FALSE,
-            color = ~palette_map(data_sel[[metric_sel]])
+            fillOpacity = 0.9, stroke = TRUE, weight = 2,
+            color = ~palette_map(data_sel[[metric_sel]]),
+            highlightOptions = leaflet::highlightOptions(
+              color = "#CF000F", weight = 2,
+              bringToFront = FALSE
+            ),
           ) %>%
           leaflet::addLegend(
             position = 'bottomright', pal = palette_map, values = data_sel[[metric_sel]],
