@@ -43,3 +43,29 @@ drawed_poly <- function(custom_polygon, points_data, lang) {
     dplyr::select(-geometry) %>%
     dplyr::mutate(geometry = custom_poly_sf[['geometry']])
 }
+
+#' translate app function
+#'
+#' translate the app based on the lang selected
+translate_app <- function(id, lang) {
+
+  app_translations
+
+  id %>%
+    purrr::map_chr(
+      ~ app_translations %>%
+        dplyr::filter(text_id == .x) %>% {
+          data_filtered <- .
+          if (nrow(data_filtered) < 1) {
+            .x
+          } else {
+            dplyr::pull(data_filtered, !! rlang::sym(glue::glue("translation_{lang}")))
+          }
+        }
+    )
+
+  # dplyr::tbl(db, 'app_translations_APP') %>%
+  #   dplyr::filter(text_id %in% id) %>%
+  #   dplyr::arrange(text_id) %>%
+  #   dplyr::pull(!! rlang::sym(glue::glue("translation_{lang}")))
+}

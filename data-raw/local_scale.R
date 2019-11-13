@@ -140,12 +140,3 @@ sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 provinces_simpl <- provinces %>%
   rmapshaper::ms_simplify(0.1) %>%
 sf::st_transform(crs = '+proj=longlat +datum=WGS84')
-
-usethis::use_data(
-  c1_data, p1_data, p2_data, r1_data, r2_data, r3_data, r4_data,
-  municipalities_simpl, counties_simpl, provinces_simpl,
-
-  internal = TRUE, overwrite = TRUE
-)
-
-

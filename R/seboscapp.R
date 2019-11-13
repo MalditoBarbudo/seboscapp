@@ -44,7 +44,7 @@ seboscapp <- function() {
       inputs = shinyWidgets::pickerInput(
         'lang', NULL,
         choices = lang_choices,
-        selected = 'cat',
+        selected = 'eng',
         width = '100px',
         choicesOpt = list(
           content = c(
@@ -133,22 +133,28 @@ seboscapp <- function() {
             width = 3,
             # title
             # shiny::h4(translate_app('sidebar_h4_title', lang_declared)),
-            shiny::h4('Settings'),
+            shiny::h4('fixed_sidebar_h4_title' %>% translate_app(lang_declared)),
 
             shiny::selectInput(
-              'fixed_var_sel', 'Select the variable',
-              choices = c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')
+              'fixed_var_sel',
+              'fixed_var_sel' %>% translate_app(lang_declared),
+              choices = c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4') %>%
+                purrr::set_names(nm = translate_app(., lang_declared))
             ),
 
             shiny::selectInput(
-              'fixed_scale', 'Select the scale',
-              choices = c('local', 'municipalities', 'counties', 'provinces', 'drawed_poly')
+              'fixed_scale',
+              'fixed_scale' %>% translate_app(lang_declared),
+              choices = c('local', 'municipalities', 'counties', 'provinces', 'drawed_poly') %>%
+                purrr::set_names(nm = translate_app(., lang_declared))
             ),
 
             shinyjs::hidden(
               shiny::selectInput(
-                'fixed_metric', 'Select the summary metric',
-                choices = c('mean', 'min', 'max', 'n')
+                'fixed_metric',
+                'fixed_metric' %>% translate_app(lang_declared),
+                choices = c('mean', 'min', 'max', 'n') %>%
+                  purrr::set_names(nm = translate_app(., lang_declared))
               )
             ),
 
@@ -158,7 +164,7 @@ seboscapp <- function() {
 
             # download
             shiny::actionButton(
-              'fixed_download_dialogue', 'Download'
+              'fixed_download_dialogue', 'download' %>% translate_app(lang_declared)
             )
           ), # end of sidebar panel
 
@@ -166,11 +172,11 @@ seboscapp <- function() {
             width = 9,
             shiny::tabsetPanel(
               shiny::tabPanel(
-                title = 'Map',
+                title = 'map' %>% translate_app(lang_declared),
                 leaflet::leafletOutput('fixed_map', height = '70vh')
               ), # end of fixed map tab
               shiny::tabPanel(
-                title = 'Table',
+                title = 'table' %>% translate_app(lang_declared),
                 DT::DTOutput('fixed_table', height = '70vh')
               ) # end of fixed table tab
             )
@@ -282,8 +288,8 @@ seboscapp <- function() {
       data_sel %>%
         tibble::as_tibble() %>%
         dplyr::select(
-          dplyr::starts_with('admin_'), 'poly_id',
-          dplyr::one_of(c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
+          dplyr::starts_with('admin_'),
+          dplyr::one_of(c('poly_id', 'c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
           dplyr::one_of(c('mean', 'min', 'max', 'n'))
         ) %>%
         DT::datatable(
@@ -311,6 +317,8 @@ seboscapp <- function() {
 
     ## fixed map output ####
     output$fixed_map <- leaflet::renderLeaflet({
+
+      lang_declared <- lang()
 
       leaflet::leaflet() %>%
         leaflet::setView(1.744, 41.726, zoom = 8) %>%
@@ -367,7 +375,8 @@ seboscapp <- function() {
       shiny::validate(
         shiny::need(input$fixed_scale, 'no inputs'),
         shiny::need(input$fixed_var_sel, 'no inputs'),
-        shiny::need(input$fixed_metric, 'no inputs')
+        shiny::need(input$fixed_metric, 'no inputs'),
+        shiny::need(lang(), 'no language')
       )
 
       # triggers observer (inputs)
@@ -375,6 +384,7 @@ seboscapp <- function() {
       scale_sel <- input$fixed_scale
       var_sel <- input$fixed_var_sel
       metric_sel <- input$fixed_metric
+      lang_declared <- lang()
 
       # local scale, markers
       if (scale_sel == 'local') {
