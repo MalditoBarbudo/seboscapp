@@ -159,7 +159,7 @@ seboscapp <- function() {
             shiny::tabsetPanel(
               shiny::tabPanel(
                 title = 'Map',
-                leaflet::leafletOutput('fixed_map')
+                leaflet::leafletOutput('fixed_map', height = '70vh')
               ), # end of fixed map tab
               shiny::tabPanel(
                 title = 'Table',
