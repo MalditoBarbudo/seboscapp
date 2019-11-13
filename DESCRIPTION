@@ -15,5 +15,6 @@ Imports:
     leaflet.extras,
     dplyr,
     magrittr,
-    shinyjs
+    shinyjs,
+    tibble
 RoxygenNote: 6.1.1

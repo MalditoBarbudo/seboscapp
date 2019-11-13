@@ -163,7 +163,7 @@ seboscapp <- function() {
               ), # end of fixed map tab
               shiny::tabPanel(
                 title = 'Table',
-                DT::DTOutput('fixed_table')
+                DT::DTOutput('fixed_table', height = '70vh')
               ) # end of fixed table tab
             )
           ) # end of main panel
@@ -232,7 +232,19 @@ seboscapp <- function() {
     })
 
     ## table fixed output ####
-    output$fixed_table <- DT::renderDT({data_fixed()})
+    output$fixed_table <- DT::renderDT({
+
+      data_sel <- data_fixed()
+
+      data_sel %>%
+        tibble::as_tibble() %>%
+        dplyr::select(
+          dplyr::starts_with('admin_'),
+          dplyr::one_of(c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
+          dplyr::one_of(c('mean', 'min', 'max', 'n'))
+        )
+
+    })
 
     ## fixed map output ####
     output$fixed_map <- leaflet::renderLeaflet({
