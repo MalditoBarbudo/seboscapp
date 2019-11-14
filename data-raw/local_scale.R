@@ -8,20 +8,20 @@ p1_mushrooms_csv <- readr::read_csv('data-raw/local_scale/csv/P1mushrooms.csv') 
     coords = c('X1', 'Y2'),
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
-  dplyr::rename(p1 = P1)
+  dplyr::rename(p1 = P1, plot_id = ID)
 p2_water_csv <- readr::read_csv('data-raw/local_scale/csv/P2water.csv') %>%
   dplyr::filter(UTM_X > 0) %>%
   sf::st_as_sf(
     coords = c('UTM_X', 'UTM_Y'),
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
-  dplyr::rename(p2 = P2)
+  dplyr::rename(p2 = P2, plot_id = cod)
 r1_carbon_csv <- readr::read_csv('data-raw/local_scale/csv/R1Carbon.csv') %>%
   sf::st_as_sf(
     coords = c('UTM_X', 'UTM_Y'),
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
-  dplyr::rename(r1 = R1)
+  dplyr::rename(r1 = R1, plot_id = IDPARCELA)
 
 # now the grid data, as points also
 c1_animals <- stars::read_stars('data-raw/local_scale/c1/w001001.adf') %>%
@@ -31,7 +31,8 @@ c1_animals <- stars::read_stars('data-raw/local_scale/c1/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
   dplyr::rename(c1 = w001001.adf) %>%
-  dplyr::filter(!is.na(c1))
+  dplyr::filter(!is.na(c1)) %>%
+  dplyr::mutate(plot_id = dplyr::row_number(c1))
 
 r2_soilc <- stars::read_stars('data-raw/local_scale/r2/w001001.adf') %>%
   stars::as_tibble.stars() %>%
@@ -40,7 +41,8 @@ r2_soilc <- stars::read_stars('data-raw/local_scale/r2/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
   dplyr::rename(r2 = w001001.adf) %>%
-  dplyr::filter(!is.na(r2))
+  dplyr::filter(!is.na(r2)) %>%
+  dplyr::mutate(plot_id = dplyr::row_number(r2))
 
 r3_riparian <- stars::read_stars('data-raw/local_scale/r3/w001001.adf') %>%
   stars::as_tibble.stars() %>%
@@ -49,7 +51,8 @@ r3_riparian <- stars::read_stars('data-raw/local_scale/r3/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
   dplyr::rename(r3 = w001001.adf) %>%
-  dplyr::filter(!is.na(r3))
+  dplyr::filter(!is.na(r3)) %>%
+  dplyr::mutate(plot_id = dplyr::row_number(r3))
 
 r4_erosion <- stars::read_stars('data-raw/local_scale/r4/w001001.adf') %>%
   stars::as_tibble.stars() %>%
@@ -58,7 +61,8 @@ r4_erosion <- stars::read_stars('data-raw/local_scale/r4/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs '
   ) %>%
   dplyr::rename(r4 = w001001.adf) %>%
-  dplyr::filter(!is.na(r4))
+  dplyr::filter(!is.na(r4)) %>%
+  dplyr::mutate(plot_id = dplyr::row_number(r4))
 
 municipalities <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp'

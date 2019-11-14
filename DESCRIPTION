@@ -17,5 +17,7 @@ Imports:
     magrittr,
     shinyjs,
     tibble,
-    glue
+    glue,
+    ggplot2,
+    ggiraph
 RoxygenNote: 6.1.1

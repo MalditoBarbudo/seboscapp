@@ -287,7 +287,7 @@ seboscapp <- function() {
 
     })
 
-    ## table fixed output ####
+    ## fixed table output ####
     output$fixed_table <- DT::renderDT({
 
       data_sel <- data_fixed()
@@ -422,6 +422,7 @@ seboscapp <- function() {
           leaflet::clearGroup('custom_poly') %>%
           leaflet::addCircles(
             group = 'plot', label = as.character(data_sel[[var_sel]]),
+            layerId = ~plot_id,
             stroke = FALSE, fillOpacity = 0.7,
             fillColor = ~palette_map(data_sel[[var_sel]]), radius = 750
           ) %>%
@@ -456,7 +457,8 @@ seboscapp <- function() {
           leaflet::clearGroup('custom_poly') %>%
           leaflet::addPolygons(
             group = if (admin_var == 'drawed_poly') {'custom_poly'} else {'poly'},
-            label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}"),
+            label = glue::glue("{data_sel[[admin_var]]} - {round(data_sel[[metric_sel]], 2)}"),
+            layerId = as.formula(glue::glue("~{admin_var}")),
             fillColor = ~palette_map(data_sel[[metric_sel]]),
             fillOpacity = 0.9, stroke = TRUE, weight = 2,
             color = ~palette_map(data_sel[[metric_sel]]),
@@ -563,7 +565,7 @@ seboscapp <- function() {
       }
     )
 
-    ## summarising banner ####
+    ## fixed summarising banner ####
     shiny::observeEvent(
       eventExpr = input$fixed_scale,
       handlerExpr = {
@@ -576,6 +578,111 @@ seboscapp <- function() {
             )
           )
         }
+      }
+    )
+
+    ## fixed click plots ####
+    # lets do a double plot, one comparing the plots inside the clicked shape and another
+    # comparing the shapes. This will be a modal dialog inside an observer
+    output$fixed_plot_data_sel <- ggiraph::renderGirafe({
+
+      shiny::validate(
+        shiny::need(input$fixed_map_shape_click, 'no click'),
+        shiny::need(data_fixed(), 'no data'),
+        shiny::need(input$fixed_var_sel, 'no inputs'),
+        shiny::need(input$fixed_scale, 'no inputs')
+      )
+
+      # data needed
+      click <- input$fixed_map_shape_click
+      data_sel <- data_fixed()
+      metric_sel <- rlang::sym(input$fixed_metric)
+      var_sel <- rlang::sym(input$fixed_var_sel)
+      admin_sel <- switch(
+        input$fixed_scale,
+        'local' = 'plot_id',
+        'municipalities' = 'admin_municipality',
+        'counties' = 'admin_region',
+        'provinces' = 'admin_province',
+        'drawed_poly' = 'poly_id'
+      ) %>% rlang::sym()
+      data_not_sel <- switch(
+        input$fixed_var_sel,
+        'c1' = c1_data,
+        'p1' = p1_data,
+        'p2' = p2_data,
+        'r1' = r1_data,
+        'r2' = r2_data,
+        'r3' = r3_data,
+        'r4' = r4_data
+      )
+
+      plot_data_not_sel <- data_not_sel %>%
+        {
+          if (click$group != 'plot') {
+            temp_data <- dplyr::filter(., !!admin_sel == click$id) %>%
+              dplyr::mutate(color_var = 'no_color')
+          } else {
+            temp_data <- dplyr::mutate(
+              ., color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
+            )
+          }
+          temp_data
+        } %>%
+        ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+        ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+        ggplot2::geom_jitter(
+          ggplot2::aes(x = ' ', colour = color_var, size = color_var),
+          width = 0.1, show.legend = FALSE, alpha = 0.4
+        ) +
+        ggplot2::scale_color_manual(values = c('gray', 'green')) +
+        ggplot2::scale_size_manual(values = c(1, 5))
+
+      if (click$group != 'plot') {
+
+        plot_data_sel <- data_sel %>%
+          dplyr::mutate(
+            color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
+          ) %>%
+          ggplot2::ggplot(ggplot2::aes(y = !!metric_sel)) +
+          ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+          ggiraph::geom_jitter_interactive(
+            ggplot2::aes(x = ' ', tooltip = !!admin_sel, colour = color_var, size = color_var),
+            width = 0.1, show.legend = FALSE, alpha = 0.8
+          ) +
+          ggplot2::scale_color_manual(values = c('gray', 'green')) +
+          ggplot2::scale_size_manual(values = c(1, 5))
+      } else {
+        plot_data_sel <- NULL
+      }
+
+      res_plots <- cowplot::plot_grid(
+        plot_data_not_sel,
+        {if (!is.null(plot_data_sel)) {plot_data_sel} else {NULL}}
+      )
+
+      return(ggiraph::girafe(
+        ggobj = res_plots, width_svg = 12, height_svg = 5
+      ))
+
+    })
+
+
+    shiny::observeEvent(
+      eventExpr = input$fixed_map_shape_click,
+      handlerExpr = {
+
+        # click info
+        click <- input$fixed_map_shape_click
+
+        # modal
+        shiny::showModal(
+          shiny::modalDialog(
+            ggiraph::girafeOutput("fixed_plot_data_sel"),
+            title = glue::glue(translate_app('fixed_click_plot_modal_title', lang())),
+            size = 'l', easyClose = TRUE, footer = NULL
+          )
+        )
       }
     )
 
