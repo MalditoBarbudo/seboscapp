@@ -330,20 +330,20 @@ seboscapp <- function() {
         leaflet::setView(1.744, 41.726, zoom = 8) %>%
         leaflet::addProviderTiles(
           leaflet::providers$Esri.WorldShadedRelief,
-          group = 'Relief',
+          group = 'Relief' %>% translate_app(lang_declared),
           options = leaflet::providerTileOptions(
             # zIndex = -1
           )
         ) %>%
         leaflet::addProviderTiles(
           leaflet::providers$Esri.WorldImagery,
-          group = 'Imaginery',
+          group = 'Imaginery' %>% translate_app(lang_declared),
           options = leaflet::providerTileOptions(
             # zIndex = -1
           )
         ) %>%
         leaflet::addLayersControl(
-          baseGroups = c('Relief', 'Imaginery'),
+          baseGroups = c('Relief', 'Imaginery') %>% translate_app(lang_declared),
           options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = FALSE)
         ) %>%
         # leaflet.extras plugins
@@ -397,7 +397,7 @@ seboscapp <- function() {
 
         # palettes
         palette_map <- leaflet::colorBin(
-          palette = 'viridis',
+          palette = 'plasma',
           domain = c(
             min(data_sel[[var_sel]], na.rm = TRUE),
             max(data_sel[[var_sel]], na.rm = TRUE)
@@ -415,7 +415,8 @@ seboscapp <- function() {
           ) %>%
           leaflet::addLegend(
             position = 'bottomright', pal = palette_map, values = data_sel[[var_sel]],
-            layerId = 'color_palette', title = var_sel
+            layerId = 'color_palette', opacity = 0.7,
+            title = var_sel %>% translate_app(lang_declared)
           )
       } else {
         # bigger scale, polygons
@@ -453,7 +454,8 @@ seboscapp <- function() {
           ) %>%
           leaflet::addLegend(
             position = 'bottomright', pal = palette_map, values = data_sel[[metric_sel]],
-            layerId = 'color_palette', title = var_sel
+            layerId = 'color_palette', opacity = 0.9,
+            title = var_sel %>% translate_app(lang_declared)
           )
       }
     })

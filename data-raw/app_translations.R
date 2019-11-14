@@ -33,6 +33,9 @@ app_translations <- tibble::tribble(
   'admin_province', 'Provincia', 'Province', 'Provincia',
   'admin_region', 'Comarca', 'County', 'Comarca',
   'admin_municipality', 'Municipi', 'Municipality', 'Municipio',
+  # map
+  'Relief', 'Relleu (base)', 'Relief (base)', 'Relieve (base)',
+  'Imaginery', 'Satèl·lit (base)', 'Imaginery (base)', 'Satélite (base)',
 
 
 
