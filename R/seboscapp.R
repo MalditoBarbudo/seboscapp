@@ -57,7 +57,7 @@ seboscapp <- function() {
 
       # navbarPage contents
       shiny::tabPanel(
-        title = 'Fixed data',
+        title = shiny::uiOutput('fixed_data_tabtitle'),
         ########################################################### debug ####
         # shiny::absolutePanel(
         #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
@@ -79,7 +79,7 @@ seboscapp <- function() {
       ), # end of tabPanel "Fixed data"
 
       shiny::tabPanel(
-        title = 'Dynamic data',
+        title = shiny::uiOutput('dynamic_data_tabtitle'),
         ########################################################### debug ####
         # shiny::absolutePanel(
         #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
@@ -119,6 +119,9 @@ seboscapp <- function() {
     lang <- shiny::reactive({
       input$lang
     })
+
+    output$fixed_data_tabtitle <- shiny::renderText({translate_app('static', lang())})
+    output$dynamic_data_tabtitle <- shiny::renderText({translate_app('dynamic', lang())})
 
     ## fixed UI (to use lang) ####
     output$fixed_ui <- shiny::renderUI({

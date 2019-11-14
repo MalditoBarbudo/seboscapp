@@ -10,6 +10,9 @@ app_translations <- tibble::tribble(
   'r2', '', 'Soil organic carbon', 'Carbono orgánico del suelo',
   'r3', '', 'Riparian forest cover', 'Cobertura de bosque de ribera',
   'r4', '', 'Forest cover in slopes', 'Cobertura de bosque en pendiente',
+  # main tabs
+  'static', 'Dades fixes', 'Static data', 'Datos fijos',
+  'dynamic', 'Dades dinamics', 'Dynamic data', 'Datos dinámicos',
   # fixed ui
   "fixed_sidebar_h4_title", "Controls", 'Controls', "Controles",
   "fixed_var_sel", "Seleccioneu la variable que voleu visualitzar", "Select the variable to visualize", "Selecciona la variable a visualizar",
