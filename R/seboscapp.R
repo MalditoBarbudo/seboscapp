@@ -242,6 +242,7 @@ seboscapp <- function() {
               min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
               n = n()
             ) %>%
+            dplyr::filter(n > 2) %>%
             tibble::as_tibble() %>%
             dplyr::select(-geometry) %>%
             dplyr::left_join(admin_polys, by = c(admin_var)) %>%
