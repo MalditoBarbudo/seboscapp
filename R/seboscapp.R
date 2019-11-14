@@ -159,7 +159,7 @@ seboscapp <- function() {
               shiny::selectInput(
                 'fixed_metric',
                 'fixed_metric' %>% translate_app(lang_declared),
-                choices = c('mean', 'min', 'max', 'n') %>%
+                choices = c('mean', 'min', 'max', 'n', 'sd', 'q25', 'q75') %>%
                   purrr::set_names(nm = translate_app(., lang_declared))
               )
             ),
@@ -240,6 +240,9 @@ seboscapp <- function() {
               mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
               max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
               min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+              q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
               n = n()
             ) %>%
             dplyr::filter(n > 2) %>%
@@ -270,6 +273,9 @@ seboscapp <- function() {
               mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
               max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
               min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+              q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+              q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
               n = n(),
               geometry = unique(geometry)
             ) %>%
@@ -288,7 +294,7 @@ seboscapp <- function() {
       columns_to_round <- names(data_sel)[
         names(data_sel) %in% c(
           'c1', 'p1', 'p2', 'r1', 'r2', 'r3',
-          'r4', 'mean', 'min', 'max'
+          'r4', 'mean', 'min', 'max', 'sd', 'q25', 'q75'
         )
       ]
 
@@ -297,7 +303,7 @@ seboscapp <- function() {
         dplyr::select(
           dplyr::starts_with('admin_'),
           dplyr::one_of(c('poly_id', 'c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
-          dplyr::one_of(c('mean', 'min', 'max', 'n'))
+          dplyr::one_of(c('mean', 'min', 'max', 'sd', 'q25', 'q75', 'n'))
         ) %>%
         {
           DT::datatable(

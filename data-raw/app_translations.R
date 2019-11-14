@@ -45,6 +45,9 @@ app_translations <- tibble::tribble(
   'mean', 'Mitjana', 'Mean', 'Media',
   'min', 'Minim', 'Minimum', 'Mínimo',
   'max', 'Maxim', 'Maximum', 'Máximo',
+  'sd', 'Desviació estandar', 'Standard deviation', 'Desviación estándar',
+  'q25', 'Quartil 25', 'Quantile 25', 'Cuartil 25',
+  'q75', 'Quartil 75', 'Quantile 75', 'Cuartil 75',
   'n', 'Nombre parcel·las', 'Plot number', 'Número de parcelas',
   # table column names, not added yet
   'admin_province', 'Provincia', 'Province', 'Provincia',
