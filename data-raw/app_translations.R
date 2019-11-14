@@ -10,12 +10,24 @@ app_translations <- tibble::tribble(
   'r2', 'Carboni orgànic del sòl', 'Soil organic carbon', 'Carbono orgánico del suelo',
   'r3', 'Cobertura de bosc de ribera', 'Riparian forest cover', 'Cobertura de bosque de ribera',
   'r4', 'Cobertura de bosc en pendent', 'Forest cover in slopes', 'Cobertura de bosque en pendiente',
+  # ecosystem services names
+  'food', "Provisió d'aliments", 'Food provision', 'Provisión de alimentos',
+  'water', "Provisió d'aigua", 'Water provision', 'Provisión de agua',
+  'recreation', 'Esbarjo', 'Recreation', 'Recreacional',
+  'climate', 'Regulació climàtica', 'Climate regulation', 'Regulación climática',
+  'soil', 'Fertilitat del sòl', 'Soil fertility', 'Fertilidad del suelo',
+  'flood', "Regulació d'inundacions", 'Flood regulation', 'Regulación de inundaciones',
+  'erosion', "Control de l'erosió", 'Erosion control', 'Control de la erosión',
+  # ES categories
+  'provisioning', "Serveis d'aprovisionament", 'Provisioning services', 'Servicios de aprovisionamiento',
+  'cultural', 'Serveis culturals', 'Cultural services', 'Servicios culturales',
+  'regulation', 'Serveis de regulació', 'Regulating services', 'Servicios de regulación',
   # main tabs
   'static', 'Dades fixes', 'Static data', 'Datos fijos',
   'dynamic', 'Dades dinamics', 'Dynamic data', 'Datos dinámicos',
   # fixed ui
   "fixed_sidebar_h4_title", "Controls", 'Controls', "Controles",
-  "fixed_var_sel", "Seleccioneu la variable que voleu visualitzar", "Select the variable to visualize", "Selecciona la variable a visualizar",
+  "fixed_var_sel", "Seleccioneu el servei que voleu visualitzar", "Select the service to visualize", "Selecciona el servicio a visualizar",
   "fixed_scale", "Seleccioneu la escala de les dades", 'Select the data scale', 'Selecciona la escala de los datos',
   "fixed_metric", "", 'Select the summary metric', 'Selecciona la métrica de agregación',
   "download", "Descarrega", "Download", "Descarga",

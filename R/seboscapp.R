@@ -141,8 +141,11 @@ seboscapp <- function() {
             shiny::selectInput(
               'fixed_var_sel',
               'fixed_var_sel' %>% translate_app(lang_declared),
-              choices = c('c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4') %>%
-                purrr::set_names(nm = translate_app(., lang_declared))
+              choices = list(
+                'provisioning' = c('p1', 'p2') %>% purrr::set_names(nm = translate_app(., lang_declared)),
+                'cultural' = c('c1') %>% purrr::set_names(nm = translate_app(., lang_declared)),
+                'regulation' = c('r1', 'r2', 'r3', 'r4') %>% purrr::set_names(nm = translate_app(., lang_declared))
+              ) %>% purrr::set_names(nm = translate_app(c('provisioning', 'cultural', 'regulation'), lang_declared))
             ),
 
             shiny::selectInput(
