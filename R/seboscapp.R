@@ -557,6 +557,22 @@ seboscapp <- function() {
       }
     )
 
+    ## summarising banner ####
+    shiny::observeEvent(
+      eventExpr = input$fixed_scale,
+      handlerExpr = {
+        if (input$fixed_scale %in% c('municipalities', 'counties', 'provinces')) {
+          shiny::showModal(
+            shiny::modalDialog(
+              shiny::p('fixed_scale_summ_warning' %>% translate_app(lang())),
+              title = 'fixed_scale_summ_warning_title' %>% translate_app(lang()),
+              footer = NULL, size = 'm', easyClose = TRUE
+            )
+          )
+        }
+      }
+    )
+
   } # end of server function
 
   # Run the application

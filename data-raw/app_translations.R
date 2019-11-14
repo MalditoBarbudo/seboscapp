@@ -33,6 +33,8 @@ app_translations <- tibble::tribble(
   "download", "Descarrega", "Download", "Descarga",
   'map', 'Map', 'Map', 'Mapa',
   'table', 'Table', 'Table', 'Tabla',
+  'fixed_scale_summ_warning', "Al pujar des l'escala local, només s'inclouen aquells polígons amb 3 o més parcel·les", 'When scaling up from local scale, only those polygons with 3 or more plots are included', 'Al subir desde la escala local, solo se incluyen aquellos polígonos con 3 o más parcelas',
+  'fixed_scale_summ_warning_title', 'Avis', 'Warning', 'Aviso',
   # scale choices
   'local', 'Local', 'Local', 'Local',
   'provinces', "Provincies", "Provinces", "Provincias",
