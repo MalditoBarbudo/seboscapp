@@ -44,7 +44,7 @@ seboscapp <- function() {
       inputs = shinyWidgets::pickerInput(
         'lang', NULL,
         choices = lang_choices,
-        selected = 'eng',
+        selected = 'cat',
         width = '100px',
         choicesOpt = list(
           content = c(
@@ -349,7 +349,7 @@ seboscapp <- function() {
         ) %>%
         # leaflet.extras plugins
         leaflet.extras::addDrawToolbar(
-          targetGroup = 'poly',
+          targetGroup = 'custom_poly',
           position = 'topleft',
           polylineOptions = FALSE, circleOptions = FALSE, rectangleOptions = FALSE,
           markerOptions = FALSE, circleMarkerOptions = FALSE,
@@ -409,6 +409,7 @@ seboscapp <- function() {
         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
           leaflet::clearGroup('poly') %>%
           leaflet::clearGroup('plot') %>%
+          leaflet::clearGroup('custom_poly') %>%
           leaflet::addCircles(
             group = 'plot', label = as.character(data_sel[[var_sel]]),
             stroke = FALSE, fillOpacity = 0.7,
@@ -442,8 +443,9 @@ seboscapp <- function() {
         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
           leaflet::clearGroup('poly') %>%
           leaflet::clearGroup('plot') %>%
+          leaflet::clearGroup('custom_poly') %>%
           leaflet::addPolygons(
-            group = 'poly',
+            group = if (admin_var == 'drawed_poly') {'custom_poly'} else {'poly'},
             label = glue::glue("{data_sel[[admin_var]]} - {data_sel[[metric_sel]]}"),
             fillColor = ~palette_map(data_sel[[metric_sel]]),
             fillOpacity = 0.9, stroke = TRUE, weight = 2,
