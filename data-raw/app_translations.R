@@ -3,13 +3,13 @@
 app_translations <- tibble::tribble(
   ~text_id, ~translation_cat, ~translation_eng, ~translation_spa,
   # fixed_var_choices
-  'c1', '', 'Wildlife observations', 'Observaciones de animales',
+  'c1', "Observacions d'animals", 'Wildlife observations', 'Observaciones de animales',
   'p1', 'Bolets', 'Mushrooms', 'Setas',
   'p2', 'Aigua exportada', 'Exported water', 'Agua exportada',
-  'r1', '', 'Carbon sequestration', 'Carbono secuestrado',
-  'r2', '', 'Soil organic carbon', 'Carbono orgánico del suelo',
-  'r3', '', 'Riparian forest cover', 'Cobertura de bosque de ribera',
-  'r4', '', 'Forest cover in slopes', 'Cobertura de bosque en pendiente',
+  'r1', 'Carboni segrestat', 'Carbon sequestration', 'Carbono secuestrado',
+  'r2', 'Carboni orgànic del sòl', 'Soil organic carbon', 'Carbono orgánico del suelo',
+  'r3', 'Cobertura de bosc de ribera', 'Riparian forest cover', 'Cobertura de bosque de ribera',
+  'r4', 'Cobertura de bosc en pendent', 'Forest cover in slopes', 'Cobertura de bosque en pendiente',
   # main tabs
   'static', 'Dades fixes', 'Static data', 'Datos fijos',
   'dynamic', 'Dades dinamics', 'Dynamic data', 'Datos dinámicos',

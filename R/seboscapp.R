@@ -288,8 +288,6 @@ seboscapp <- function() {
         )
       ]
 
-      browser()
-
       data_sel %>%
         tibble::as_tibble() %>%
         dplyr::select(
