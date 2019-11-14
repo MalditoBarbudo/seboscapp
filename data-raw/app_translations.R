@@ -29,6 +29,10 @@ app_translations <- tibble::tribble(
   'min', 'Minim', 'Minimum', 'Mínimo',
   'max', 'Maxim', 'Maximum', 'Máximo',
   'n', 'Nombre parcel·las', 'Plot number', 'Número de parcelas',
+  # table column names, not added yet
+  'admin_province', 'Provincia', 'Province', 'Provincia',
+  'admin_region', 'Comarca', 'County', 'Comarca',
+  'admin_municipality', 'Municipi', 'Municipality', 'Municipio',
 
 
 

@@ -285,6 +285,8 @@ seboscapp <- function() {
         )
       ]
 
+      browser()
+
       data_sel %>%
         tibble::as_tibble() %>%
         dplyr::select(
@@ -292,24 +294,28 @@ seboscapp <- function() {
           dplyr::one_of(c('poly_id', 'c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
           dplyr::one_of(c('mean', 'min', 'max', 'n'))
         ) %>%
-        DT::datatable(
-          rownames = FALSE,
-          class = 'hover order-column stripe nowrap',
-          filter = list(position = 'top', clear = FALSE, plain = FALSE),
-          options = list(
-            pageLength = 15,
-            dom = 'tip',
-            autoWidth = FALSE,
-            initComplete = DT::JS(
-              "function(settings, json) {",
-              "$(this.api().table().header()).css({'font-family': 'Montserrat'});",
-              "$(this.api().table().body()).css({'font-family': 'Hacker'});",
-              "}"
+        {
+          DT::datatable(
+            .,
+            rownames = FALSE,
+            colnames = names(.) %>% purrr::set_names(., nm = translate_app(., lang())),
+            class = 'hover order-column stripe nowrap',
+            filter = list(position = 'top', clear = FALSE, plain = FALSE),
+            options = list(
+              pageLength = 15,
+              dom = 'tip',
+              autoWidth = FALSE,
+              initComplete = DT::JS(
+                "function(settings, json) {",
+                "$(this.api().table().header()).css({'font-family': 'Montserrat'});",
+                "$(this.api().table().body()).css({'font-family': 'Hacker'});",
+                "}"
+              )
             )
           )
-        ) %>%
+        } %>%
         DT::formatRound(
-          columns = columns_to_round,
+          columns = columns_to_round %>% translate_app(lang()),
           digits = 2
         )
 
