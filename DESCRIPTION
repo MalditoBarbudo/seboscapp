@@ -19,5 +19,6 @@ Imports:
     tibble,
     glue,
     ggplot2,
-    ggiraph
+    ggiraph,
+    cowplot
 RoxygenNote: 6.1.1

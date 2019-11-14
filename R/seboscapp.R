@@ -636,7 +636,7 @@ seboscapp <- function() {
           width = 0.1, show.legend = FALSE, alpha = 0.4
         ) +
         ggplot2::scale_color_manual(values = c('gray', 'green')) +
-        ggplot2::scale_size_manual(values = c(1, 5))
+        ggplot2::scale_size_manual(values = c(3, 7))
 
       if (click$group != 'plot') {
 
@@ -651,7 +651,7 @@ seboscapp <- function() {
             width = 0.1, show.legend = FALSE, alpha = 0.8
           ) +
           ggplot2::scale_color_manual(values = c('gray', 'green')) +
-          ggplot2::scale_size_manual(values = c(1, 5))
+          ggplot2::scale_size_manual(values = c(3, 7))
       } else {
         plot_data_sel <- NULL
       }
@@ -662,7 +662,10 @@ seboscapp <- function() {
       )
 
       return(ggiraph::girafe(
-        ggobj = res_plots, width_svg = 12, height_svg = 5
+        ggobj = res_plots, width_svg = 12, height_svg = 5,
+        options = list(
+          ggiraph::opts_tooltip(zindex = 9999)
+        )
       ))
 
     })
