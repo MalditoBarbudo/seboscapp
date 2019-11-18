@@ -193,12 +193,23 @@ seboscapp <- function() {
 
     ## dynamic UI (to use lang) ####
 
-    ## data_reactive ####
-    data_fixed <- shiny::reactive({
+    ## show the metric when scale is not local ####
+    shiny::observeEvent(
+      eventExpr = input$fixed_scale,
+      handlerExpr = {
+        if (input$fixed_scale == 'local') {
+          shinyjs::hideElement('fixed_metric')
+        } else {
+          shinyjs::showElement('fixed_metric')
+        }
+      }
+    )
 
+    ## data reactives ####
+    # we create three reactive data, a raw one, summ one and drawed_poly one
+    raw_fixed <- shiny::reactive({
       shiny::validate(
-        shiny::need(input$fixed_var_sel, 'no inputs'),
-        shiny::need(input$fixed_scale, 'no inputs')
+        shiny::need(input$fixed_var_sel, 'no inputs')
       )
 
       dataset_fixed <- switch(
@@ -212,78 +223,106 @@ seboscapp <- function() {
         'r4' = r4_data
       )
 
+      return(dataset_fixed)
+    })
+
+    summ_fixed <- shiny::reactive({
+      shiny::validate(
+        shiny::need(input$fixed_scale, 'no inputs'),
+        shiny::need(raw_fixed(), 'no raw data'),
+        shiny::need(
+          input$fixed_scale %in% c('municipalities', 'counties', 'provinces'),
+          'no fixed scale as polys'
+        )
+      )
+
+      raw_data <- raw_fixed()
       scale_sel <- input$fixed_scale
 
-      # if scale is local, return the data as is
-      if (scale_sel == 'local') {
-        return(dataset_fixed)
-      } else {
-        if (scale_sel %in% c('municipalities', 'counties', 'provinces')) {
-          admin_var <- switch(
-            scale_sel,
-            'municipalities' = 'admin_municipality',
-            'counties' = 'admin_region',
-            'provinces' = 'admin_province'
-          )
+      admin_var <- switch(
+        scale_sel,
+        'municipalities' = 'admin_municipality',
+        'counties' = 'admin_region',
+        'provinces' = 'admin_province'
+      )
 
-          admin_polys <- switch(
-            scale_sel,
-            'municipalities' = municipalities_simpl,
-            'counties' = counties_simpl,
-            'provinces' = provinces_simpl
-          )
+      admin_polys <- switch(
+        scale_sel,
+        'municipalities' = municipalities_simpl,
+        'counties' = counties_simpl,
+        'provinces' = provinces_simpl
+      )
 
-          # calculate the scale
-          summarise_fixed <- dataset_fixed %>%
-            dplyr::group_by(.data[[admin_var]]) %>%
-            dplyr::summarise(
-              mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
-              q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
-              n = n()
-            ) %>%
-            dplyr::filter(n > 2) %>%
-            tibble::as_tibble() %>%
-            dplyr::select(-geometry) %>%
-            dplyr::left_join(admin_polys, by = c(admin_var)) %>%
-            sf::st_as_sf(sf_column_name = 'geometry')
+      # calculate the scale
+      summarise_fixed <- raw_data %>%
+        dplyr::group_by(.data[[admin_var]]) %>%
+        dplyr::summarise(
+          mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+          q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
+          n = n()
+        ) %>%
+        dplyr::filter(n > 2) %>%
+        tibble::as_tibble() %>%
+        dplyr::select(-geometry) %>%
+        dplyr::left_join(admin_polys, by = c(admin_var)) %>%
+        sf::st_as_sf(sf_column_name = 'geometry')
 
-          return(summarise_fixed)
-        } else {
+      return(summarise_fixed)
 
-          shiny::validate(
-            shiny::need(input$fixed_map_draw_all_features, 'no drawed poly'),
-            shiny::need(
-              !rlang::is_empty(input$fixed_map_draw_all_features[['features']]),
-              'removed poly'
-            )
-          )
+    })
 
-          # here the data for custom poly
-          custom_poly_data <- drawed_poly(
-            custom_polygon = input$fixed_map_draw_all_features,
-            points_data = dataset_fixed,
-            lang()
-          ) %>%
-            dplyr::group_by(poly_id) %>%
-            dplyr::summarise(
-              mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
-              q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
-              q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
-              n = n(),
-              geometry = unique(geometry)
-            ) %>%
-            sf::st_as_sf(sf_column_name = 'geometry')
+    custom_poly_fixed <- shiny::reactive({
 
-          return(custom_poly_data)
-        }
-      }
+      shiny::validate(
+        shiny::need(input$fixed_map_draw_all_features, 'no drawed poly'),
+        shiny::need(
+          !rlang::is_empty(input$fixed_map_draw_all_features[['features']]),
+          'removed poly'
+        ),
+        shiny::need(raw_fixed(), 'no raw data')
+      )
+
+      # here the data for custom poly
+      custom_poly_data <- drawed_poly(
+        custom_polygon = input$fixed_map_draw_all_features,
+        points_data = raw_fixed(),
+        lang()
+      ) %>%
+        dplyr::group_by(poly_id) %>%
+        dplyr::summarise(
+          mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+          q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+          q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
+          n = n(),
+          geometry = unique(geometry)
+        ) %>%
+        sf::st_as_sf(sf_column_name = 'geometry')
+
+      return(custom_poly_data)
+    })
+
+
+    data_fixed <- shiny::reactive({
+
+      shiny::validate(
+        shiny::need(input$fixed_scale, 'no inputs')
+      )
+
+      switch(
+        input$fixed_scale,
+        'local' = raw_fixed(),
+        'municipalities' = summ_fixed(),
+        'counties' = summ_fixed(),
+        'provinces' = summ_fixed(),
+        'drawed_poly' = custom_poly_fixed()
+      )
 
     })
 
@@ -373,18 +412,6 @@ seboscapp <- function() {
         )
     })
 
-    ## show the metric when scale is not local ####
-    shiny::observeEvent(
-      eventExpr = input$fixed_scale,
-      handlerExpr = {
-        if (input$fixed_scale == 'local') {
-          shinyjs::hideElement('fixed_metric')
-        } else {
-          shinyjs::showElement('fixed_metric')
-        }
-      }
-    )
-
     ## leaflet proxy map ####
     shiny::observe({
 
@@ -395,6 +422,8 @@ seboscapp <- function() {
         shiny::need(input$fixed_metric, 'no inputs'),
         shiny::need(lang(), 'no language')
       )
+
+      # browser()
 
       # triggers observer (inputs)
       data_sel <- data_fixed()
@@ -606,60 +635,126 @@ seboscapp <- function() {
         'provinces' = 'admin_province',
         'drawed_poly' = 'poly_id'
       ) %>% rlang::sym()
-      data_not_sel <- switch(
-        input$fixed_var_sel,
-        'c1' = c1_data,
-        'p1' = p1_data,
-        'p2' = p2_data,
-        'r1' = r1_data,
-        'r2' = r2_data,
-        'r3' = r3_data,
-        'r4' = r4_data
-      )
 
-      plot_data_not_sel <- data_not_sel %>%
-        {
-          if (click$group != 'plot') {
-            temp_data <- dplyr::filter(., !!admin_sel == click$id) %>%
-              dplyr::mutate(color_var = 'no_color')
-          } else {
-            temp_data <- dplyr::mutate(
-              ., color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
-            )
-          }
-          temp_data
-        } %>%
-        ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
-        ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-        ggplot2::geom_jitter(
-          ggplot2::aes(x = ' ', colour = color_var, size = color_var),
-          width = 0.1, show.legend = FALSE, alpha = 0.4
-        ) +
-        ggplot2::scale_color_manual(values = c('gray', 'green')) +
-        ggplot2::scale_size_manual(values = c(3, 7))
-
-      if (click$group != 'plot') {
-
-        plot_data_sel <- data_sel %>%
+      # plot for plots, only one, bringing to front the plot clicked and ggiraph for
+      # >Q90 and <Q10 and clicked, to do that we need three layers of points:
+      if (admin_sel == 'plot_id') {
+        data_temp <- data_sel %>%
           dplyr::mutate(
             color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
-          ) %>%
-          ggplot2::ggplot(ggplot2::aes(y = !!metric_sel)) +
-          ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-          ggiraph::geom_jitter_interactive(
-            ggplot2::aes(x = ' ', tooltip = !!admin_sel, colour = color_var, size = color_var),
-            width = 0.1, show.legend = FALSE, alpha = 0.8
-          ) +
-          ggplot2::scale_color_manual(values = c('gray', 'green')) +
-          ggplot2::scale_size_manual(values = c(3, 7))
-      } else {
-        plot_data_sel <- NULL
-      }
+          )
 
-      res_plots <- cowplot::plot_grid(
-        plot_data_not_sel,
-        {if (!is.null(plot_data_sel)) {plot_data_sel} else {NULL}}
-      )
+        plots_plot <- data_temp %>%
+          ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+          ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+          # gray not interactive points
+          ggplot2::geom_jitter(
+            data = data_temp %>%
+              dplyr::filter(
+                color_var == 'no_color',
+                !!var_sel > quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
+                !!var_sel < quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
+              ),
+            ggplot2::aes(x = ' '), colour = 'gray', size = 3,
+            width = 0.1, show.legend = FALSE, alpha = 0.7, height = 0
+          ) +
+          # gray interactive points
+          ggiraph::geom_jitter_interactive(
+            data = data_temp %>%
+              dplyr::filter(
+                color_var == 'no_color',
+                !dplyr::between(
+                  !!var_sel, quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
+                  quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
+                )
+              ),
+            ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'gray', size = 3,
+            width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+          ) +
+          # green interactive point
+          ggiraph::geom_jitter_interactive(
+            data = data_temp %>%
+              dplyr::filter(
+                color_var == 'zcolor'
+              ),
+            ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'green', size = 7,
+            width = 0.1, show.legend = FALSE, alpha = 1, height = 0
+          ) +
+          ggplot2::labs(
+            x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+            title = glue::glue(translate_app('fixed_plot_plots_title', lang())),
+            subtitle = glue::glue(translate_app('fixed_plot_plots_subtitle', lang()))
+          )
+
+        res_plots <- cowplot::plot_grid(plots_plot)
+      } else {
+        # plot for drawed poly, one for the plots contained on the poly
+        if (admin_sel == 'poly_id') {
+          data_temp <- drawed_poly(
+            custom_polygon = input$fixed_map_draw_all_features,
+            points_data = raw_fixed(),
+            lang()
+          )
+
+          drawed_poly_plot <- data_temp %>%
+            ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+            # gray interactive points
+            ggiraph::geom_jitter_interactive(
+              ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
+              width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+            ) +
+            ggplot2::labs(
+              x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+              title = glue::glue(translate_app('fixed_drawed_poly_plot_title', lang())),
+              subtitle = glue::glue(translate_app('fixed_drawed_poly_plot_subtitle', lang()))
+            )
+
+          res_plots <- cowplot::plot_grid(drawed_poly_plot)
+        } else {
+          # polys plots, two plots, one for the plots inside the clicked polygon, another
+          # for polygons comparisions
+          plots_inside_data <- dplyr::filter(raw_fixed(), !!admin_sel == click$id)
+          plots_inside_plot <- plots_inside_data %>%
+            ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+            # gray interactive points
+            ggiraph::geom_jitter_interactive(
+              ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
+              width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+            ) +
+            ggplot2::labs(
+              x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+              title = glue::glue(translate_app('fixed_plots_inside_plot_title', lang())),
+              subtitle = glue::glue(translate_app('fixed_plots_inside_plot_subtitle', lang()))
+            )
+
+          poly_comparision_plot <- data_sel %>%
+            dplyr::mutate(
+              color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
+            ) %>%
+            ggplot2::ggplot(ggplot2::aes(y = !!metric_sel)) +
+            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+            ggiraph::geom_jitter_interactive(
+              ggplot2::aes(
+                x = ' ', tooltip = !!admin_sel,
+                colour = color_var, size = color_var, alpha = color_var
+              ),
+              width = 0.1, show.legend = FALSE, height = 0
+            ) +
+            ggplot2::scale_color_manual(values = c('gray', 'green')) +
+            ggplot2::scale_size_manual(values = c(3, 7)) +
+            ggplot2::scale_alpha_manual(values = c(0.4, 1)) +
+            ggplot2::labs(
+              x = '', y = glue::glue(translate_app(rlang::as_label(metric_sel), lang())),
+              title = glue::glue(translate_app('fixed_poly_comparision_plot_title', lang())),
+              subtitle = glue::glue(translate_app('fixed_poly_comparision_plot_subtitle', lang()))
+            )
+
+          res_plots <- cowplot::plot_grid(plots_inside_plot, poly_comparision_plot)
+
+        }
+      }
 
       return(ggiraph::girafe(
         ggobj = res_plots, width_svg = 12, height_svg = 5,

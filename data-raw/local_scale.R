@@ -118,6 +118,9 @@ all_datasets_classified_by_admin_div <- all_datasets_as_points %>%
   ) %>%
   purrr::map(
     .f = sf::st_transform, crs = '+proj=longlat +datum=WGS84'
+  ) %>%
+  purrr::map(
+    .f = ~ dplyr::mutate(.x, plot_id = glue::glue("P{plot_id}"))
   )
 
 c1_data <- all_datasets_classified_by_admin_div[['c1']]
