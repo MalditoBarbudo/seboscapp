@@ -9,7 +9,8 @@ ifn_plots_data <-
   select(
     plot_id,
     coords_utm_x_ETRS89, coords_utm_y_ETRS89,
-    old_idparcela
+    old_idparcela,
+    admin_province, admin_region, admin_municipality
   )
 dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t') %>%
   select(-AguaIFN2, -AguaIFN4)
@@ -63,7 +64,9 @@ all_together_data <-
     plot_id, Servei, IFN, values
   ) %>%
   select(
-    plot_id, es_name = Servei, nfi = IFN, values, geometry
+    plot_id, es_name = Servei, nfi = IFN, values,
+    admin_province, admin_region, admin_municipality,
+    geometry
   ) %>%
   mutate(
     nfi = case_when(

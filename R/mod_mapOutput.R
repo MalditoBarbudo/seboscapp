@@ -111,24 +111,22 @@ mod_map <- function(
 
     # if local scale, then the raw data is ok
     if (data_scale == 'local') {
-      raw_data <- raw_data
-      return(raw_data)
+      res <- raw_data
+    } else {
+      # if scale diferent from local, the summ data is what we want.
+      # Also we need the polygons
+      polygon_data <- switch(
+        data_scale,
+        'admin_municipality' = municipalities,
+        'admin_region' = regions,
+        'admin_province' = provinces
+
+      )
+      res <- summ_data %>%
+        dplyr::left_join(polygon_data, by = data_scale) %>%
+        sf::st_as_sf(sf_column_name = 'geometry')
     }
-
-    # if scale diferent from local, the summ data is what we want.
-    # Also we need the polygons
-    polygon_data <- switch(
-      data_scale,
-      'admin_municipality' = municipalities,
-      'admin_region' = regions,
-      'admin_province' = provinces
-
-    )
-    summ_data <- summ_data %>%
-      dplyr::left_join(polygon_data, by = data_scale) %>%
-      sf::st_as_sf(sf_column_name = 'geometry')
-
-    return(summ_data)
+    return(res)
   })
 
   ## observers ####
@@ -137,23 +135,34 @@ mod_map <- function(
 
     shiny::validate(
       shiny::need(map_data(), 'no data yet'),
-      shiny::need(viz_reactives$viz_color, 'no viz yet'),
-      shiny::need(
-        viz_reactives$viz_color %in% names(map_data()), 'no updated viz'
-      )
+      shiny::need(viz_reactives$viz_color, 'no viz yet')
+      # shiny::need(
+      #   viz_reactives$viz_color %in% names(map_data()), 'no updated viz'
+      # )
     )
 
-    foo <- map_data()
-
-    browser()
-    # data and scale
+    # scale
     data_scale <- shiny::isolate(data_reactives$data_scale)
+    if (data_scale == 'local') {
+      viz_color <- viz_reactives$viz_color
+    } else {
+      viz_color <-
+        # glue::glue("{viz_reactives$viz_color}_{viz_reactives$viz_size}")
+        glue::glue("{viz_reactives$viz_color}_mean")
+    }
+
+    # validate the viz color is in concordance with the data
+    shiny::validate(
+      shiny::need(
+        viz_color %in% names(map_data()), 'no updated viz'
+      )
+    )
+    # data (remove NAs)
     map_data_ready <- map_data() %>%
-      # remove the nas
-      dplyr::filter(!is.na(!! rlang::sym(viz_reactives$viz_color)))
+      dplyr::filter(!is.na(!! rlang::sym(viz_color)))
     # palette configuration
     color_vector <- map_data_ready %>%
-      dplyr::pull(!! rlang::sym(viz_reactives$viz_color))
+      dplyr::pull(!! rlang::sym(viz_color))
     color_palette <- leaflet::colorNumeric(
       'plasma', color_vector, reverse = FALSE,
       na.color = 'black'
@@ -207,7 +216,7 @@ mod_map <- function(
         values = color_vector,
         title = names(
           translate_app(
-            viz_reactives$viz_color, lang()
+            viz_color, lang()
           )
         ),
         layerId = 'color_legend', opacity = 1,
