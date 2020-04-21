@@ -1,9 +1,15 @@
-#' function to launch the lidar app
+#' function to launch the fes app
 #'
 #' @importFrom magrittr %>%
 #'
 #' @export
-seboscapp <- function() {
+fes_app <- function() {
+
+  ### DB access ################################################################
+  fesdb <- lfcdata::fes()
+
+  ### thesauruses ##############################################################
+  var_thes <- fesdb$get_data('variables_thesaurus')
 
   ### Language input ###########################################################
   shiny::addResourcePath(
@@ -11,36 +17,35 @@ seboscapp <- function() {
   )
   lang_choices <- c('cat', 'spa', 'eng')
   lang_flags <- c(
-    glue::glue("<img class='flag-image' src='images/cat.png' width=20px><div class='flag-lang'>%s</div></img>"),
-    glue::glue("<img class='flag-image' src='images/spa.png' width=20px><div class='flag-lang'>%s</div></img>"),
-    glue::glue("<img class='flag-image' src='images/eng.png' width=20px><div class='flag-lang'>%s</div></img>")
+    glue::glue(
+      "<img class='flag-image' src='images/cat.png'",
+      " width=20px><div class='flag-lang'>%s</div></img>"
+    ),
+    glue::glue(
+      "<img class='flag-image' src='images/spa.png'",
+      " width=20px><div class='flag-lang'>%s</div></img>"
+    ),
+    glue::glue(
+      "<img class='flag-image' src='images/eng.png'",
+      " width=20px><div class='flag-lang'>%s</div></img>"
+    )
   )
 
-  ## UI ####
+  ## UI ########################################################################
   ui <- shiny::tagList(
-    # shinyjs
+
+    # use shinyjs
     shinyjs::useShinyjs(),
 
-    # css
-    shiny::tags$head(
-      # custom css
-      shiny::includeCSS(
-        system.file('resources', 'seboscapp.css', package = 'seboscapp')
-      ),
-      # corporative image css
-      shiny::includeCSS(
-        system.file('resources', 'corp_image.css', package = 'seboscapp')
-      )
-    ),
-
+    # navbar with inputs (custom function, see helpers.R)
     navbarPageWithInputs(
       # opts
-      title = 'Forest Ecosystem Services of Catalunya App',
+      title = 'FES app',
       id = 'nav',
       collapsible = TRUE,
 
-      # navbar with inputs (helpers.R) accepts an input argument, we use it for the lang
-      # selector
+      # navbar with inputs (helpers.R) accepts an input argument, we use it for
+      # the lang selector
       inputs = shinyWidgets::pickerInput(
         'lang', NULL,
         choices = lang_choices,
@@ -55,746 +60,1022 @@ seboscapp <- function() {
         )
       ),
 
-      # navbarPage contents
+      # main tab
       shiny::tabPanel(
-        title = shiny::uiOutput('fixed_data_tabtitle'),
-        ########################################################### debug ####
-        # shiny::absolutePanel(
-        #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
-        #   draggable = TRUE, width = 640, height = 'auto',
-        #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
-        #   top = 60, left = 'auto', right = 50, bottom = 'auto',
-        #
-        #   shiny::textOutput('debug1'),
-        #   shiny::textOutput('debug2'),
-        #   shiny::textOutput('debug3')
-        # ),
-        ####################################################### end debug ####
+        title = mod_tab_translateOutput('main_tab_translation'),
+        # css
+        shiny::tags$head(
+          # custom css
+          shiny::includeCSS(
+            system.file('resources', 'seboscapp.css', package = 'seboscapp')
+          ),
+          # corporative image css
+          shiny::includeCSS(
+            system.file('resources', 'corp_image.css', package = 'seboscapp')
+          )
+        ),
+        # Sidebar layout
+        shiny::sidebarLayout(
+          ## options
+          position = 'left', fluid = TRUE,
+          ## sidebar panel
+          sidebarPanel = shiny::sidebarPanel(
+            width = 5,
+            # this is gonna be a tabsetPanel, for data selection, filtering and
+            # viz. The apply button will be on the top, that way is always
+            # visible in any size
+            # apply button module
+            # mod_applyButtonInput("mod_applyButtonInput"),
+            # shiny::br(),
+            # tabset panel
+            shiny::tabsetPanel(
+              id = 'sidebar_tabset', type = 'pills',
+              # data tab
+              shiny::tabPanel(
+                title = mod_tab_translateOutput('data_translation'),
+                # 'data',
+                value = 'data_inputs_panel',
+                mod_dataInput('mod_dataInput'),
+                mod_vizInput('mod_vizInput')
+              ), # end of data tab
+              shiny::tabPanel(
+                title = mod_tab_translateOutput('save_translation'),
+                # 'save',
+                value = 'save_panel'#,
+                # mod_saveUI('mod_saveUI')
+              ), # end fo save panel
+              # help panel
+              shiny::tabPanel(
+                title = mod_tab_translateOutput('help_translation'),
+                # 'help',
+                value = 'help_panel',
+                mod_helpUI('mod_helpUI')
+              )
+            ) # end of sidebar tabsetPanel
+          ),
+          ## main panel
+          mainPanel = shiny::mainPanel(
+            width = 7,
+            shiny::tabsetPanel(
+              id = 'main_panel_tabset', type = 'pills',
+              shiny::tabPanel(
+                title = mod_tab_translateOutput('map_translation'),
+                # 'map',
+                value = 'map_panel'#,
+                # mod_mapOutput('mod_mapOutput')
+              ),
+              shiny::tabPanel(
+                title = mod_tab_translateOutput('table_translation'),
+                # 'table',
+                value = 'table_panel'#,
+                # mod_dataTableOutput('mod_dataTableOutput')
+              )
+            )
+          )
+        ) # end sidebar layout
+      )
+    ) # end NavBarWithInputs
 
-        # we need an UI beacuse we need to translate based on the lang input from the
-        # navbar
-        shiny::uiOutput('fixed_ui')
+  ) # end of UI
 
-      ), # end of tabPanel "Fixed data"
-
-      shiny::tabPanel(
-        title = shiny::uiOutput('dynamic_data_tabtitle'),
-        ########################################################### debug ####
-        # shiny::absolutePanel(
-        #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
-        #   draggable = TRUE, width = 640, height = 'auto',
-        #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
-        #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
-        #   top = 60, left = 'auto', right = 50, bottom = 'auto',
-        #
-        #   shiny::textOutput('debug1'),
-        #   shiny::textOutput('debug2'),
-        #   shiny::textOutput('debug3')
-        # ),
-        ####################################################### end debug ####
-
-        # we need an UI beacuse we need to translate based on the lang input from the
-        # navbar
-        shiny::uiOutput('dynamic_ui')
-
-      ) # end of tabPanel "Dynamic data"
-    ) # end of navbarwithinputs
-  ) # end of ui (tagList)
-
-  ## SERVER ####
+  ## server ####
   server <- function(input, output, session) {
-    ## debug #####
-    # output$debug1 <- shiny::renderPrint({
-    #   input$
-    # })
-    # output$debug2 <- shiny::renderPrint({
-    #   input$
-    # })
-    # output$debug3 <- shiny::renderPrint({
-    #   input$
-    # })
 
-    ## lang reactive ####
+    # lang reactive ####
     lang <- shiny::reactive({
       input$lang
     })
 
-    output$fixed_data_tabtitle <- shiny::renderText({translate_app('static', lang())})
-    output$dynamic_data_tabtitle <- shiny::renderText({translate_app('dynamic', lang())})
+    # cache ####
+    viz_cache <- shiny::memoryCache(evict = 'fifo')
 
-    ## fixed UI (to use lang) ####
-    output$fixed_ui <- shiny::renderUI({
-
-      # lang
-      lang_declared <- lang()
-
-      shiny::fluidPage(
-        shiny::sidebarLayout(
-
-          sidebarPanel = shiny::sidebarPanel(
-            width = 3,
-            # title
-            # shiny::h4(translate_app('sidebar_h4_title', lang_declared)),
-            shiny::h4('fixed_sidebar_h4_title' %>% translate_app(lang_declared)),
-
-            shiny::selectInput(
-              'fixed_var_sel',
-              'fixed_var_sel' %>% translate_app(lang_declared),
-              choices = list(
-                'provisioning' = c('p1', 'p2') %>% purrr::set_names(nm = translate_app(., lang_declared)),
-                'cultural' = c('c1') %>% purrr::set_names(nm = translate_app(., lang_declared)),
-                'regulation' = c('r1', 'r2', 'r3', 'r4') %>% purrr::set_names(nm = translate_app(., lang_declared))
-              ) %>% purrr::set_names(nm = translate_app(c('provisioning', 'cultural', 'regulation'), lang_declared))
-            ),
-
-            shiny::selectInput(
-              'fixed_scale',
-              'fixed_scale' %>% translate_app(lang_declared),
-              choices = c('local', 'municipalities', 'counties', 'provinces', 'drawed_poly') %>%
-                purrr::set_names(nm = translate_app(., lang_declared))
-            ),
-
-            shinyjs::hidden(
-              shiny::selectInput(
-                'fixed_metric',
-                'fixed_metric' %>% translate_app(lang_declared),
-                choices = c('mean', 'min', 'max', 'n', 'sd', 'q25', 'q75') %>%
-                  purrr::set_names(nm = translate_app(., lang_declared))
-              )
-            ),
-
-            # little spaces
-            shiny::br(),
-            shiny::br(),
-
-            # download
-            shiny::actionButton(
-              'fixed_download_dialogue', 'download' %>% translate_app(lang_declared)
-            )
-          ), # end of sidebar panel
-
-          mainPanel = shiny::mainPanel(
-            width = 9,
-            shiny::tabsetPanel(
-              shiny::tabPanel(
-                title = 'map' %>% translate_app(lang_declared),
-                leaflet::leafletOutput('fixed_map', height = '70vh')
-              ), # end of fixed map tab
-              shiny::tabPanel(
-                title = 'table' %>% translate_app(lang_declared),
-                DT::DTOutput('fixed_table', height = '70vh')
-              ) # end of fixed table tab
-            )
-          ) # end of main panel
-        ) # end of layout
-      ) # end of fluidPage
-    }) # end of fixed_ui
-
-    ## dynamic UI (to use lang) ####
-
-    ## show the metric when scale is not local ####
-    shiny::observeEvent(
-      eventExpr = input$fixed_scale,
-      handlerExpr = {
-        if (input$fixed_scale == 'local') {
-          shinyjs::hideElement('fixed_metric')
-        } else {
-          shinyjs::showElement('fixed_metric')
-        }
-      }
+    # modules ####
+    # data inputs
+    data_reactives <- shiny::callModule(
+      mod_data, 'mod_dataInput', lang
+    )
+    # apply button
+    # apply_reactives <- shiny::callModule(
+    #   mod_applyButton, 'mod_applyButtonInput', lang,
+    #   texts_thes, var_thes, numerical_thes,
+    #   data_reactives, filter_reactives
+    # )
+    # main data
+    main_data_reactives <- shiny::callModule(
+      mod_mainData, 'mod_mainDataOutput',
+      data_reactives, fesdb, lang
+    )
+    # viz
+    viz_reactives <- shiny::callModule(
+      mod_viz, 'mod_vizInput',
+      data_reactives, var_thes, lang, viz_cache
+    )
+    # table
+    # table_reactives <- shiny::callModule(
+    #   mod_dataTable, 'mod_dataTableOutput',
+    #   main_data_reactives, data_reactives, viz_reactives,
+    #   var_thes, lang
+    # )
+    # map
+    # map_reactives <- shiny::callModule(
+    #   mod_map, 'mod_mapOutput',
+    #   data_reactives, viz_reactives, main_data_reactives,
+    #   lang, var_thes
+    # )
+    # info
+    # shiny::callModule(
+    #   mod_info, 'mod_infoUI',
+    #   map_reactives, main_data_reactives, viz_reactives,
+    #   var_thes, texts_thes, numerical_thes, lang
+    # )
+    # save
+    # shiny::callModule(
+    #   mod_save, 'mod_saveUI',
+    #   map_reactives, table_reactives, main_data_reactives,
+    #   lang
+    # )
+    # help
+    shiny::callModule(
+      mod_help, 'mod_helpUI',
+      data_reactives, viz_reactives,
+      var_thes, lang
     )
 
-    ## data reactives ####
-    # we create three reactive data, a raw one, summ one and drawed_poly one
-    raw_fixed <- shiny::reactive({
-      shiny::validate(
-        shiny::need(input$fixed_var_sel, 'no inputs')
-      )
-
-      dataset_fixed <- switch(
-        input$fixed_var_sel,
-        'c1' = c1_data,
-        'p1' = p1_data,
-        'p2' = p2_data,
-        'r1' = r1_data,
-        'r2' = r2_data,
-        'r3' = r3_data,
-        'r4' = r4_data
-      )
-
-      return(dataset_fixed)
-    })
-
-    summ_fixed <- shiny::reactive({
-      shiny::validate(
-        shiny::need(input$fixed_scale, 'no inputs'),
-        shiny::need(raw_fixed(), 'no raw data'),
-        shiny::need(
-          input$fixed_scale %in% c('municipalities', 'counties', 'provinces'),
-          'no fixed scale as polys'
-        )
-      )
-
-      raw_data <- raw_fixed()
-      scale_sel <- input$fixed_scale
-
-      admin_var <- switch(
-        scale_sel,
-        'municipalities' = 'admin_municipality',
-        'counties' = 'admin_region',
-        'provinces' = 'admin_province'
-      )
-
-      admin_polys <- switch(
-        scale_sel,
-        'municipalities' = municipalities_simpl,
-        'counties' = counties_simpl,
-        'provinces' = provinces_simpl
-      )
-
-      # calculate the scale
-      summarise_fixed <- raw_data %>%
-        dplyr::group_by(.data[[admin_var]]) %>%
-        dplyr::summarise(
-          mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
-          q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
-          n = n()
-        ) %>%
-        dplyr::filter(n > 2) %>%
-        tibble::as_tibble() %>%
-        dplyr::select(-geometry) %>%
-        dplyr::left_join(admin_polys, by = c(admin_var)) %>%
-        sf::st_as_sf(sf_column_name = 'geometry')
-
-      return(summarise_fixed)
-
-    })
-
-    custom_poly_fixed <- shiny::reactive({
-
-      shiny::validate(
-        shiny::need(input$fixed_map_draw_all_features, 'no drawed poly'),
-        shiny::need(
-          !rlang::is_empty(input$fixed_map_draw_all_features[['features']]),
-          'removed poly'
-        ),
-        shiny::need(raw_fixed(), 'no raw data')
-      )
-
-      # here the data for custom poly
-      custom_poly_data <- drawed_poly(
-        custom_polygon = input$fixed_map_draw_all_features,
-        points_data = raw_fixed(),
-        lang()
-      ) %>%
-        dplyr::group_by(poly_id) %>%
-        dplyr::summarise(
-          mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
-          q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
-          q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
-          n = n(),
-          geometry = unique(geometry)
-        ) %>%
-        sf::st_as_sf(sf_column_name = 'geometry')
-
-      return(custom_poly_data)
-    })
-
-
-    data_fixed <- shiny::reactive({
-
-      shiny::validate(
-        shiny::need(input$fixed_scale, 'no inputs')
-      )
-
-      switch(
-        input$fixed_scale,
-        'local' = raw_fixed(),
-        'municipalities' = summ_fixed(),
-        'counties' = summ_fixed(),
-        'provinces' = summ_fixed(),
-        'drawed_poly' = custom_poly_fixed()
-      )
-
-    })
-
-    ## fixed table output ####
-    output$fixed_table <- DT::renderDT({
-
-      data_sel <- data_fixed()
-      columns_to_round <- names(data_sel)[
-        names(data_sel) %in% c(
-          'c1', 'p1', 'p2', 'r1', 'r2', 'r3',
-          'r4', 'mean', 'min', 'max', 'sd', 'q25', 'q75'
-        )
-      ]
-
-      data_sel %>%
-        tibble::as_tibble() %>%
-        dplyr::select(
-          dplyr::starts_with('admin_'),
-          dplyr::one_of(c('poly_id', 'c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
-          dplyr::one_of(c('mean', 'min', 'max', 'sd', 'q25', 'q75', 'n'))
-        ) %>%
-        {
-          DT::datatable(
-            .,
-            rownames = FALSE,
-            colnames = names(.) %>% purrr::set_names(., nm = translate_app(., lang())),
-            class = 'hover order-column stripe nowrap',
-            filter = list(position = 'top', clear = FALSE, plain = FALSE),
-            options = list(
-              pageLength = 15,
-              dom = 'tip',
-              autoWidth = FALSE,
-              initComplete = DT::JS(
-                "function(settings, json) {",
-                "$(this.api().table().header()).css({'font-family': 'Montserrat'});",
-                "$(this.api().table().body()).css({'font-family': 'Hacker'});",
-                "}"
-              )
-            )
-          )
-        } %>%
-        DT::formatRound(
-          columns = columns_to_round %>% translate_app(lang()),
-          digits = 2
-        )
-
-    })
-
-    ## fixed map output ####
-    output$fixed_map <- leaflet::renderLeaflet({
-
-      lang_declared <- lang()
-
-      leaflet::leaflet() %>%
-        leaflet::setView(1.744, 41.726, zoom = 8) %>%
-        leaflet::addProviderTiles(
-          leaflet::providers$Esri.WorldShadedRelief,
-          group = 'Relief' %>% translate_app(lang_declared),
-          options = leaflet::providerTileOptions(
-            # zIndex = -1
-          )
-        ) %>%
-        leaflet::addProviderTiles(
-          leaflet::providers$Esri.WorldImagery,
-          group = 'Imaginery' %>% translate_app(lang_declared),
-          options = leaflet::providerTileOptions(
-            # zIndex = -1
-          )
-        ) %>%
-        leaflet::addLayersControl(
-          baseGroups = c('Relief', 'Imaginery') %>% translate_app(lang_declared),
-          options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = FALSE)
-        ) %>%
-        # leaflet.extras plugins
-        leaflet.extras::addDrawToolbar(
-          targetGroup = 'custom_poly',
-          position = 'topleft',
-          polylineOptions = FALSE, circleOptions = FALSE, rectangleOptions = FALSE,
-          markerOptions = FALSE, circleMarkerOptions = FALSE,
-          polygonOptions = leaflet.extras::drawPolygonOptions(
-            shapeOptions = leaflet.extras::drawShapeOptions()
-          ),
-          editOptions = leaflet.extras::editToolbarOptions(
-            edit = TRUE, remove = TRUE
-          ),
-          singleFeature = TRUE
-        )
-    })
-
-    ## leaflet proxy map ####
-    shiny::observe({
-
-      # needed inputs
-      shiny::validate(
-        shiny::need(input$fixed_scale, 'no inputs'),
-        shiny::need(input$fixed_var_sel, 'no inputs'),
-        shiny::need(input$fixed_metric, 'no inputs'),
-        shiny::need(lang(), 'no language')
-      )
-
-      # browser()
-
-      # triggers observer (inputs)
-      data_sel <- data_fixed()
-      scale_sel <- input$fixed_scale
-      var_sel <- input$fixed_var_sel
-      metric_sel <- input$fixed_metric
-      lang_declared <- lang()
-
-      # local scale, markers
-      if (scale_sel == 'local') {
-
-        # palettes
-        palette_map <- leaflet::colorBin(
-          palette = 'plasma',
-          domain = c(
-            min(data_sel[[var_sel]], na.rm = TRUE),
-            max(data_sel[[var_sel]], na.rm = TRUE)
-          ),
-          bins = 6
-        )
-
-        leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
-          leaflet::clearGroup('poly') %>%
-          leaflet::clearGroup('plot') %>%
-          leaflet::clearGroup('custom_poly') %>%
-          leaflet::addCircles(
-            group = 'plot', label = as.character(data_sel[[var_sel]]),
-            layerId = ~plot_id,
-            stroke = FALSE, fillOpacity = 0.7,
-            fillColor = ~palette_map(data_sel[[var_sel]]), radius = 750
-          ) %>%
-          leaflet::addLegend(
-            position = 'bottomright', pal = palette_map, values = data_sel[[var_sel]],
-            layerId = 'color_palette', opacity = 0.7,
-            title = var_sel %>% translate_app(lang_declared)
-          )
-      } else {
-        # bigger scale, polygons
-        admin_var <- switch(
-          scale_sel,
-          'municipalities' = 'admin_municipality',
-          'counties' = 'admin_region',
-          'provinces' = 'admin_province',
-          'drawed_poly' = 'poly_id'
-        )
-
-        # palettes
-        palette_map <- leaflet::colorBin(
-          palette = 'plasma',
-          domain = c(
-            min(data_sel[[metric_sel]], na.rm = TRUE),
-            max(data_sel[[metric_sel]], na.rm = TRUE)
-          ),
-          bins = 6
-        )
-
-        leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
-          leaflet::clearGroup('poly') %>%
-          leaflet::clearGroup('plot') %>%
-          leaflet::clearGroup('custom_poly') %>%
-          leaflet::addPolygons(
-            group = if (admin_var == 'drawed_poly') {'custom_poly'} else {'poly'},
-            label = glue::glue("{data_sel[[admin_var]]} - {round(data_sel[[metric_sel]], 2)}"),
-            layerId = as.formula(glue::glue("~{admin_var}")),
-            fillColor = ~palette_map(data_sel[[metric_sel]]),
-            fillOpacity = 0.9, stroke = TRUE, weight = 2,
-            color = ~palette_map(data_sel[[metric_sel]]),
-            highlightOptions = leaflet::highlightOptions(
-              color = "#CF000F", weight = 2,
-              bringToFront = FALSE
-            ),
-          ) %>%
-          leaflet::addLegend(
-            position = 'bottomright', pal = palette_map, values = data_sel[[metric_sel]],
-            layerId = 'color_palette', opacity = 0.9,
-            title = var_sel %>% translate_app(lang_declared)
-          )
-      }
-    })
-
-    ## download handlers ####
-    # modal for saving the raster data
-    shiny::observeEvent(
-      eventExpr = input$fixed_download_dialogue,
-      handlerExpr = {
-
-        lang_declared = lang()
-
-        shiny::showModal(
-          ui = shiny::modalDialog(
-            shiny::tagList(
-
-              shiny::fluidRow(
-                shiny::column(
-                  12,
-                  # format options
-                  shiny::selectInput(
-                    'fixed_data_format',
-                    'Select the format',
-                    choices = list(
-                      'Map' = c('shp', 'gpkg'),
-                      'Table' = c('excel', 'csv')
-                    ),
-                    selected = 'gpkg'
-                  )
-                )
-              )
-            ),
-            easyClose = TRUE,
-            footer = shiny::tagList(
-              # shiny::modalButton(translate_app('modal_dismiss_label', lang_declared)),
-              shiny::modalButton('Dismiss'),
-              shiny::downloadButton(
-                'fixed_download',
-                label = 'Download',
-                class = 'btn-success'
-              )
-            )
-          )
-        )
-      }
-    ) # end of download dialog handler
-
-    output$fixed_download <- shiny::downloadHandler(
-      filename = function() {
-        file_name <- switch(
-          input$fixed_data_format,
-          'shp' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.zip"),
-          'gpkg' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.gpkg"),
-          'excel' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.xlsx"),
-          'csv' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.csv")
-        )
-        return(file_name)
-      },
-      content = function(file) {
-
-        if (input$fixed_data_format == 'gpkg') {
-          sf::st_write(data_fixed(), dsn = file)
-        } else {
-          if (input$fixed_data_format == 'xlsx') {
-            writexl::write_xlsx(data_fixed(), path = file)
-          } else {
-            if (input$fixed_data_format ==  'csv') {
-              readr::write_csv(data_fixed(), path = file)
-            } else {
-              tmp_dir <- tempdir()
-              sf::st_write(
-                data_fixed(),
-                file.path(
-                  tmp_dir,
-                  glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.shp")
-                )
-              )
-              shp_files <- list.files(
-                tmp_dir,
-                glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static"),
-                full.names = TRUE
-              )
-              utils::zip(
-                file.path(tmp_dir, 'shp_files.zip'),
-                shp_files
-              )
-              file.copy(file.path(tmp_dir, 'shp_files.zip'), file)
-              file.remove(file.path(tmp_dir, 'shp_files.zip'), shp_files)
-            }
-          }
-        }
-      }
+    ## tab translations ####
+    shiny::callModule(
+      mod_tab_translate, 'main_tab_translation',
+      'main_tab_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'data_translation',
+      'data_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'viz_translation',
+      'viz_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'save_translation',
+      'save_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'help_translation',
+      'help_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'map_translation',
+      'map_translation', lang
+    )
+    shiny::callModule(
+      mod_tab_translate, 'table_translation',
+      'table_translation', lang
     )
 
-    ## fixed summarising banner ####
-    shiny::observeEvent(
-      eventExpr = input$fixed_scale,
-      handlerExpr = {
-        if (input$fixed_scale %in% c('municipalities', 'counties', 'provinces')) {
-          shiny::showModal(
-            shiny::modalDialog(
-              shiny::p('fixed_scale_summ_warning' %>% translate_app(lang())),
-              title = 'fixed_scale_summ_warning_title' %>% translate_app(lang()),
-              footer = NULL, size = 'm', easyClose = TRUE
-            )
-          )
-        }
-      }
-    )
+    ## observers ####
+    # modal observer
+    # shiny::observeEvent(
+    #   eventExpr = map_reactives$nfi_map_shape_click,
+    #   handlerExpr = {
+    #     shiny::showModal(
+    #       shiny::modalDialog(
+    #         mod_infoUI('mod_infoUI'),
+    #         footer = shiny::modalButton(
+    #           translate_app('dismiss', lang())
+    #         ),
+    #         size = 'm', easyClose = TRUE
+    #       )
+    #     )
+    #   }
+    # )
 
-    ## fixed click plots ####
-    # lets do a double plot, one comparing the plots inside the clicked shape and another
-    # comparing the shapes. This will be a modal dialog inside an observer
-    output$fixed_plot_data_sel <- ggiraph::renderGirafe({
-
-      shiny::validate(
-        shiny::need(input$fixed_map_shape_click, 'no click'),
-        shiny::need(data_fixed(), 'no data'),
-        shiny::need(input$fixed_var_sel, 'no inputs'),
-        shiny::need(input$fixed_scale, 'no inputs')
-      )
-
-      # data needed
-      click <- input$fixed_map_shape_click
-      data_sel <- data_fixed()
-      metric_sel <- rlang::sym(input$fixed_metric)
-      var_sel <- rlang::sym(input$fixed_var_sel)
-      admin_sel <- switch(
-        input$fixed_scale,
-        'local' = 'plot_id',
-        'municipalities' = 'admin_municipality',
-        'counties' = 'admin_region',
-        'provinces' = 'admin_province',
-        'drawed_poly' = 'poly_id'
-      ) %>% rlang::sym()
-
-      # plot for plots, only one, bringing to front the plot clicked and ggiraph for
-      # >Q90 and <Q10 and clicked, to do that we need three layers of points:
-      if (admin_sel == 'plot_id') {
-        data_temp <- data_sel %>%
-          dplyr::mutate(
-            color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
-          )
-
-        plots_plot <- data_temp %>%
-          ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
-          ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-          # gray not interactive points
-          ggplot2::geom_jitter(
-            data = data_temp %>%
-              dplyr::filter(
-                color_var == 'no_color',
-                !!var_sel > quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
-                !!var_sel < quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
-              ),
-            ggplot2::aes(x = ' '), colour = 'gray', size = 3,
-            width = 0.1, show.legend = FALSE, alpha = 0.7, height = 0
-          ) +
-          # gray interactive points
-          ggiraph::geom_jitter_interactive(
-            data = data_temp %>%
-              dplyr::filter(
-                color_var == 'no_color',
-                !dplyr::between(
-                  !!var_sel, quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
-                  quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
-                )
-              ),
-            ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'gray', size = 3,
-            width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
-          ) +
-          # green interactive point
-          ggiraph::geom_jitter_interactive(
-            data = data_temp %>%
-              dplyr::filter(
-                color_var == 'zcolor'
-              ),
-            ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'green', size = 7,
-            width = 0.1, show.legend = FALSE, alpha = 1, height = 0
-          ) +
-          ggplot2::labs(
-            x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
-            title = glue::glue(translate_app('fixed_plot_plots_title', lang())),
-            subtitle = glue::glue(translate_app('fixed_plot_plots_subtitle', lang()))
-          )
-
-        res_plots <- cowplot::plot_grid(plots_plot)
-      } else {
-        # plot for drawed poly, one for the plots contained on the poly
-        if (admin_sel == 'poly_id') {
-          data_temp <- drawed_poly(
-            custom_polygon = input$fixed_map_draw_all_features,
-            points_data = raw_fixed(),
-            lang()
-          )
-
-          drawed_poly_plot <- data_temp %>%
-            ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
-            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-            # gray interactive points
-            ggiraph::geom_jitter_interactive(
-              ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
-              width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
-            ) +
-            ggplot2::labs(
-              x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
-              title = glue::glue(translate_app('fixed_drawed_poly_plot_title', lang())),
-              subtitle = glue::glue(translate_app('fixed_drawed_poly_plot_subtitle', lang()))
-            )
-
-          res_plots <- cowplot::plot_grid(drawed_poly_plot)
-        } else {
-          # polys plots, two plots, one for the plots inside the clicked polygon, another
-          # for polygons comparisions
-          plots_inside_data <- dplyr::filter(raw_fixed(), !!admin_sel == click$id)
-          plots_inside_plot <- plots_inside_data %>%
-            ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
-            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-            # gray interactive points
-            ggiraph::geom_jitter_interactive(
-              ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
-              width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
-            ) +
-            ggplot2::labs(
-              x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
-              title = glue::glue(translate_app('fixed_plots_inside_plot_title', lang())),
-              subtitle = glue::glue(translate_app('fixed_plots_inside_plot_subtitle', lang()))
-            )
-
-          poly_comparision_plot <- data_sel %>%
-            dplyr::mutate(
-              color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
-            ) %>%
-            ggplot2::ggplot(ggplot2::aes(y = !!metric_sel)) +
-            ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
-            ggiraph::geom_jitter_interactive(
-              ggplot2::aes(
-                x = ' ', tooltip = !!admin_sel,
-                colour = color_var, size = color_var, alpha = color_var
-              ),
-              width = 0.1, show.legend = FALSE, height = 0
-            ) +
-            ggplot2::scale_color_manual(values = c('gray', 'green')) +
-            ggplot2::scale_size_manual(values = c(3, 7)) +
-            ggplot2::scale_alpha_manual(values = c(0.4, 1)) +
-            ggplot2::labs(
-              x = '', y = glue::glue(translate_app(rlang::as_label(metric_sel), lang())),
-              title = glue::glue(translate_app('fixed_poly_comparision_plot_title', lang())),
-              subtitle = glue::glue(translate_app('fixed_poly_comparision_plot_subtitle', lang()))
-            )
-
-          res_plots <- cowplot::plot_grid(plots_inside_plot, poly_comparision_plot)
-
-        }
-      }
-
-      return(ggiraph::girafe(
-        ggobj = res_plots, width_svg = 12, height_svg = 5,
-        options = list(
-          ggiraph::opts_tooltip(zindex = 9999)
-        )
-      ))
-
-    })
+    # first time observer
+    # shiny::observeEvent(
+    #   once = TRUE, priority = 1,
+    #   eventExpr = {
+    #     input$first_time
+    #     shiny::isolate(data_reactives$nfi)
+    #   },
+    #   handlerExpr = {
+    #     shinyjs::click("mod_applyButtonInput-apply", asis = TRUE)
+    #   }
+    # )
 
 
-    shiny::observeEvent(
-      eventExpr = input$fixed_map_shape_click,
-      handlerExpr = {
-
-        # click info
-        click <- input$fixed_map_shape_click
-
-        # modal
-        shiny::showModal(
-          shiny::modalDialog(
-            ggiraph::girafeOutput("fixed_plot_data_sel"),
-            title = glue::glue(translate_app('fixed_click_plot_modal_title', lang())),
-            size = 'l', easyClose = TRUE, footer = NULL
-          )
-        )
-      }
-    )
-
-  } # end of server function
+  } # end of server
 
   # Run the application
-  seboscapp <- shiny::shinyApp(
-    ui = ui, server = server,
-    onStart = function() {
-      # nothing to see here
-    }
+  fes_app_res <- shiny::shinyApp(
+    ui = ui, server = server
   )
 
   # shiny::runApp(nfi_app)
-  return(seboscapp)
+  return(fes_app_res)
 
 }
+
+
+
+
+
+
+
+#' #' function to launch the lidar app
+#' #'
+#' #' @importFrom magrittr %>%
+#' #'
+#' #' @export
+#' seboscapp <- function() {
+#'
+#'   ### Language input ###########################################################
+#'   shiny::addResourcePath(
+#'     'images', system.file('resources', 'images', package = 'seboscapp')
+#'   )
+#'   lang_choices <- c('cat', 'spa', 'eng')
+#'   lang_flags <- c(
+#'     glue::glue("<img class='flag-image' src='images/cat.png' width=20px><div class='flag-lang'>%s</div></img>"),
+#'     glue::glue("<img class='flag-image' src='images/spa.png' width=20px><div class='flag-lang'>%s</div></img>"),
+#'     glue::glue("<img class='flag-image' src='images/eng.png' width=20px><div class='flag-lang'>%s</div></img>")
+#'   )
+#'
+#'   ## UI ####
+#'   ui <- shiny::tagList(
+#'     # shinyjs
+#'     shinyjs::useShinyjs(),
+#'
+#'     # css
+#'     shiny::tags$head(
+#'       # custom css
+#'       shiny::includeCSS(
+#'         system.file('resources', 'seboscapp.css', package = 'seboscapp')
+#'       ),
+#'       # corporative image css
+#'       shiny::includeCSS(
+#'         system.file('resources', 'corp_image.css', package = 'seboscapp')
+#'       )
+#'     ),
+#'
+#'     navbarPageWithInputs(
+#'       # opts
+#'       title = 'Forest Ecosystem Services of Catalunya App',
+#'       id = 'nav',
+#'       collapsible = TRUE,
+#'
+#'       # navbar with inputs (helpers.R) accepts an input argument, we use it for the lang
+#'       # selector
+#'       inputs = shinyWidgets::pickerInput(
+#'         'lang', NULL,
+#'         choices = lang_choices,
+#'         selected = 'cat',
+#'         width = '100px',
+#'         choicesOpt = list(
+#'           content = c(
+#'             sprintf(lang_flags[1], lang_choices[1]),
+#'             sprintf(lang_flags[2], lang_choices[2]),
+#'             sprintf(lang_flags[3], lang_choices[3])
+#'           )
+#'         )
+#'       ),
+#'
+#'       # navbarPage contents
+#'       shiny::tabPanel(
+#'         title = shiny::uiOutput('fixed_data_tabtitle'),
+#'         ########################################################### debug ####
+#'         # shiny::absolutePanel(
+#'         #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
+#'         #   draggable = TRUE, width = 640, height = 'auto',
+#'         #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+#'         #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
+#'         #   top = 60, left = 'auto', right = 50, bottom = 'auto',
+#'         #
+#'         #   shiny::textOutput('debug1'),
+#'         #   shiny::textOutput('debug2'),
+#'         #   shiny::textOutput('debug3')
+#'         # ),
+#'         ####################################################### end debug ####
+#'
+#'         # we need an UI beacuse we need to translate based on the lang input from the
+#'         # navbar
+#'         shiny::uiOutput('fixed_ui')
+#'
+#'       ), # end of tabPanel "Fixed data"
+#'
+#'       shiny::tabPanel(
+#'         title = shiny::uiOutput('dynamic_data_tabtitle'),
+#'         ########################################################### debug ####
+#'         # shiny::absolutePanel(
+#'         #   id = 'debug', class = 'panel panel-default', fixed = TRUE,
+#'         #   draggable = TRUE, width = 640, height = 'auto',
+#'         #   # top = 100, left = 100, rigth = 'auto', bottom = 'auto',
+#'         #   # top = 'auto', left = 'auto', right = 100, bottom = 100,
+#'         #   top = 60, left = 'auto', right = 50, bottom = 'auto',
+#'         #
+#'         #   shiny::textOutput('debug1'),
+#'         #   shiny::textOutput('debug2'),
+#'         #   shiny::textOutput('debug3')
+#'         # ),
+#'         ####################################################### end debug ####
+#'
+#'         # we need an UI beacuse we need to translate based on the lang input from the
+#'         # navbar
+#'         shiny::uiOutput('dynamic_ui')
+#'
+#'       ) # end of tabPanel "Dynamic data"
+#'     ) # end of navbarwithinputs
+#'   ) # end of ui (tagList)
+#'
+#'   ## SERVER ####
+#'   server <- function(input, output, session) {
+#'     ## debug #####
+#'     # output$debug1 <- shiny::renderPrint({
+#'     #   input$
+#'     # })
+#'     # output$debug2 <- shiny::renderPrint({
+#'     #   input$
+#'     # })
+#'     # output$debug3 <- shiny::renderPrint({
+#'     #   input$
+#'     # })
+#'
+#'     ## lang reactive ####
+#'     lang <- shiny::reactive({
+#'       input$lang
+#'     })
+#'
+#'     output$fixed_data_tabtitle <- shiny::renderText({translate_app('static', lang())})
+#'     output$dynamic_data_tabtitle <- shiny::renderText({translate_app('dynamic', lang())})
+#'
+#'     ## fixed UI (to use lang) ####
+#'     output$fixed_ui <- shiny::renderUI({
+#'
+#'       # lang
+#'       lang_declared <- lang()
+#'
+#'       shiny::fluidPage(
+#'         shiny::sidebarLayout(
+#'
+#'           sidebarPanel = shiny::sidebarPanel(
+#'             width = 3,
+#'             # title
+#'             # shiny::h4(translate_app('sidebar_h4_title', lang_declared)),
+#'             shiny::h4('fixed_sidebar_h4_title' %>% translate_app(lang_declared)),
+#'
+#'             shiny::selectInput(
+#'               'fixed_var_sel',
+#'               'fixed_var_sel' %>% translate_app(lang_declared),
+#'               choices = list(
+#'                 'provisioning' = c('p1', 'p2') %>% purrr::set_names(nm = translate_app(., lang_declared)),
+#'                 'cultural' = c('c1') %>% purrr::set_names(nm = translate_app(., lang_declared)),
+#'                 'regulation' = c('r1', 'r2', 'r3', 'r4') %>% purrr::set_names(nm = translate_app(., lang_declared))
+#'               ) %>% purrr::set_names(nm = translate_app(c('provisioning', 'cultural', 'regulation'), lang_declared))
+#'             ),
+#'
+#'             shiny::selectInput(
+#'               'fixed_scale',
+#'               'fixed_scale' %>% translate_app(lang_declared),
+#'               choices = c('local', 'municipalities', 'counties', 'provinces', 'drawed_poly') %>%
+#'                 purrr::set_names(nm = translate_app(., lang_declared))
+#'             ),
+#'
+#'             shinyjs::hidden(
+#'               shiny::selectInput(
+#'                 'fixed_metric',
+#'                 'fixed_metric' %>% translate_app(lang_declared),
+#'                 choices = c('mean', 'min', 'max', 'n', 'sd', 'q25', 'q75') %>%
+#'                   purrr::set_names(nm = translate_app(., lang_declared))
+#'               )
+#'             ),
+#'
+#'             # little spaces
+#'             shiny::br(),
+#'             shiny::br(),
+#'
+#'             # download
+#'             shiny::actionButton(
+#'               'fixed_download_dialogue', 'download' %>% translate_app(lang_declared)
+#'             )
+#'           ), # end of sidebar panel
+#'
+#'           mainPanel = shiny::mainPanel(
+#'             width = 9,
+#'             shiny::tabsetPanel(
+#'               shiny::tabPanel(
+#'                 title = 'map' %>% translate_app(lang_declared),
+#'                 leaflet::leafletOutput('fixed_map', height = '70vh')
+#'               ), # end of fixed map tab
+#'               shiny::tabPanel(
+#'                 title = 'table' %>% translate_app(lang_declared),
+#'                 DT::DTOutput('fixed_table', height = '70vh')
+#'               ) # end of fixed table tab
+#'             )
+#'           ) # end of main panel
+#'         ) # end of layout
+#'       ) # end of fluidPage
+#'     }) # end of fixed_ui
+#'
+#'     ## dynamic UI (to use lang) ####
+#'
+#'     ## show the metric when scale is not local ####
+#'     shiny::observeEvent(
+#'       eventExpr = input$fixed_scale,
+#'       handlerExpr = {
+#'         if (input$fixed_scale == 'local') {
+#'           shinyjs::hideElement('fixed_metric')
+#'         } else {
+#'           shinyjs::showElement('fixed_metric')
+#'         }
+#'       }
+#'     )
+#'
+#'     ## data reactives ####
+#'     # we create three reactive data, a raw one, summ one and drawed_poly one
+#'     raw_fixed <- shiny::reactive({
+#'       shiny::validate(
+#'         shiny::need(input$fixed_var_sel, 'no inputs')
+#'       )
+#'
+#'       dataset_fixed <- switch(
+#'         input$fixed_var_sel,
+#'         'c1' = c1_data,
+#'         'p1' = p1_data,
+#'         'p2' = p2_data,
+#'         'r1' = r1_data,
+#'         'r2' = r2_data,
+#'         'r3' = r3_data,
+#'         'r4' = r4_data
+#'       )
+#'
+#'       return(dataset_fixed)
+#'     })
+#'
+#'     summ_fixed <- shiny::reactive({
+#'       shiny::validate(
+#'         shiny::need(input$fixed_scale, 'no inputs'),
+#'         shiny::need(raw_fixed(), 'no raw data'),
+#'         shiny::need(
+#'           input$fixed_scale %in% c('municipalities', 'counties', 'provinces'),
+#'           'no fixed scale as polys'
+#'         )
+#'       )
+#'
+#'       raw_data <- raw_fixed()
+#'       scale_sel <- input$fixed_scale
+#'
+#'       admin_var <- switch(
+#'         scale_sel,
+#'         'municipalities' = 'admin_municipality',
+#'         'counties' = 'admin_region',
+#'         'provinces' = 'admin_province'
+#'       )
+#'
+#'       admin_polys <- switch(
+#'         scale_sel,
+#'         'municipalities' = municipalities_simpl,
+#'         'counties' = counties_simpl,
+#'         'provinces' = provinces_simpl
+#'       )
+#'
+#'       # calculate the scale
+#'       summarise_fixed <- raw_data %>%
+#'         dplyr::group_by(.data[[admin_var]]) %>%
+#'         dplyr::summarise(
+#'           mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+#'           q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
+#'           n = n()
+#'         ) %>%
+#'         dplyr::filter(n > 2) %>%
+#'         tibble::as_tibble() %>%
+#'         dplyr::select(-geometry) %>%
+#'         dplyr::left_join(admin_polys, by = c(admin_var)) %>%
+#'         sf::st_as_sf(sf_column_name = 'geometry')
+#'
+#'       return(summarise_fixed)
+#'
+#'     })
+#'
+#'     custom_poly_fixed <- shiny::reactive({
+#'
+#'       shiny::validate(
+#'         shiny::need(input$fixed_map_draw_all_features, 'no drawed poly'),
+#'         shiny::need(
+#'           !rlang::is_empty(input$fixed_map_draw_all_features[['features']]),
+#'           'removed poly'
+#'         ),
+#'         shiny::need(raw_fixed(), 'no raw data')
+#'       )
+#'
+#'       # here the data for custom poly
+#'       custom_poly_data <- drawed_poly(
+#'         custom_polygon = input$fixed_map_draw_all_features,
+#'         points_data = raw_fixed(),
+#'         lang()
+#'       ) %>%
+#'         dplyr::group_by(poly_id) %>%
+#'         dplyr::summarise(
+#'           mean = mean(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           max = max(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           min = min(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           sd = sd(.data[[input$fixed_var_sel]], na.rm = TRUE),
+#'           q25 = quantile(.data[[input$fixed_var_sel]], probs = 0.25, na.rm = TRUE),
+#'           q75 = quantile(.data[[input$fixed_var_sel]], probs = 0.75, na.rm = TRUE),
+#'           n = n(),
+#'           geometry = unique(geometry)
+#'         ) %>%
+#'         sf::st_as_sf(sf_column_name = 'geometry')
+#'
+#'       return(custom_poly_data)
+#'     })
+#'
+#'
+#'     data_fixed <- shiny::reactive({
+#'
+#'       shiny::validate(
+#'         shiny::need(input$fixed_scale, 'no inputs')
+#'       )
+#'
+#'       switch(
+#'         input$fixed_scale,
+#'         'local' = raw_fixed(),
+#'         'municipalities' = summ_fixed(),
+#'         'counties' = summ_fixed(),
+#'         'provinces' = summ_fixed(),
+#'         'drawed_poly' = custom_poly_fixed()
+#'       )
+#'
+#'     })
+#'
+#'     ## fixed table output ####
+#'     output$fixed_table <- DT::renderDT({
+#'
+#'       data_sel <- data_fixed()
+#'       columns_to_round <- names(data_sel)[
+#'         names(data_sel) %in% c(
+#'           'c1', 'p1', 'p2', 'r1', 'r2', 'r3',
+#'           'r4', 'mean', 'min', 'max', 'sd', 'q25', 'q75'
+#'         )
+#'       ]
+#'
+#'       data_sel %>%
+#'         tibble::as_tibble() %>%
+#'         dplyr::select(
+#'           dplyr::starts_with('admin_'),
+#'           dplyr::one_of(c('poly_id', 'c1', 'p1', 'p2', 'r1', 'r2', 'r3', 'r4')),
+#'           dplyr::one_of(c('mean', 'min', 'max', 'sd', 'q25', 'q75', 'n'))
+#'         ) %>%
+#'         {
+#'           DT::datatable(
+#'             .,
+#'             rownames = FALSE,
+#'             colnames = names(.) %>% purrr::set_names(., nm = translate_app(., lang())),
+#'             class = 'hover order-column stripe nowrap',
+#'             filter = list(position = 'top', clear = FALSE, plain = FALSE),
+#'             options = list(
+#'               pageLength = 15,
+#'               dom = 'tip',
+#'               autoWidth = FALSE,
+#'               initComplete = DT::JS(
+#'                 "function(settings, json) {",
+#'                 "$(this.api().table().header()).css({'font-family': 'Montserrat'});",
+#'                 "$(this.api().table().body()).css({'font-family': 'Hacker'});",
+#'                 "}"
+#'               )
+#'             )
+#'           )
+#'         } %>%
+#'         DT::formatRound(
+#'           columns = columns_to_round %>% translate_app(lang()),
+#'           digits = 2
+#'         )
+#'
+#'     })
+#'
+#'     ## fixed map output ####
+#'     output$fixed_map <- leaflet::renderLeaflet({
+#'
+#'       lang_declared <- lang()
+#'
+#'       leaflet::leaflet() %>%
+#'         leaflet::setView(1.744, 41.726, zoom = 8) %>%
+#'         leaflet::addProviderTiles(
+#'           leaflet::providers$Esri.WorldShadedRelief,
+#'           group = 'Relief' %>% translate_app(lang_declared),
+#'           options = leaflet::providerTileOptions(
+#'             # zIndex = -1
+#'           )
+#'         ) %>%
+#'         leaflet::addProviderTiles(
+#'           leaflet::providers$Esri.WorldImagery,
+#'           group = 'Imaginery' %>% translate_app(lang_declared),
+#'           options = leaflet::providerTileOptions(
+#'             # zIndex = -1
+#'           )
+#'         ) %>%
+#'         leaflet::addLayersControl(
+#'           baseGroups = c('Relief', 'Imaginery') %>% translate_app(lang_declared),
+#'           options = leaflet::layersControlOptions(collapsed = FALSE, autoZIndex = FALSE)
+#'         ) %>%
+#'         # leaflet.extras plugins
+#'         leaflet.extras::addDrawToolbar(
+#'           targetGroup = 'custom_poly',
+#'           position = 'topleft',
+#'           polylineOptions = FALSE, circleOptions = FALSE, rectangleOptions = FALSE,
+#'           markerOptions = FALSE, circleMarkerOptions = FALSE,
+#'           polygonOptions = leaflet.extras::drawPolygonOptions(
+#'             shapeOptions = leaflet.extras::drawShapeOptions()
+#'           ),
+#'           editOptions = leaflet.extras::editToolbarOptions(
+#'             edit = TRUE, remove = TRUE
+#'           ),
+#'           singleFeature = TRUE
+#'         )
+#'     })
+#'
+#'     ## leaflet proxy map ####
+#'     shiny::observe({
+#'
+#'       # needed inputs
+#'       shiny::validate(
+#'         shiny::need(input$fixed_scale, 'no inputs'),
+#'         shiny::need(input$fixed_var_sel, 'no inputs'),
+#'         shiny::need(input$fixed_metric, 'no inputs'),
+#'         shiny::need(lang(), 'no language')
+#'       )
+#'
+#'       # browser()
+#'
+#'       # triggers observer (inputs)
+#'       data_sel <- data_fixed()
+#'       scale_sel <- input$fixed_scale
+#'       var_sel <- input$fixed_var_sel
+#'       metric_sel <- input$fixed_metric
+#'       lang_declared <- lang()
+#'
+#'       # local scale, markers
+#'       if (scale_sel == 'local') {
+#'
+#'         # palettes
+#'         palette_map <- leaflet::colorBin(
+#'           palette = 'plasma',
+#'           domain = c(
+#'             min(data_sel[[var_sel]], na.rm = TRUE),
+#'             max(data_sel[[var_sel]], na.rm = TRUE)
+#'           ),
+#'           bins = 6
+#'         )
+#'
+#'         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
+#'           leaflet::clearGroup('poly') %>%
+#'           leaflet::clearGroup('plot') %>%
+#'           leaflet::clearGroup('custom_poly') %>%
+#'           leaflet::addCircles(
+#'             group = 'plot', label = as.character(data_sel[[var_sel]]),
+#'             layerId = ~plot_id,
+#'             stroke = FALSE, fillOpacity = 0.7,
+#'             fillColor = ~palette_map(data_sel[[var_sel]]), radius = 750
+#'           ) %>%
+#'           leaflet::addLegend(
+#'             position = 'bottomright', pal = palette_map, values = data_sel[[var_sel]],
+#'             layerId = 'color_palette', opacity = 0.7,
+#'             title = var_sel %>% translate_app(lang_declared)
+#'           )
+#'       } else {
+#'         # bigger scale, polygons
+#'         admin_var <- switch(
+#'           scale_sel,
+#'           'municipalities' = 'admin_municipality',
+#'           'counties' = 'admin_region',
+#'           'provinces' = 'admin_province',
+#'           'drawed_poly' = 'poly_id'
+#'         )
+#'
+#'         # palettes
+#'         palette_map <- leaflet::colorBin(
+#'           palette = 'plasma',
+#'           domain = c(
+#'             min(data_sel[[metric_sel]], na.rm = TRUE),
+#'             max(data_sel[[metric_sel]], na.rm = TRUE)
+#'           ),
+#'           bins = 6
+#'         )
+#'
+#'         leaflet::leafletProxy('fixed_map', session, data = data_sel) %>%
+#'           leaflet::clearGroup('poly') %>%
+#'           leaflet::clearGroup('plot') %>%
+#'           leaflet::clearGroup('custom_poly') %>%
+#'           leaflet::addPolygons(
+#'             group = if (admin_var == 'drawed_poly') {'custom_poly'} else {'poly'},
+#'             label = glue::glue("{data_sel[[admin_var]]} - {round(data_sel[[metric_sel]], 2)}"),
+#'             layerId = as.formula(glue::glue("~{admin_var}")),
+#'             fillColor = ~palette_map(data_sel[[metric_sel]]),
+#'             fillOpacity = 0.9, stroke = TRUE, weight = 2,
+#'             color = ~palette_map(data_sel[[metric_sel]]),
+#'             highlightOptions = leaflet::highlightOptions(
+#'               color = "#CF000F", weight = 2,
+#'               bringToFront = FALSE
+#'             ),
+#'           ) %>%
+#'           leaflet::addLegend(
+#'             position = 'bottomright', pal = palette_map, values = data_sel[[metric_sel]],
+#'             layerId = 'color_palette', opacity = 0.9,
+#'             title = var_sel %>% translate_app(lang_declared)
+#'           )
+#'       }
+#'     })
+#'
+#'     ## download handlers ####
+#'     # modal for saving the raster data
+#'     shiny::observeEvent(
+#'       eventExpr = input$fixed_download_dialogue,
+#'       handlerExpr = {
+#'
+#'         lang_declared = lang()
+#'
+#'         shiny::showModal(
+#'           ui = shiny::modalDialog(
+#'             shiny::tagList(
+#'
+#'               shiny::fluidRow(
+#'                 shiny::column(
+#'                   12,
+#'                   # format options
+#'                   shiny::selectInput(
+#'                     'fixed_data_format',
+#'                     'Select the format',
+#'                     choices = list(
+#'                       'Map' = c('shp', 'gpkg'),
+#'                       'Table' = c('excel', 'csv')
+#'                     ),
+#'                     selected = 'gpkg'
+#'                   )
+#'                 )
+#'               )
+#'             ),
+#'             easyClose = TRUE,
+#'             footer = shiny::tagList(
+#'               # shiny::modalButton(translate_app('modal_dismiss_label', lang_declared)),
+#'               shiny::modalButton('Dismiss'),
+#'               shiny::downloadButton(
+#'                 'fixed_download',
+#'                 label = 'Download',
+#'                 class = 'btn-success'
+#'               )
+#'             )
+#'           )
+#'         )
+#'       }
+#'     ) # end of download dialog handler
+#'
+#'     output$fixed_download <- shiny::downloadHandler(
+#'       filename = function() {
+#'         file_name <- switch(
+#'           input$fixed_data_format,
+#'           'shp' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.zip"),
+#'           'gpkg' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.gpkg"),
+#'           'excel' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.xlsx"),
+#'           'csv' = glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.csv")
+#'         )
+#'         return(file_name)
+#'       },
+#'       content = function(file) {
+#'
+#'         if (input$fixed_data_format == 'gpkg') {
+#'           sf::st_write(data_fixed(), dsn = file)
+#'         } else {
+#'           if (input$fixed_data_format == 'xlsx') {
+#'             writexl::write_xlsx(data_fixed(), path = file)
+#'           } else {
+#'             if (input$fixed_data_format ==  'csv') {
+#'               readr::write_csv(data_fixed(), path = file)
+#'             } else {
+#'               tmp_dir <- tempdir()
+#'               sf::st_write(
+#'                 data_fixed(),
+#'                 file.path(
+#'                   tmp_dir,
+#'                   glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static.shp")
+#'                 )
+#'               )
+#'               shp_files <- list.files(
+#'                 tmp_dir,
+#'                 glue::glue("{input$fixed_var_sel}_{input$fixed_scale}_static"),
+#'                 full.names = TRUE
+#'               )
+#'               utils::zip(
+#'                 file.path(tmp_dir, 'shp_files.zip'),
+#'                 shp_files
+#'               )
+#'               file.copy(file.path(tmp_dir, 'shp_files.zip'), file)
+#'               file.remove(file.path(tmp_dir, 'shp_files.zip'), shp_files)
+#'             }
+#'           }
+#'         }
+#'       }
+#'     )
+#'
+#'     ## fixed summarising banner ####
+#'     shiny::observeEvent(
+#'       eventExpr = input$fixed_scale,
+#'       handlerExpr = {
+#'         if (input$fixed_scale %in% c('municipalities', 'counties', 'provinces')) {
+#'           shiny::showModal(
+#'             shiny::modalDialog(
+#'               shiny::p('fixed_scale_summ_warning' %>% translate_app(lang())),
+#'               title = 'fixed_scale_summ_warning_title' %>% translate_app(lang()),
+#'               footer = NULL, size = 'm', easyClose = TRUE
+#'             )
+#'           )
+#'         }
+#'       }
+#'     )
+#'
+#'     ## fixed click plots ####
+#'     # lets do a double plot, one comparing the plots inside the clicked shape and another
+#'     # comparing the shapes. This will be a modal dialog inside an observer
+#'     output$fixed_plot_data_sel <- ggiraph::renderGirafe({
+#'
+#'       shiny::validate(
+#'         shiny::need(input$fixed_map_shape_click, 'no click'),
+#'         shiny::need(data_fixed(), 'no data'),
+#'         shiny::need(input$fixed_var_sel, 'no inputs'),
+#'         shiny::need(input$fixed_scale, 'no inputs')
+#'       )
+#'
+#'       # data needed
+#'       click <- input$fixed_map_shape_click
+#'       data_sel <- data_fixed()
+#'       metric_sel <- rlang::sym(input$fixed_metric)
+#'       var_sel <- rlang::sym(input$fixed_var_sel)
+#'       admin_sel <- switch(
+#'         input$fixed_scale,
+#'         'local' = 'plot_id',
+#'         'municipalities' = 'admin_municipality',
+#'         'counties' = 'admin_region',
+#'         'provinces' = 'admin_province',
+#'         'drawed_poly' = 'poly_id'
+#'       ) %>% rlang::sym()
+#'
+#'       # plot for plots, only one, bringing to front the plot clicked and ggiraph for
+#'       # >Q90 and <Q10 and clicked, to do that we need three layers of points:
+#'       if (admin_sel == 'plot_id') {
+#'         data_temp <- data_sel %>%
+#'           dplyr::mutate(
+#'             color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
+#'           )
+#'
+#'         plots_plot <- data_temp %>%
+#'           ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+#'           ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+#'           # gray not interactive points
+#'           ggplot2::geom_jitter(
+#'             data = data_temp %>%
+#'               dplyr::filter(
+#'                 color_var == 'no_color',
+#'                 !!var_sel > quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
+#'                 !!var_sel < quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
+#'               ),
+#'             ggplot2::aes(x = ' '), colour = 'gray', size = 3,
+#'             width = 0.1, show.legend = FALSE, alpha = 0.7, height = 0
+#'           ) +
+#'           # gray interactive points
+#'           ggiraph::geom_jitter_interactive(
+#'             data = data_temp %>%
+#'               dplyr::filter(
+#'                 color_var == 'no_color',
+#'                 !dplyr::between(
+#'                   !!var_sel, quantile(data_temp[[input$fixed_var_sel]], 0.05, na.rm = TRUE),
+#'                   quantile(data_temp[[input$fixed_var_sel]], 0.95, na.rm = TRUE)
+#'                 )
+#'               ),
+#'             ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'gray', size = 3,
+#'             width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+#'           ) +
+#'           # green interactive point
+#'           ggiraph::geom_jitter_interactive(
+#'             data = data_temp %>%
+#'               dplyr::filter(
+#'                 color_var == 'zcolor'
+#'               ),
+#'             ggplot2::aes(x = ' ', tooltip = !!admin_sel), colour = 'green', size = 7,
+#'             width = 0.1, show.legend = FALSE, alpha = 1, height = 0
+#'           ) +
+#'           ggplot2::labs(
+#'             x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+#'             title = glue::glue(translate_app('fixed_plot_plots_title', lang())),
+#'             subtitle = glue::glue(translate_app('fixed_plot_plots_subtitle', lang()))
+#'           )
+#'
+#'         res_plots <- cowplot::plot_grid(plots_plot)
+#'       } else {
+#'         # plot for drawed poly, one for the plots contained on the poly
+#'         if (admin_sel == 'poly_id') {
+#'           data_temp <- drawed_poly(
+#'             custom_polygon = input$fixed_map_draw_all_features,
+#'             points_data = raw_fixed(),
+#'             lang()
+#'           )
+#'
+#'           drawed_poly_plot <- data_temp %>%
+#'             ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+#'             ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+#'             # gray interactive points
+#'             ggiraph::geom_jitter_interactive(
+#'               ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
+#'               width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+#'             ) +
+#'             ggplot2::labs(
+#'               x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+#'               title = glue::glue(translate_app('fixed_drawed_poly_plot_title', lang())),
+#'               subtitle = glue::glue(translate_app('fixed_drawed_poly_plot_subtitle', lang()))
+#'             )
+#'
+#'           res_plots <- cowplot::plot_grid(drawed_poly_plot)
+#'         } else {
+#'           # polys plots, two plots, one for the plots inside the clicked polygon, another
+#'           # for polygons comparisions
+#'           plots_inside_data <- dplyr::filter(raw_fixed(), !!admin_sel == click$id)
+#'           plots_inside_plot <- plots_inside_data %>%
+#'             ggplot2::ggplot(ggplot2::aes(y = !!var_sel)) +
+#'             ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+#'             # gray interactive points
+#'             ggiraph::geom_jitter_interactive(
+#'               ggplot2::aes(x = ' ', tooltip = plot_id), colour = 'gray', size = 3,
+#'               width = 0.1, show.legend = FALSE, alpha = 0.4, height = 0
+#'             ) +
+#'             ggplot2::labs(
+#'               x = '', y = glue::glue(translate_app(rlang::as_label(var_sel), lang())),
+#'               title = glue::glue(translate_app('fixed_plots_inside_plot_title', lang())),
+#'               subtitle = glue::glue(translate_app('fixed_plots_inside_plot_subtitle', lang()))
+#'             )
+#'
+#'           poly_comparision_plot <- data_sel %>%
+#'             dplyr::mutate(
+#'               color_var = dplyr::if_else(!!admin_sel == click$id, 'zcolor', 'no_color')
+#'             ) %>%
+#'             ggplot2::ggplot(ggplot2::aes(y = !!metric_sel)) +
+#'             ggplot2::geom_violin(ggplot2::aes(x = ' ')) +
+#'             ggiraph::geom_jitter_interactive(
+#'               ggplot2::aes(
+#'                 x = ' ', tooltip = !!admin_sel,
+#'                 colour = color_var, size = color_var, alpha = color_var
+#'               ),
+#'               width = 0.1, show.legend = FALSE, height = 0
+#'             ) +
+#'             ggplot2::scale_color_manual(values = c('gray', 'green')) +
+#'             ggplot2::scale_size_manual(values = c(3, 7)) +
+#'             ggplot2::scale_alpha_manual(values = c(0.4, 1)) +
+#'             ggplot2::labs(
+#'               x = '', y = glue::glue(translate_app(rlang::as_label(metric_sel), lang())),
+#'               title = glue::glue(translate_app('fixed_poly_comparision_plot_title', lang())),
+#'               subtitle = glue::glue(translate_app('fixed_poly_comparision_plot_subtitle', lang()))
+#'             )
+#'
+#'           res_plots <- cowplot::plot_grid(plots_inside_plot, poly_comparision_plot)
+#'
+#'         }
+#'       }
+#'
+#'       return(ggiraph::girafe(
+#'         ggobj = res_plots, width_svg = 12, height_svg = 5,
+#'         options = list(
+#'           ggiraph::opts_tooltip(zindex = 9999)
+#'         )
+#'       ))
+#'
+#'     })
+#'
+#'
+#'     shiny::observeEvent(
+#'       eventExpr = input$fixed_map_shape_click,
+#'       handlerExpr = {
+#'
+#'         # click info
+#'         click <- input$fixed_map_shape_click
+#'
+#'         # modal
+#'         shiny::showModal(
+#'           shiny::modalDialog(
+#'             ggiraph::girafeOutput("fixed_plot_data_sel"),
+#'             title = glue::glue(translate_app('fixed_click_plot_modal_title', lang())),
+#'             size = 'l', easyClose = TRUE, footer = NULL
+#'           )
+#'         )
+#'       }
+#'     )
+#'
+#'   } # end of server function
+#'
+#'   # Run the application
+#'   seboscapp <- shiny::shinyApp(
+#'     ui = ui, server = server,
+#'     onStart = function() {
+#'       # nothing to see here
+#'     }
+#'   )
+#'
+#'   # shiny::runApp(nfi_app)
+#'   return(seboscapp)
+#'
+#' }

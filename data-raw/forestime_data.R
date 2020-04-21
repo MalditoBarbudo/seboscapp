@@ -11,14 +11,15 @@ ifn_plots_data <-
     coords_utm_x_ETRS89, coords_utm_y_ETRS89,
     old_idparcela
   )
-dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t')
-erosion_data <- read_delim('data-raw/ErosionRecalc.txt', delim = '\t')
+dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t') %>%
+  select(-AguaIFN2, -AguaIFN4)
+erosion_water_data <- read_delim('data-raw/ErosionAgua.txt', delim = '\t')
 
 # join all togheter, nfi plots to get the plot_id and also know which plots
 # remain at the end
 joined_data <-
   dynamic_data %>%
-  full_join(erosion_data, by = c('PLOTS' = 'plot', 'X', 'Y')) %>%
+  full_join(erosion_water_data, by = c('PLOTS' = 'plot', 'X', 'Y')) %>%
   # remove the duplicated 251187 plots
   filter(!ID %in% c(2894, 2899)) %>%
   mutate(
@@ -30,7 +31,13 @@ joined_data <-
     # coords_utm_y_ETRS89 = Y,
     old_idparcela = PLOTS,
     CarbonoIFN23 = CarbonoIFN2,
-    CarbonoIFN34 = CarbonoIFN4
+    CarbonoIFN34 = CarbonoIFN4,
+    ErosIFN2 = Mitigada2,
+    ErosIFN3 = Mitigada3,
+    ErosIFN4 = Mitigada4,
+    WaterIFN2 = Water2,
+    WaterIFN3 = Water3,
+    WaterIFN4 = Water4,
   ) %>%
   left_join(
     ifn_plots_data,
@@ -48,7 +55,7 @@ joined_data <-
 all_together_data <-
   joined_data %>%
   pivot_longer(
-    cols = SetasIFN2:ErosIFN4, names_to = 'serveiIFN', values_to = 'values'
+    cols = SetasIFN2:WaterIFN4, names_to = 'serveiIFN', values_to = 'values'
   ) %>%
   separate(serveiIFN, c('Servei', 'IFN'), sep = 'I', remove = TRUE) %>%
   mutate(IFN = paste0('I', IFN)) %>%
@@ -67,31 +74,46 @@ all_together_data <-
       nfi == 'IFN34' ~ 'NFI_3_NFI_4',
     ),
     es_name = case_when(
-      es_name == 'Agua' ~ 'exported_water',
+      es_name == 'Water' ~ 'exported_water',
       es_name == 'Carbono' ~ 'soil_organic_carbon',
       es_name == 'Eros' ~ 'erosion_control',
       es_name == 'Setas' ~ 'mushrooms_production',
       es_name == 'Madera' ~ 'wood'
     )
-  ) %>%
-  sf::st_as_sf(sf_column_name = 'geometry')
+  )
 
 nfi_2_data <-
   all_together_data %>%
-  filter(nfi == 'NFI_2')
+  filter(nfi == 'NFI_2') %>%
+  pivot_wider(names_from = es_name, values_from = values) %>%
+  select(-nfi) %>%
+  sf::st_as_sf(sf_column_name = 'geometry')
+
 
 nfi_3_data <-
   all_together_data %>%
-  filter(nfi == 'NFI_3')
+  filter(nfi == 'NFI_3') %>%
+  pivot_wider(names_from = es_name, values_from = values) %>%
+  select(-nfi) %>%
+  sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_4_data <-
   all_together_data %>%
-  filter(nfi == 'NFI_4')
+  filter(nfi == 'NFI_4') %>%
+  pivot_wider(names_from = es_name, values_from = values) %>%
+  select(-nfi) %>%
+  sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_2_nfi_3_data <-
   all_together_data %>%
-  filter(nfi == 'NFI_2_NFI_3')
+  filter(nfi == 'NFI_2_NFI_3') %>%
+  pivot_wider(names_from = es_name, values_from = values) %>%
+  select(-nfi) %>%
+  sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_3_nfi_4_data <-
   all_together_data %>%
-  filter(nfi == 'NFI_3_NFI_4')
+  filter(nfi == 'NFI_3_NFI_4') %>%
+  pivot_wider(names_from = es_name, values_from = values) %>%
+  select(-nfi) %>%
+  sf::st_as_sf(sf_column_name = 'geometry')

@@ -69,3 +69,16 @@ translate_app <- function(id, lang) {
   #   dplyr::arrange(text_id) %>%
   #   dplyr::pull(!! rlang::sym(glue::glue("translation_{lang}")))
 }
+
+# cache_selected_choice
+# logic is as follows:
+#   - if the cached value is in choices provided, then return it, if not,
+#     return the default value (first choice if not provided)
+cache_selected_choice <- function(choices, cache, key, default = choices[1]) {
+  cached_input <- cache$get(key, 'non_existent')
+  if (all(cached_input %in% choices)) {
+    return(cached_input)
+  } else {
+    return(default)
+  }
+}
