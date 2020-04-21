@@ -121,8 +121,8 @@ fes_app <- function() {
               shiny::tabPanel(
                 title = mod_tab_translateOutput('map_translation'),
                 # 'map',
-                value = 'map_panel'#,
-                # mod_mapOutput('mod_mapOutput')
+                value = 'map_panel',
+                mod_mapOutput('mod_mapOutput')
               ),
               shiny::tabPanel(
                 title = mod_tab_translateOutput('table_translation'),
@@ -177,11 +177,11 @@ fes_app <- function() {
     #   var_thes, lang
     # )
     # map
-    # map_reactives <- shiny::callModule(
-    #   mod_map, 'mod_mapOutput',
-    #   data_reactives, viz_reactives, main_data_reactives,
-    #   lang, var_thes
-    # )
+    map_reactives <- shiny::callModule(
+      mod_map, 'mod_mapOutput',
+      data_reactives, viz_reactives, main_data_reactives,
+      lang, var_thes
+    )
     # info
     # shiny::callModule(
     #   mod_info, 'mod_infoUI',

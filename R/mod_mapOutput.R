@@ -37,13 +37,10 @@ mod_map <- function(
 
     # ns
     ns <- session$ns
-    # shiny::tagList(
-    #   leaflet::leafletOutput(ns('fes_map'), height = 600),
     shiny::tags$div(
       id = 'cite',
       translate_app('cite_div', lang())
     )
-    #   )
   }) # end of renderUI
 
   ## leaflet output (empty map) ####
@@ -102,12 +99,19 @@ mod_map <- function(
   # reactive to buid the map data
   map_data <- shiny::reactive({
 
+    shiny::validate(
+      shiny::need(main_data_reactives$raw_data, 'no raw data'),
+      shiny::need(main_data_reactives$summ_data, 'no summ data')
+    )
+
     # get the scale
-    data_scale <- data_reactives$data_scale
+    data_scale <- shiny::isolate(data_reactives$data_scale)
+    raw_data <- main_data_reactives$raw_data
+    summ_data <- main_data_reactives$summ_data
 
     # if local scale, then the raw data is ok
     if (data_scale == 'local') {
-      raw_data <- main_data_reactives$raw_data
+      raw_data <- raw_data
       return(raw_data)
     }
 
@@ -120,7 +124,7 @@ mod_map <- function(
       'admin_province' = provinces
 
     )
-    summ_data <- main_data_reactives$summ_data %>%
+    summ_data <- summ_data %>%
       dplyr::left_join(polygon_data, by = data_scale) %>%
       sf::st_as_sf(sf_column_name = 'geometry')
 
@@ -130,9 +134,23 @@ mod_map <- function(
   ## observers ####
   # observer to update the map
   shiny::observe({
+
+    shiny::validate(
+      shiny::need(map_data(), 'no data yet'),
+      shiny::need(viz_reactives$viz_color, 'no viz yet'),
+      shiny::need(
+        viz_reactives$viz_color %in% names(map_data()), 'no updated viz'
+      )
+    )
+
+    foo <- map_data()
+
+    browser()
     # data and scale
     data_scale <- shiny::isolate(data_reactives$data_scale)
-    map_data_ready <- map_data()
+    map_data_ready <- map_data() %>%
+      # remove the nas
+      dplyr::filter(!is.na(!! rlang::sym(viz_reactives$viz_color)))
     # palette configuration
     color_vector <- map_data_ready %>%
       dplyr::pull(!! rlang::sym(viz_reactives$viz_color))
@@ -186,7 +204,7 @@ mod_map <- function(
       } %>%
       leaflet::addLegend(
         position = 'bottomright', pal = color_palette_legend,
-        values = aesthetics_data$color_vector,
+        values = color_vector,
         title = names(
           translate_app(
             viz_reactives$viz_color, lang()

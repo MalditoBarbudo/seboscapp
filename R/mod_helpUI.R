@@ -98,7 +98,6 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
-    browser()
     var_units <- var_thes %>%
       dplyr::filter(var_id == input$glossary_var) %>%
       dplyr::select(tidyselect::any_of(c(

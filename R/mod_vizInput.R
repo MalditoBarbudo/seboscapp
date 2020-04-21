@@ -49,7 +49,7 @@ mod_viz <- function(
       dplyr::filter(var_table == data_reactives$data_version) %>%
       dplyr::pull(var_id) %>%
       magrittr::extract(
-        stringr::str_detect(., pattern = '^admin_', negate = TRUE)
+        stringr::str_detect(., pattern = '^admin_|^plot_', negate = TRUE)
       ) %>%
       magrittr::set_names(translate_app(., lang()))
     selected_color <- cache_selected_choice(

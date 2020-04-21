@@ -137,7 +137,16 @@ forescale_data <-
   plot_to_poly_classificator(
     provinces, provinces$admin_province, 'admin_province'
   ) %>%
-  st_transform(crs = '+proj=longlat +datum=WGS84')
+  st_transform(crs = '+proj=longlat +datum=WGS84') %>%
+  dplyr::mutate(
+    plot_id = paste0(
+      "FES_",
+      round(sf::st_coordinates(geometry)[,1], 6),
+      "_",
+      round(sf::st_coordinates(geometry)[,2], 6)
+    ) %>% stringr::str_remove_all('\\.')
+  ) %>%
+  dplyr::select(plot_id, dplyr::everything())
 
 municipalities_simpl <- municipalities %>%
   rmapshaper::ms_simplify(0.1) %>%
