@@ -147,8 +147,8 @@ mod_map <- function(
       viz_color <- viz_reactives$viz_color
     } else {
       viz_color <-
-        # glue::glue("{viz_reactives$viz_color}_{viz_reactives$viz_size}")
-        glue::glue("{viz_reactives$viz_color}_mean")
+        glue::glue("{viz_reactives$viz_color}_{viz_reactives$viz_statistic}")
+        # glue::glue("{viz_reactives$viz_color}_mean")
     }
 
     # validate the viz color is in concordance with the data
@@ -157,9 +157,14 @@ mod_map <- function(
         viz_color %in% names(map_data()), 'no updated viz'
       )
     )
-    # data (remove NAs)
+
+    # data (remove NAs and Inf)
     map_data_ready <- map_data() %>%
-      dplyr::filter(!is.na(!! rlang::sym(viz_color)))
+      dplyr::filter(
+        !is.na(!! rlang::sym(viz_color)),
+        # min and max creates Inf when all vector values are NAs, remove them
+        !is.infinite(!! rlang::sym(viz_color))
+      )
     # palette configuration
     color_vector <- map_data_ready %>%
       dplyr::pull(!! rlang::sym(viz_color))

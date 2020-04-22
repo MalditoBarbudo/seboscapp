@@ -56,6 +56,14 @@ mod_viz <- function(
       color_choices, cache, 'selectedcol'
     )
 
+    statistic_choices <- c(
+      'mean', 'se', 'min', 'max', 'n'
+    ) %>%
+      magrittr::set_names(translate_app(., lang()))
+    selected_statistic <- cache_selected_choice(
+      statistic_choices, cache, 'selectedstatistic', 'mean'
+    )
+
     # tagList ####
     shiny::tagList(
       shiny::h4(translate_app('h4_viz', lang())),
@@ -83,15 +91,80 @@ mod_viz <- function(
               liveSearch = TRUE,
               tickIcon = 'glyphicon-tree-deciduous'
             )
-          )
+          ),
+          {
+            if (data_reactives$data_scale == 'local') {
+              shinyjs::hidden(
+                shinyWidgets::pickerInput(
+                  ns('viz_statistic'),
+                  translate_app('viz_color_input', lang()),
+                  choices = statistic_choices,
+                  selected = selected_statistic,
+                  options = shinyWidgets::pickerOptions(
+                    actionsBox = FALSE,
+                    noneSelectedText = translate_app(
+                      'deselect-all-text', lang()
+                    ),
+                    selectAllText = translate_app(
+                      'select-all-text', lang()
+                    ),
+                    selectedTextFormat =  'count',
+                    countSelectedText = translate_app(
+                      'count-selected-text-value', lang()
+                    ),
+                    size = 10,
+                    liveSearch = TRUE,
+                    tickIcon = 'glyphicon-tree-deciduous'
+                  )
+                )
+              )
+            } else {
+              shinyWidgets::pickerInput(
+                ns('viz_statistic'),
+                translate_app('viz_color_input', lang()),
+                choices = statistic_choices,
+                selected = selected_statistic,
+                options = shinyWidgets::pickerOptions(
+                  actionsBox = FALSE,
+                  noneSelectedText = translate_app(
+                    'deselect-all-text', lang()
+                  ),
+                  selectAllText = translate_app(
+                    'select-all-text', lang()
+                  ),
+                  selectedTextFormat =  'count',
+                  countSelectedText = translate_app(
+                    'count-selected-text-value', lang()
+                  ),
+                  size = 10,
+                  liveSearch = TRUE,
+                  tickIcon = 'glyphicon-tree-deciduous'
+                )
+              )
+            }
+          }
         )
-      )
-    )
-
-
-  })
+      ) # end of fluidRow
+    ) # end of tagList
+  }) # end of renderUI
 
   # observers ####
+  # make visible statistic selecctor if needed
+  shiny::observe({
+
+    shiny::validate(
+      shiny::need(data_reactives$data_scale, 'no inputs yet')
+    )
+
+    if (data_reactives$data_scale == 'local') {
+      shinyjs::reset('viz_statistic')
+      shinyjs::disable('viz_statistic')
+      shinyjs::hide('viz_statistic')
+    } else {
+      shinyjs::enable('viz_statistic')
+      shinyjs::show('viz_statistic')
+    }
+  })
   # update cache
   shiny::observe({
     shiny::validate(shiny::need(input$viz_color, 'no input yet'))
@@ -99,10 +172,17 @@ mod_viz <- function(
     cache$set('selectedcol', selected_color)
   })
 
+  shiny::observe({
+    shiny::validate(shiny::need(input$viz_statistic, 'no input yet'))
+    selected_statistic <- input$viz_statistic
+    cache$set('selectedstatistic', selected_statistic)
+  })
+
   # return the viz inputs
   viz_reactives <- shiny::reactiveValues()
   shiny::observe({
     viz_reactives$viz_color <- input$viz_color
+    viz_reactives$viz_statistic <- input$viz_statistic
   })
   return(viz_reactives)
 }
