@@ -21,7 +21,7 @@ mod_dataTableOutput <- function(id) {
 #' @param output internal
 #' @param session internal
 #'
-#' @param data_reactives reactives from other modules
+#' @param main_data_reactives,data_reactives reactives from other modules
 #' @param var_thes thesauruses
 #' @param lang lang value
 #'
@@ -30,15 +30,20 @@ mod_dataTableOutput <- function(id) {
 #' @rdname mod_dataTableOutput
 mod_dataTable <- function(
   input, output, session,
-  main_data_reactives, data_reactives, viz_reactives,
+  main_data_reactives, data_reactives,
   var_thes, lang
 ) {
 
   # data reactive
   table_data <- shiny::reactive({
 
+    shiny::validate(
+      shiny::need(main_data_reactives$raw_data, 'no raw data'),
+      shiny::need(main_data_reactives$summ_data, 'no summ data')
+    )
+
     # get the scale
-    data_scale <- data_reactives$data_scale
+    data_scale <- shiny::isolate(data_reactives$data_scale)
 
     # if local scale, then the raw data is ok
     if (data_scale == 'local') {
@@ -63,9 +68,7 @@ mod_dataTable <- function(
     table_data() %>%
       DT::datatable(
         rownames = FALSE,
-        colnames = names(
-          translate_app(names(.), lang())
-        ),
+        colnames = translate_app(names(.), lang()),
         class = 'hover order-column stripe nowrap',
         filter = list(position = 'top', clear = FALSE, plain = FALSE),
         # extensions = 'Buttons',

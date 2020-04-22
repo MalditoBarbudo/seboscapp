@@ -219,11 +219,7 @@ mod_map <- function(
       leaflet::addLegend(
         position = 'bottomright', pal = color_palette_legend,
         values = color_vector,
-        title = names(
-          translate_app(
-            viz_color, lang()
-          )
-        ),
+        title = translate_app(viz_color, lang()),
         layerId = 'color_legend', opacity = 1,
         na.label = '', className = 'info legend na_out',
         labFormat = leaflet::labelFormat(

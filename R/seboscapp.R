@@ -127,8 +127,8 @@ fes_app <- function() {
               shiny::tabPanel(
                 title = mod_tab_translateOutput('table_translation'),
                 # 'table',
-                value = 'table_panel'#,
-                # mod_dataTableOutput('mod_dataTableOutput')
+                value = 'table_panel',
+                mod_dataTableOutput('mod_dataTableOutput')
               )
             )
           )
@@ -171,11 +171,11 @@ fes_app <- function() {
       data_reactives, var_thes, lang, viz_cache
     )
     # table
-    # table_reactives <- shiny::callModule(
-    #   mod_dataTable, 'mod_dataTableOutput',
-    #   main_data_reactives, data_reactives, viz_reactives,
-    #   var_thes, lang
-    # )
+    table_reactives <- shiny::callModule(
+      mod_dataTable, 'mod_dataTableOutput',
+      main_data_reactives, data_reactives,
+      var_thes, lang
+    )
     # map
     map_reactives <- shiny::callModule(
       mod_map, 'mod_mapOutput',

@@ -13,7 +13,6 @@ mod_dataTable(
   session,
   main_data_reactives,
   data_reactives,
-  viz_reactives,
   var_thes,
   lang
 )
@@ -27,7 +26,7 @@ mod_dataTable(
 
 \item{session}{internal}
 
-\item{data_reactives}{reactives from other modules}
+\item{main_data_reactives, data_reactives}{reactives from other modules}
 
 \item{var_thes}{thesauruses}
 
