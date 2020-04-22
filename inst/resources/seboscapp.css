@@ -50,7 +50,7 @@ div.table_container {
 /* position of the modal */
 div.modal-dialog {
   position: relative;
-  top: 300px;
+  top: 50px;
 }
 
 /* table body */

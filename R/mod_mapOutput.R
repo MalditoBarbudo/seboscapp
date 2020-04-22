@@ -232,7 +232,7 @@ mod_map <- function(
   shiny::observe({
     map_reactives$map_data <- map_data()
     map_reactives$fes_map_shape_click <- input$fes_map_shape_click
-    map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
+    # map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
   })
   return(map_reactives)
 }
