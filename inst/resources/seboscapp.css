@@ -55,16 +55,6 @@ div.modal-dialog {
 
 /* table body */
 table.dataTable tbody tr {
-  background-color: #c8cac8 !important;
+  background-color: var(--main-bg-color) !important;
   color: black;
-}
-
-
-span>a.paginate_button {
-  color: #c8cac8 !important;
-}
-
-span>a.paginate_button.current {
-  background-color: #448714;
-  color: #c8cac8 !important;
 }
