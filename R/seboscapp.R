@@ -101,8 +101,8 @@ fes_app <- function() {
               shiny::tabPanel(
                 title = mod_tab_translateOutput('save_translation'),
                 # 'save',
-                value = 'save_panel'#,
-                # mod_saveUI('mod_saveUI')
+                value = 'save_panel',
+                mod_saveUI('mod_saveUI')
               ), # end fo save panel
               # help panel
               shiny::tabPanel(
@@ -189,11 +189,11 @@ fes_app <- function() {
     #   var_thes, texts_thes, numerical_thes, lang
     # )
     # save
-    # shiny::callModule(
-    #   mod_save, 'mod_saveUI',
-    #   map_reactives, table_reactives, main_data_reactives,
-    #   lang
-    # )
+    shiny::callModule(
+      mod_save, 'mod_saveUI',
+      map_reactives, table_reactives, main_data_reactives,
+      lang
+    )
     # help
     shiny::callModule(
       mod_help, 'mod_helpUI',
