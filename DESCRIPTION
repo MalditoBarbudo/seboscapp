@@ -1,8 +1,9 @@
 Package: seboscapp
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Shiny App for the FES Database
+Version: 0.0.1
+Authors@R: person("Victor", "Granda", email = "victorgrandagarcia@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0469-1991"))
+Description: Access the Forest Ecosystem Services data for Catalonia interactively
+  (<http://laboratoriforestal.creaf.uab.cat>). 
 Depends: R (>= 3.6.1)
 License: What license is it under?
 Encoding: UTF-8
@@ -19,6 +20,10 @@ Imports:
     tibble,
     glue,
     ggplot2,
-    ggiraph,
-    cowplot
+    stringr,
+    shinyWidgets,
+    lfcdata,
+    rlang,
+    purrr,
+    htmltools
 RoxygenNote: 7.1.0
