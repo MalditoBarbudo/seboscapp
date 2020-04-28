@@ -78,7 +78,7 @@ all_together_data <-
     ),
     es_name = case_when(
       es_name == 'Water' ~ 'exported_water',
-      es_name == 'Carbono' ~ 'soil_organic_carbon',
+      es_name == 'Carbono' ~ 'carbon_sequestration',
       es_name == 'Eros' ~ 'erosion_mitigation',
       es_name == 'Setas' ~ 'mushrooms_production',
       es_name == 'Madera' ~ 'wood'
@@ -117,14 +117,14 @@ nfi_2_nfi_3_data <-
     suffix = c('_nfi_3', '_nfi_2')
   ) %>%
   mutate(
-    soil_organic_carbon_nfi_2 = NA,
-    soil_organic_carbon_nfi_3 = soil_organic_carbon,
+    carbon_sequestration_nfi_2 = NA,
+    carbon_sequestration_nfi_3 = carbon_sequestration,
     wood_nfi_2 = NA,
     wood_nfi_3 = wood
   ) %>%
-  select(-soil_organic_carbon, -wood) %>%
+  select(-carbon_sequestration, -wood) %>%
   mutate(
-    soil_organic_carbon = soil_organic_carbon_nfi_3 - soil_organic_carbon_nfi_2,
+    carbon_sequestration = carbon_sequestration_nfi_3 - carbon_sequestration_nfi_2,
     erosion_mitigation = erosion_mitigation_nfi_3 - erosion_mitigation_nfi_2,
     mushrooms_production = mushrooms_production_nfi_3 - mushrooms_production_nfi_2,
     exported_water = exported_water_nfi_3 - exported_water_nfi_2,
@@ -132,7 +132,7 @@ nfi_2_nfi_3_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
-    soil_organic_carbon, erosion_mitigation, mushrooms_production,
+    carbon_sequestration, erosion_mitigation, mushrooms_production,
     exported_water, wood
   ) %>%
   left_join(
@@ -151,7 +151,7 @@ nfi_3_nfi_4_data <-
     suffix = c('_nfi_4', '_nfi_3')
   ) %>%
   mutate(
-    soil_organic_carbon = soil_organic_carbon_nfi_4 - soil_organic_carbon_nfi_3,
+    carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_3,
     erosion_mitigation = erosion_mitigation_nfi_4 - erosion_mitigation_nfi_3,
     mushrooms_production = mushrooms_production_nfi_4 - mushrooms_production_nfi_3,
     exported_water = exported_water_nfi_4 - exported_water_nfi_3,
@@ -159,7 +159,7 @@ nfi_3_nfi_4_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
-    soil_organic_carbon, erosion_mitigation, mushrooms_production,
+    carbon_sequestration, erosion_mitigation, mushrooms_production,
     exported_water, wood
   ) %>%
   left_join(
@@ -178,14 +178,14 @@ nfi_2_nfi_4_data <-
     suffix = c('_nfi_4', '_nfi_2')
   ) %>%
   mutate(
-    soil_organic_carbon_nfi_2 = nfi_3_data$soil_organic_carbon,
-    soil_organic_carbon_nfi_4 = soil_organic_carbon,
+    carbon_sequestration_nfi_2 = nfi_3_data$carbon_sequestration,
+    carbon_sequestration_nfi_4 = carbon_sequestration,
     wood_nfi_2 = nfi_3_data$wood,
     wood_nfi_4 = wood
   ) %>%
-  select(-soil_organic_carbon, -wood) %>%
+  select(-carbon_sequestration, -wood) %>%
   mutate(
-    soil_organic_carbon = soil_organic_carbon_nfi_4 - soil_organic_carbon_nfi_2,
+    carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_2,
     erosion_mitigation = erosion_mitigation_nfi_4 - erosion_mitigation_nfi_2,
     mushrooms_production = mushrooms_production_nfi_4 - mushrooms_production_nfi_2,
     exported_water = exported_water_nfi_4 - exported_water_nfi_2,
@@ -193,7 +193,7 @@ nfi_2_nfi_4_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
-    soil_organic_carbon, erosion_mitigation, mushrooms_production,
+    carbon_sequestration, erosion_mitigation, mushrooms_production,
     exported_water, wood
   ) %>%
   left_join(

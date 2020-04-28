@@ -44,7 +44,8 @@ mod_data <- function(
         # base_data
         'plot_nfi_2_results', 'plot_nfi_3_results', 'plot_nfi_4_results',
         # comparisions
-        'plot_nfi2_nfi3_results', 'plot_nfi3_nfi4_results'
+        'plot_nfi2_nfi3_results', 'plot_nfi3_nfi4_results',
+        'plot_nfi2_nfi4_results'
       ) %>%
         magrittr::set_names(translate_app(., lang()))
     ) %>%
