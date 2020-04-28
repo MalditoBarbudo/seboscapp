@@ -34,7 +34,8 @@ c1_animals <- stars::read_stars('data-raw/local_scale/c1/w001001.adf') %>%
     x = round(as.numeric(st_coordinates(geometry)[,1]), 0),
     y = round(as.numeric(st_coordinates(geometry)[,2]), 0)
   ) %>%
-  dplyr::select(animals_presence, x, y)
+  dplyr::select(animals_presence, x, y) %>%
+  dplyr::filter(animals_presence > 0)
 
 r2_soilc <- stars::read_stars('data-raw/local_scale/r2/w001001.adf') %>%
   sf::st_as_sf(
@@ -88,24 +89,27 @@ r4_erosion <- stars::read_stars('data-raw/local_scale/r4/w001001.adf') %>%
   dplyr::select(slope_forest_cover, x, y)
 
 municipalities <- sf::read_sf(
-  '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp'
+  '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp',
 ) %>%
-  dplyr::select(municipality_id = CODIMUNI, admin_municipality = NOMMUNI, geometry)
+  dplyr::select(municipality_id = CODIMUNI, admin_municipality = NOMMUNI, geometry) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 counties <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpc1_20180101_0.shp'
 ) %>%
-  dplyr::select(county_id = CODICOMAR, admin_region = NOMCOMAR, geometry)
+  dplyr::select(county_id = CODICOMAR, admin_region = NOMCOMAR, geometry) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 provinces <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpp1_20180101_0.shp'
 ) %>%
-  dplyr::select(province_id = CODIPROV, admin_province = NOMPROV, geometry)
+  dplyr::select(province_id = CODIPROV, admin_province = NOMPROV, geometry) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 
 plot_to_poly_classificator <- function(plots_data, polygons_to_check, names_polys, name_var) {
 
   intersections_list <- polygons_to_check %>%
     sf::st_intersects(plots_data)
   names(intersections_list) <- names_polys
-  plots_data[[name_var]] <- NA
+  plots_data[[name_var]] <- NA_character_
   for (name in names_polys) {
     plots_data[intersections_list[[name]], name_var] <- name
   }
