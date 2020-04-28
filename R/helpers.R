@@ -82,3 +82,18 @@ cache_selected_choice <- function(choices, cache, key, default = choices[1]) {
     return(default)
   }
 }
+
+# custom stats functions, capped to perform only with 3 or more
+stat_capped <- function(x, .f, ...) {
+  if (length(x[!is.na(x)]) < 3) {
+    res <- NA_integer_
+  } else {
+    res <- .f(x, ...)
+  }
+  return(res)
+}
+
+# custom standar error function
+se_custom <- function(x) {
+  sd(x[!is.na(x)])/length(x[!is.na(x)])
+}

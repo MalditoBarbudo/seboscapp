@@ -66,13 +66,21 @@ mod_mainData <- function(
       dplyr::summarise_if(
         is.numeric,
         .funs = list(
-          mean = ~ mean(., na.rm = TRUE),
-          se = ~ sd(., na.rm = TRUE)/sqrt(n()),
-          min = ~ min(., na.rm = TRUE),
-          max = ~ max(., na.rm = TRUE),
-          n = ~ n()
+          mean = ~ stat_capped(., mean, na.rm = TRUE),
+          se = ~ stat_capped(., se_custom),
+          min = ~ stat_capped(., min, na.rm = TRUE),
+          max = ~ stat_capped(., max, na.rm = TRUE),
+          q95 = ~ stat_capped(., quantile, prob = 0.95, na.rm = TRUE),
+          q05 = ~ stat_capped(., quantile, prob = 0.05, na.rm = TRUE),
+          n = ~ n() - sum(is.na(.))
         )
       )
+
+    ## TODO change the calculations for any service to NA if the number of
+    ## plots is less than 3. This should be able to achieve using custom
+    ## stats functions that return NA if length < 3 or the stat function result
+    ## otherwise:
+
 
     return(summ_data)
   })
