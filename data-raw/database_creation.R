@@ -79,6 +79,7 @@ sf::st_write(nfi_3_data, conn, 'plot_nfi_3_results', overwrite = TRUE)
 sf::st_write(nfi_4_data, conn, 'plot_nfi_4_results', overwrite = TRUE)
 sf::st_write(nfi_2_nfi_3_data, conn, 'plot_nfi2_nfi3_results', overwrite = TRUE)
 sf::st_write(nfi_3_nfi_4_data, conn, 'plot_nfi3_nfi4_results', overwrite = TRUE)
+sf::st_write(nfi_2_nfi_4_data, conn, 'plot_nfi2_nfi4_results', overwrite = TRUE)
 # thesauruses
 dplyr::copy_to(
   conn, variable_thesaurus, 'variables_thesaurus',
