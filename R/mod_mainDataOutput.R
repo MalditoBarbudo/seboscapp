@@ -76,12 +76,6 @@ mod_mainData <- function(
         )
       )
 
-    ## TODO change the calculations for any service to NA if the number of
-    ## plots is less than 3. This should be able to achieve using custom
-    ## stats functions that return NA if length < 3 or the stat function result
-    ## otherwise:
-
-
     return(summ_data)
   })
 

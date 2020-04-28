@@ -57,7 +57,7 @@ mod_viz <- function(
     )
 
     statistic_choices <- c(
-      'mean', 'se', 'min', 'max', 'n'
+      'mean', 'se', 'min', 'max', 'q05', 'q95', 'n'
     ) %>%
       magrittr::set_names(translate_app(., lang()))
     selected_statistic <- cache_selected_choice(
