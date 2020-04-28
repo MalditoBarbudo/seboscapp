@@ -113,7 +113,7 @@ mod_map <- function(
     if (data_scale == 'local') {
       res <- raw_data
     } else {
-      # if scale diferent from local, the summ data is what we want.
+      # if scale different from local, the summ data is what we want.
       # Also we need the polygons
       polygon_data <- switch(
         data_scale,
@@ -168,13 +168,49 @@ mod_map <- function(
     # palette configuration
     color_vector <- map_data_ready %>%
       dplyr::pull(!! rlang::sym(viz_color))
-    color_palette <- leaflet::colorNumeric(
-      'plasma', color_vector, reverse = FALSE,
-      na.color = 'black'
+
+    color_palette <- switch(
+      viz_reactives$viz_pal_config,
+      "low" = leaflet::colorNumeric(
+        scales::gradient_n_pal(
+          viridis::plasma(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+        ),
+        color_vector, reverse = viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      ),
+      "high" = leaflet::colorNumeric(
+        scales::gradient_n_pal(
+          viridis::plasma(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+        ),
+        color_vector, reverse = viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      ),
+      "normal" = leaflet::colorNumeric(
+        'plasma', color_vector, reverse = viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      )
     )
-    color_palette_legend <- leaflet::colorNumeric(
-      'plasma', color_vector, reverse = TRUE,
-      na.color = 'black'
+
+    color_palette_legend <- switch(
+      viz_reactives$viz_pal_config,
+      "low" = leaflet::colorNumeric(
+        scales::gradient_n_pal(
+          viridis::plasma(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+        ),
+        color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      ),
+      "high" = leaflet::colorNumeric(
+        scales::gradient_n_pal(
+          viridis::plasma(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+        ),
+        color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      ),
+      "normal" = leaflet::colorNumeric(
+        'plasma', color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        na.color = 'black'
+      )
     )
     # labels
     polygon_label <- as.formula(glue::glue("~{data_scale}"))

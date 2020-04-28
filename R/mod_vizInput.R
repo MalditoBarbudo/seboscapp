@@ -64,6 +64,9 @@ mod_viz <- function(
       statistic_choices, cache, 'selectedstatistic', 'mean'
     )
 
+    selected_pal_config <- cache$get('selectedpalconfig', 'normal')
+    selected_pal_reverse <- cache$get('selectedpalreverse', FALSE)
+
     # tagList ####
     shiny::tagList(
       shiny::h4(translate_app('h4_viz', lang())),
@@ -143,6 +146,32 @@ mod_viz <- function(
               )
             }
           }
+        ),
+        shiny::column(
+          4,
+          # low, normal or high palette
+          shinyWidgets::radioGroupButtons(
+            ns('viz_pal_config'),
+            translate_app('viz_pal_config_input', lang()),
+            size = 'sm',
+            choices = c('high', 'normal', 'low') %>%
+              magrittr::set_names(c(
+                translate_app('pal_high', lang()),
+                translate_app('pal_normal', lang()),
+                translate_app('pal_low', lang())
+              )),
+            selected = selected_pal_config, direction = 'vertical',
+            checkIcon = list(
+              yes = shiny::icon('tree-deciduous', lib = 'glyphicon')
+            ),
+            status = 'lfc_radiogroupbuttons'
+          ),
+          # reverse palette
+          shinyWidgets::awesomeCheckbox(
+            ns('viz_pal_reverse'),
+            label = translate_app('viz_pal_reverse_input', lang()),
+            value = selected_pal_reverse, status = 'info'
+          )
         )
       ) # end of fluidRow
     ) # end of tagList
@@ -178,11 +207,25 @@ mod_viz <- function(
     cache$set('selectedstatistic', selected_statistic)
   })
 
+  shiny::observe({
+    shiny::validate(shiny::need(input$viz_pal_config, 'no_input_yet'))
+    selected_pal_config <- input$viz_pal_config
+    cache$set('selectedpalconfig', selected_pal_config)
+  })
+
+  shiny::observe({
+    shiny::validate(shiny::need(input$viz_pal_reverse, 'no_input_yet'))
+    selected_pal_reverse <- input$viz_pal_reverse
+    cache$set('selectedpalreverse', selected_pal_reverse)
+  })
+
   # return the viz inputs
   viz_reactives <- shiny::reactiveValues()
   shiny::observe({
     viz_reactives$viz_color <- input$viz_color
     viz_reactives$viz_statistic <- input$viz_statistic
+    viz_reactives$viz_pal_config <- input$viz_pal_config
+    viz_reactives$viz_pal_reverse <- input$viz_pal_reverse
   })
   return(viz_reactives)
 }
