@@ -101,12 +101,6 @@ variable_thesaurus <- tibble::tribble(
   "exported_water", "plot_nfi2_nfi3_results", "",
   "Exported water", "Agua exportada", "Aigua exportada",
   "", "", "",
-  "carbon_sequestration", "plot_nfi2_nfi3_results", "",
-  "Carbon sequestration", "Carbono secuestrado", "Carboni segrestat",
-  "", "", "",
-  "wood", "plot_nfi2_nfi3_results", "",
-  "Wood production", "Producción de madera", "Producció de fusta",
-  "", "", "",
   # comp 3 4
   "plot_id", "plot_nfi3_nfi4_results", "-",
   "Plot ID", "ID de parcela", "ID de parcel·la",
