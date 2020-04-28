@@ -72,14 +72,14 @@ conn <- RPostgres::dbConnect(
 
 # data uploading
 # forescale data
-sf::st_write(forescale_data, conn, 'static', overwrite = TRUE)
+sf::st_write(forescale_data, conn, 'static', layer_options = "OVERWRITE=true")
 # forestime data
-sf::st_write(nfi_2_data, conn, 'plot_nfi_2_results', overwrite = TRUE)
-sf::st_write(nfi_3_data, conn, 'plot_nfi_3_results', overwrite = TRUE)
-sf::st_write(nfi_4_data, conn, 'plot_nfi_4_results', overwrite = TRUE)
-sf::st_write(nfi_2_nfi_3_data, conn, 'plot_nfi2_nfi3_results', overwrite = TRUE)
-sf::st_write(nfi_3_nfi_4_data, conn, 'plot_nfi3_nfi4_results', overwrite = TRUE)
-sf::st_write(nfi_2_nfi_4_data, conn, 'plot_nfi2_nfi4_results', overwrite = TRUE)
+sf::st_write(nfi_2_data, conn, 'plot_nfi_2_results', layer_options = "OVERWRITE=true")
+sf::st_write(nfi_3_data, conn, 'plot_nfi_3_results', layer_options = "OVERWRITE=true")
+sf::st_write(nfi_4_data, conn, 'plot_nfi_4_results', layer_options = "OVERWRITE=true")
+sf::st_write(nfi_2_nfi_3_data, conn, 'plot_nfi2_nfi3_results', layer_options = "OVERWRITE=true")
+sf::st_write(nfi_3_nfi_4_data, conn, 'plot_nfi3_nfi4_results', layer_options = "OVERWRITE=true")
+sf::st_write(nfi_2_nfi_4_data, conn, 'plot_nfi2_nfi4_results', layer_options = "OVERWRITE=true")
 # thesauruses
 dplyr::copy_to(
   conn, variable_thesaurus, 'variables_thesaurus',
