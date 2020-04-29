@@ -171,12 +171,35 @@ mod_map <- function(
     )
 
     # data (remove NAs and Inf)
+    # browser()
     map_data_ready <- map_data() %>%
       dplyr::filter(
         !is.na(!! rlang::sym(viz_color)),
         # min and max creates Inf when all vector values are NAs, remove them
         !is.infinite(!! rlang::sym(viz_color))
       )
+
+    # custom polys and files 0 rows check. It can happen that a custom polygon
+    # or a file can try to scale an area with less than 3 plots. In this case
+    # the stat_capped functions will return NA. Check if this has happen and
+    # give a nice warning to the user
+    if (nrow(map_data_ready) < 1) {
+      shinyWidgets::sendSweetAlert(
+        session = session,
+        title = translate_app(
+          'stats_unavailable_title', lang()
+        ),
+        text = translate_app(
+          'stats_unavailable', lang()
+        )
+      )
+    }
+
+    # validation
+    shiny::validate(
+      shiny::need(nrow(map_data_ready) > 0, 'custom scale too restrictive')
+    )
+
     # palette configuration
     color_vector <- map_data_ready %>%
       dplyr::pull(!! rlang::sym(viz_color))
