@@ -104,6 +104,42 @@ provinces <- sf::read_sf(
   dplyr::select(province_id = CODIPROV, admin_province = NOMPROV, geometry) %>%
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 
+# enpe_polygons
+natural_interest_areas <-
+  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/enpe_2017.shp') %>%
+  # rmapshaper::ms_simplify(0.01) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') %>%
+  dplyr::select(admin_natural_interest_area = nom, geometry) %>%
+  dplyr::mutate(dummy = admin_natural_interest_area) %>%
+  dplyr::group_by(admin_natural_interest_area) %>%
+  dplyr::summarise(dummy = dplyr::first(dummy)) %>%
+  dplyr::select(-dummy) %>%
+  sf::st_cast('MULTIPOLYGON')
+
+# peins
+special_protection_natural_areas <-
+  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/pein_2017.shp') %>%
+  # rmapshaper::ms_simplify(0.01) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') %>%
+  dplyr::select(admin_special_protection_natural_area = nom, geometry) %>%
+  dplyr::mutate(dummy = admin_special_protection_natural_area) %>%
+  dplyr::group_by(admin_special_protection_natural_area) %>%
+  dplyr::summarise(dummy = dplyr::first(dummy)) %>%
+  dplyr::select(-dummy) %>%
+  sf::st_cast('MULTIPOLYGON')
+
+# xn2000_polyogns
+natura_network_2000s <-
+  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/xn2000_2017.shp') %>%
+  # rmapshaper::ms_simplify(0.01) %>%
+  sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') %>%
+  dplyr::select(admin_natura_network_2000 = nom_n2, geometry) %>%
+  dplyr::mutate(dummy = admin_natura_network_2000) %>%
+  dplyr::group_by(admin_natura_network_2000) %>%
+  dplyr::summarise(dummy = dplyr::first(dummy)) %>%
+  dplyr::select(-dummy) %>%
+  sf::st_cast('MULTIPOLYGON')
+
 plot_to_poly_classificator <- function(plots_data, polygons_to_check, names_polys, name_var) {
 
   intersections_list <- polygons_to_check %>%
@@ -141,6 +177,15 @@ forescale_data <-
   plot_to_poly_classificator(
     provinces, provinces$admin_province, 'admin_province'
   ) %>%
+  plot_to_poly_classificator(
+    natural_interest_areas, natural_interest_areas$admin_natural_interest_area, 'admin_natural_interest_area'
+  ) %>%
+  plot_to_poly_classificator(
+    special_protection_natural_areas, special_protection_natural_areas$admin_special_protection_natural_area, 'admin_special_protection_natural_area'
+  ) %>%
+  plot_to_poly_classificator(
+    natura_network_2000s, natura_network_2000s$admin_natura_network_2000, 'admin_natura_network_2000'
+  ) %>%
   st_transform(crs = '+proj=longlat +datum=WGS84') %>%
   dplyr::mutate(
     plot_id = paste0(
@@ -159,5 +204,14 @@ regions <- regions %>%
   rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')
 provinces <- provinces %>%
+  rmapshaper::ms_simplify(0.1) %>%
+  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+natural_interest_areas <- natural_interest_areas %>%
+  rmapshaper::ms_simplify(0.1) %>%
+  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+special_protection_natural_areas <- special_protection_natural_areas %>%
+  rmapshaper::ms_simplify(0.1) %>%
+  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+natura_network_2000s <- natura_network_2000s %>%
   rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')

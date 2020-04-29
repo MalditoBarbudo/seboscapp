@@ -126,11 +126,14 @@ mod_info <- function(
       data_scale <- 'plot_id'
     } else {
       viz_color <- glue::glue("{viz_color}_{viz_reactives$viz_statistic}")
+      if (data_scale %in% c('file', 'drawn_polygon')) {
+        data_scale <- 'poly_id'
+      }
     }
 
     glue::glue(
       "{translate_app(viz_color, lang())} ",
-      translate_app(glue::glue("{data_scale}_info_plot_title"))
+      translate_app(glue::glue("{data_scale}_info_plot_title"), lang())
     )
   })
 

@@ -92,6 +92,7 @@ RPostgres::dbDisconnect(conn)
 usethis::use_data(
   # local scale
   municipalities, regions, provinces,
+  natural_interest_areas, special_protection_natural_areas, natura_network_2000s,
   # app_translations
   app_translations,
 

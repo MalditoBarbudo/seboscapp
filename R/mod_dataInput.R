@@ -54,6 +54,8 @@ mod_data <- function(
     scale_choices <- c(
       # preset scales
       'local', 'admin_municipality', 'admin_region', 'admin_province',
+      "admin_natural_interest_area","admin_special_protection_natural_area",
+      "admin_natura_network_2000",
       # custom scales
       'drawn_polygon', 'file'
     ) %>%

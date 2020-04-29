@@ -10,7 +10,9 @@ ifn_plots_data <-
     plot_id,
     coords_utm_x_ETRS89, coords_utm_y_ETRS89,
     old_idparcela,
-    admin_province, admin_region, admin_municipality
+    admin_province, admin_region, admin_municipality,
+    admin_natural_interest_area, admin_special_protection_natural_area,
+    admin_natura_network_2000
   )
 dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t') %>%
   select(-AguaIFN2, -AguaIFN4)
@@ -67,7 +69,9 @@ all_together_data <-
   ) %>%
   select(
     plot_id, es_name = Servei, nfi = IFN, values,
-    admin_province, admin_region, admin_municipality,
+    admin_province, admin_region, admin_municipality,,
+    admin_natural_interest_area, admin_special_protection_natural_area,
+    admin_natura_network_2000,
     geometry
   ) %>%
   mutate(

@@ -100,7 +100,7 @@ mod_viz <- function(
               shinyjs::hidden(
                 shinyWidgets::pickerInput(
                   ns('viz_statistic'),
-                  translate_app('viz_color_input', lang()),
+                  translate_app('viz_statistic_input', lang()),
                   choices = statistic_choices,
                   selected = selected_statistic,
                   options = shinyWidgets::pickerOptions(

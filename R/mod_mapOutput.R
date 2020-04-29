@@ -122,6 +122,9 @@ mod_map <- function(
         'admin_municipality' = municipalities,
         'admin_region' = regions,
         'admin_province' = provinces,
+        "admin_natural_interest_area" = natural_interest_areas,
+        "admin_special_protection_natural_area" = special_protection_natural_areas,
+        "admin_natura_network_2000" = natura_network_2000s,
         'file' = custom_polygon,
         'drawn_polygon' = custom_polygon
 
@@ -131,6 +134,9 @@ mod_map <- function(
         'admin_municipality' = 'admin_municipality',
         'admin_region' = 'admin_region',
         'admin_province' = 'admin_province',
+        "admin_natural_interest_area" = "admin_natural_interest_area",
+        "admin_special_protection_natural_area" = "admin_special_protection_natural_area",
+        "admin_natura_network_2000" = "admin_natura_network_2000",
         'file' = 'poly_id',
         'drawn_polygon' = 'poly_id'
       )
