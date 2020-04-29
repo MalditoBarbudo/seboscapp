@@ -4,7 +4,15 @@
 \alias{mod_mainData}
 \title{mod_mainData server function}
 \usage{
-mod_mainData(input, output, session, data_reactives, fesdb, lang)
+mod_mainData(
+  input,
+  output,
+  session,
+  data_reactives,
+  map_reactives,
+  fesdb,
+  lang
+)
 }
 \arguments{
 \item{input}{internal}
@@ -13,7 +21,7 @@ mod_mainData(input, output, session, data_reactives, fesdb, lang)
 
 \item{session}{internal}
 
-\item{data_reactives}{reactives from modules}
+\item{data_reactives, map_reactives}{reactives from modules}
 
 \item{fesdb}{object to access the fes db}
 

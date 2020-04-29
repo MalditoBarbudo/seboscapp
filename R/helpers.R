@@ -97,3 +97,44 @@ stat_capped <- function(x, .f, ...) {
 se_custom <- function(x) {
   sd(x[!is.na(x)])/length(x[!is.na(x)])
 }
+
+# raw data grouping, for preset polys or custom ones
+raw_data_grouping <- function(raw_data, data_scale, custom_polygon) {
+
+  # browser()
+  # if the scale is one of the presets, group by that and return it
+  if (!data_scale %in% c('file', 'drawn_polygon')) {
+    res <- raw_data %>%
+      dplyr::as_tibble() %>%
+      dplyr::select(-geometry) %>%
+      dplyr::group_by(!! rlang::sym(data_scale))
+    return(res)
+  }
+
+  # if scale is given by the user (file or drawn poly) then we need to
+  # make the intersection of the data and the polygons
+  #
+  # get the custom polygon with the reactive and validate it
+  custom_poly <- custom_polygon()
+  shiny::validate(shiny::need(custom_poly, 'no custom poly'))
+
+  # get only the plots inside the polygons supplied
+  # The logic is as follows:
+  #   - get the indexes of the intersection between them
+  #   - use that indexes to extract the poly_id from the custom poly
+  #   - create a new column in the main data with the poly_id to summarise
+  #     later
+  indexes <- sf::st_intersects(raw_data, custom_poly) %>%
+    as.numeric()
+  polys_names <- custom_poly %>%
+    dplyr::pull(poly_id) %>%
+    as.character() %>%
+    magrittr::extract(indexes)
+
+  res <- raw_data %>%
+    dplyr::as_tibble() %>%
+    dplyr::select(-geometry) %>%
+    dplyr::mutate(poly_id = polys_names) %>%
+    dplyr::filter(!is.na(poly_id)) %>%
+    dplyr::group_by(poly_id)
+}

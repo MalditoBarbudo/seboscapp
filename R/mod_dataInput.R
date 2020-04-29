@@ -52,7 +52,10 @@ mod_data <- function(
       magrittr::set_names(translate_app(c('static', 'dynamic'), lang()))
 
     scale_choices <- c(
-      'local', 'admin_municipality', 'admin_region', 'admin_province'
+      # preset scales
+      'local', 'admin_municipality', 'admin_region', 'admin_province',
+      # custom scales
+      'drawn_polygon', 'file'
     ) %>%
       magrittr::set_names(translate_app(., lang()))
 
@@ -77,9 +80,50 @@ mod_data <- function(
             scale_choices, selected = 'local'
           )
         )
-      )
+      ),
+      shinyjs::hidden(
+        shiny::div(
+          id = ns('file_upload_panel'),
+          shiny::fluidRow(
+            shiny::column(
+              7, align = 'center',
+              shiny::fileInput(
+                ns('user_file_sel'),
+                translate_app('user_file_sel_label', lang()),
+                accept = c('zip', 'gpkg'),
+                buttonLabel = translate_app(
+                  'user_file_sel_buttonLabel', lang()
+                ),
+                placeholder = translate_app(
+                  'user_file_sel_placeholder', lang()
+                )
+              )
+            ),
+            shiny::column(
+              5, align = 'center',
+              shiny::p(translate_app('file_text', lang()))
+            )
+          )
+        )
+      ) # end of hidden file selector
     ) # end of tagList
   }) # end of renderUI
+
+  ## observers ####
+  # observer to show the file upload panel if needed
+  shiny::observe({
+
+    shiny::validate(
+      shiny::need(input$data_scale, 'no div')
+    )
+    data_scale <- input$data_scale
+
+    if (data_scale == 'file') {
+      shinyjs::show('file_upload_panel')
+    } else {
+      shinyjs::hide('file_upload_panel')
+    }
+  })
 
   ## returning inputs ####
   # reactive values to return and use in other modules

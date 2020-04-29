@@ -60,22 +60,22 @@ mod_map <- function(
       leaflet::addLayersControl(
         baseGroups = c('Relief', 'Imaginery'),
         options = leaflet::layersControlOptions(collapsed = TRUE)
-      ) #%>%
+      ) %>%
       # leaflet.extras plugins
-      # leaflet.extras::addDrawToolbar(
-      #   targetGroup = 'drawn_poly',
-      #   position = 'topleft',
-      #   polylineOptions = FALSE, circleOptions = FALSE,
-      #   rectangleOptions = FALSE, markerOptions = FALSE,
-      #   circleMarkerOptions = FALSE,
-      #   polygonOptions = leaflet.extras::drawPolygonOptions(
-      #     shapeOptions = leaflet.extras::drawShapeOptions()
-      #   ),
-      #   editOptions = leaflet.extras::editToolbarOptions(
-      #     edit = TRUE, remove = TRUE
-      #   ),
-      #   singleFeature = TRUE
-      # )
+      leaflet.extras::addDrawToolbar(
+        targetGroup = 'drawn_polygon',
+        position = 'topleft',
+        polylineOptions = FALSE, circleOptions = FALSE,
+        rectangleOptions = FALSE, markerOptions = FALSE,
+        circleMarkerOptions = FALSE,
+        polygonOptions = leaflet.extras::drawPolygonOptions(
+          shapeOptions = leaflet.extras::drawShapeOptions()
+        ),
+        editOptions = leaflet.extras::editToolbarOptions(
+          edit = TRUE, remove = TRUE
+        ),
+        singleFeature = TRUE
+      )
   }) # end of leaflet output (empty map)
 
   ## reactives ####
@@ -104,26 +104,38 @@ mod_map <- function(
       shiny::need(main_data_reactives$summ_data, 'no summ data')
     )
 
-    # get the scale
+    # get the scale and the data
     data_scale <- shiny::isolate(data_reactives$data_scale)
     raw_data <- main_data_reactives$raw_data
     summ_data <- main_data_reactives$summ_data
+    custom_polygon <- main_data_reactives$custom_polygon
 
     # if local scale, then the raw data is ok
     if (data_scale == 'local') {
       res <- raw_data
     } else {
+
       # if scale different from local, the summ data is what we want.
       # Also we need the polygons
       polygon_data <- switch(
         data_scale,
         'admin_municipality' = municipalities,
         'admin_region' = regions,
-        'admin_province' = provinces
+        'admin_province' = provinces,
+        'file' = custom_polygon,
+        'drawn_polygon' = custom_polygon
 
       )
+      join_by <- switch(
+        data_scale,
+        'admin_municipality' = 'admin_municipality',
+        'admin_region' = 'admin_region',
+        'admin_province' = 'admin_province',
+        'file' = 'poly_id',
+        'drawn_polygon' = 'poly_id'
+      )
       res <- summ_data %>%
-        dplyr::left_join(polygon_data, by = data_scale) %>%
+        dplyr::left_join(polygon_data, by = join_by) %>%
         sf::st_as_sf(sf_column_name = 'geometry')
     }
     return(res)
@@ -169,6 +181,16 @@ mod_map <- function(
     color_vector <- map_data_ready %>%
       dplyr::pull(!! rlang::sym(viz_color))
 
+    if (length(color_vector) < 2) {
+      color_vector_legend <- c(
+        color_vector - (color_vector*0.05),
+        color_vector,
+        color_vector + (color_vector*0.05)
+      )
+    } else {
+      color_vector_legend <- color_vector
+    }
+
     color_palette <- switch(
       viz_reactives$viz_pal_config,
       "low" = leaflet::colorNumeric(
@@ -197,27 +219,32 @@ mod_map <- function(
         scales::gradient_n_pal(
           viridis::plasma(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
-        color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "high" = leaflet::colorNumeric(
         scales::gradient_n_pal(
           viridis::plasma(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
-        color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "normal" = leaflet::colorNumeric(
-        'plasma', color_vector, reverse = !viz_reactives$viz_pal_reverse,
+        'plasma', color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       )
     )
     # labels
-    polygon_label <- as.formula(glue::glue("~{data_scale}"))
+    if (data_scale %in% c('file', 'drawn_polygon')) {
+      polygon_label <- as.formula("~poly_id")
+    } else {
+      polygon_label <- as.formula(glue::glue("~{data_scale}"))
+    }
 
     leaflet::leafletProxy('fes_map') %>%
       leaflet::clearGroup('plots') %>%
       leaflet::clearGroup('polys') %>%
+      leaflet::clearGroup('drawn_polygon') %>%
       {
         temp <- .
         if (data_scale == 'local') {
@@ -254,7 +281,7 @@ mod_map <- function(
       } %>%
       leaflet::addLegend(
         position = 'bottomright', pal = color_palette_legend,
-        values = color_vector,
+        values = color_vector_legend,
         title = translate_app(viz_color, lang()),
         layerId = 'color_legend', opacity = 1,
         na.label = '', className = 'info legend na_out',
@@ -268,7 +295,7 @@ mod_map <- function(
   shiny::observe({
     map_reactives$map_data <- map_data()
     map_reactives$fes_map_shape_click <- input$fes_map_shape_click
-    # map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
+    map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
   })
   return(map_reactives)
 }

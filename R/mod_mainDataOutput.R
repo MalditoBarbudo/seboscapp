@@ -16,7 +16,7 @@ mod_mainDataOutput <- function(id) {
 #' @param output internal
 #' @param session internal
 #'
-#' @param data_reactives reactives from modules
+#' @param data_reactives,map_reactives reactives from modules
 #' @param fesdb object to access the fes db
 #' @param lang lang selected
 #'
@@ -27,8 +27,80 @@ mod_mainDataOutput <- function(id) {
 #' @rdname mod_mainDataOuput
 mod_mainData <- function(
   input, output, session,
-  data_reactives, fesdb, lang
+  data_reactives, map_reactives,
+  fesdb, lang
 ) {
+
+  # custom poly
+  # custom polygon ####
+  # we need to check if custom polygon, to retrieve it and build the data later
+  custom_polygon <- shiny::reactive({
+
+    shiny::validate(
+      shiny::need(data_reactives$data_scale, 'no inputs yet')
+    )
+
+    data_scale <- data_reactives$data_scale
+    path_to_file <- data_reactives$user_file_sel$datapath
+
+    # file
+    if (data_scale == 'file') {
+      # check if there is user file
+      if (is.null(path_to_file)) {
+        user_file_polygons <- NULL
+      } else {
+        # check if zip (shapefile) or gpkg to load the data
+        if (stringr::str_detect(path_to_file, 'zip')) {
+          tmp_folder <- tempdir()
+          utils::unzip(path_to_file, exdir = tmp_folder)
+
+          user_file_polygons <- sf::st_read(
+            list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
+            as_tibble = TRUE
+          ) %>%
+            sf::st_transform(4326)
+        } else {
+          # gpkg
+          user_file_polygons <- sf::st_read(path_to_file) %>%
+            sf::st_transform(4326)
+        }
+      }
+
+      shiny::validate(
+        shiny::need(user_file_polygons, 'no file provided')
+      )
+
+      # rename the poly_id
+      names(user_file_polygons)[1] <- 'poly_id'
+
+      return(user_file_polygons)
+    }
+
+    if (data_scale == 'drawn_polygon') {
+      # validation
+      drawn_polygon <- map_reactives$fes_map_draw_all_features
+      # When removing the features (custom polygon) the
+      # input$map_draw_new_feature is not cleared, so is always filtering the
+      # sites, even after removing. For that we need to control when the removed
+      # feature equals the new, that's it, when we removed the last one
+      shiny::validate(
+        shiny::need(drawn_polygon, 'no draw polys yet'),
+        shiny::need(length(drawn_polygon[['features']]) != 0, 'removed poly')
+      )
+
+      res <-
+        drawn_polygon[['features']][[1]][['geometry']][['coordinates']] %>%
+        purrr::flatten() %>%
+        purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) %>%
+        dplyr::bind_rows() %>%
+        {list(as.matrix(.))} %>%
+        sf::st_polygon() %>%
+        sf::st_sfc() %>%
+        sf::st_sf(crs = 4326) %>%
+        dplyr::mutate(poly_id = 'drawn_polygon')
+      return(res)
+    }
+  })
 
   # raw data
   raw_data <- shiny::reactive({
@@ -60,9 +132,18 @@ mod_mainData <- function(
     }
 
     summ_data <- raw_data() %>%
-      dplyr::as_tibble() %>%
-      dplyr::select(-geometry) %>%
-      dplyr::group_by(!! rlang::sym(data_scale)) %>%
+      ##########################################################################
+      # abstract this in a function taking
+      #   - raw_data
+      #   - data_scale
+      #   - custom_polygon (if any)
+      # function should return
+      #   - tibble grouped by the polygon identifier
+      # dplyr::as_tibble() %>%
+      # dplyr::select(-geometry) %>%
+      # dplyr::group_by(!! rlang::sym(data_scale)) %>%
+      raw_data_grouping(data_scale, custom_polygon) %>%
+      ##########################################################################
       dplyr::summarise_if(
         is.numeric,
         .funs = list(
@@ -84,6 +165,7 @@ mod_mainData <- function(
   shiny::observe({
     main_data_reactives$raw_data <- raw_data()
     main_data_reactives$summ_data <- summ_data()
+    main_data_reactives$custom_polygon <- custom_polygon()
   })
   return(main_data_reactives)
 }

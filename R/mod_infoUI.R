@@ -48,24 +48,42 @@ mod_info <- function(
       data_scale <- 'plot_id'
     } else {
       viz_color <- glue::glue("{viz_color}_{viz_reactives$viz_statistic}")
+      if (data_scale %in% c('file', 'drawn_polygon')) {
+        data_scale <- 'poly_id'
+      }
     }
     # click info
     fes_map_shape_click <- map_reactives$fes_map_shape_click
 
-    map_data %>%
+    # browser()
+
+    temp_plot <- map_data %>%
       dplyr::rename(
         y_var = !! rlang::sym(viz_color),
         label_var = !! rlang::sym(data_scale)
       ) %>%
-      ggplot2::ggplot(ggplot2::aes(x = 0, y = y_var)) +
-      ggplot2::geom_point(
-        data = ~ dplyr::filter(.x, label_var != fes_map_shape_click$id),
-        colour = '#606064', size = 4, alpha = 0.5,
-        position = ggplot2::position_jitter(
-          width = .2, height = 0, seed = 25
+      ggplot2::ggplot(ggplot2::aes(x = 0, y = y_var))
+
+    # case 1 row, for gray points to not appear. Like for example file or
+    # drawn polygon with only one element
+    if (nrow(map_data) > 1) {
+      temp_plot <- temp_plot +
+        ggplot2::geom_point(
+          data = ~ dplyr::filter(.x, label_var != fes_map_shape_click$id),
+          colour = '#606064', size = 4, alpha = 0.5,
+          position = ggplot2::position_jitter(
+            width = .2, height = 0, seed = 25
+          )
         )
-      ) +
-      ggplot2::geom_violin(fill = 'transparent') +
+    }
+    # case less than 3 rows, not violin plots because it fails. Like for example
+    # when file or custom polygon use less than 3 plots
+    if (nrow(map_data) > 2) {
+      temp_plot <- temp_plot +
+        ggplot2::geom_violin(fill = 'transparent')
+    }
+
+    temp_plot +
       ggplot2::geom_point(
         data = ~ dplyr::filter(.x, label_var == fes_map_shape_click$id),
         colour = '#83A24E', size = 6

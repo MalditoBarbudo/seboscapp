@@ -66,6 +66,9 @@ mod_dataTable <- function(
 
     # DT
     table_data() %>%
+      dplyr::mutate_if(
+        is.numeric, round, 3
+      ) %>%
       DT::datatable(
         rownames = FALSE,
         colnames = translate_app(names(.), lang()),

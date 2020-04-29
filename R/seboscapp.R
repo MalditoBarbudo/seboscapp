@@ -152,7 +152,8 @@ fes_app <- function() {
     # main data
     main_data_reactives <- shiny::callModule(
       mod_mainData, 'mod_mainDataOutput',
-      data_reactives, fesdb, lang
+      data_reactives, map_reactives,
+      fesdb, lang
     )
     # viz
     viz_reactives <- shiny::callModule(
