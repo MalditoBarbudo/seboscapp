@@ -136,8 +136,8 @@ nfi_2_nfi_3_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
-    carbon_sequestration, erosion_mitigation, mushrooms_production,
-    exported_water, wood
+    erosion_mitigation, mushrooms_production,
+    exported_water
   ) %>%
   left_join(
     nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality),

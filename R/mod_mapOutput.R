@@ -178,7 +178,6 @@ mod_map <- function(
     )
 
     # data (remove NAs and Inf)
-    # browser()
     map_data_ready <- map_data() %>%
       dplyr::filter(
         !is.na(!! rlang::sym(viz_color)),

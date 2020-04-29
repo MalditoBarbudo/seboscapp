@@ -55,7 +55,7 @@ mod_viz <- function(
         stringr::str_detect(., pattern = '^admin_|^plot_', negate = TRUE)
       ) %>%
       magrittr::set_names(
-        translate_var(., data_version, data_scale, lang(), var_thes)
+        translate_var(., data_version, 'local', lang(), var_thes)
       )
     selected_color <- cache_selected_choice(
       color_choices, cache, 'selectedcol'
@@ -129,7 +129,7 @@ mod_viz <- function(
             } else {
               shinyWidgets::pickerInput(
                 ns('viz_statistic'),
-                translate_app('viz_color_input', lang()),
+                translate_app('viz_statistic_input', lang()),
                 choices = statistic_choices,
                 selected = selected_statistic,
                 options = shinyWidgets::pickerOptions(

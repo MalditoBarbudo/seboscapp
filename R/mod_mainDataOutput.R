@@ -43,8 +43,6 @@ mod_mainData <- function(
     data_scale <- data_reactives$data_scale
     path_to_file <- data_reactives$user_file_sel$datapath
 
-    # browser()
-
     # file
     if (data_scale == 'file') {
       # check if there is user file
@@ -133,8 +131,21 @@ mod_mainData <- function(
       return(raw_data())
     }
 
+    # set a progress
+    progress <- shiny::Progress$new(session, min = 25, max = 100)
+    on.exit(progress$close())
+    progress$set(
+      message = translate_app("progress_message", lang()),
+      # 'Calculation in progress',
+      detail = translate_app("progress_detail_initial", lang())
+      # 'This may take a while...'
+    )
+
     summ_data <- raw_data() %>%
       raw_data_grouping(data_scale, custom_polygon) %>%
+      purrr::walk(
+        ~ progress$set(value = 35)
+      ) %>%
       dplyr::summarise_if(
         is.numeric,
         .funs = list(
@@ -147,6 +158,8 @@ mod_mainData <- function(
           n = ~ n() - sum(is.na(.))
         )
       )
+
+    progress$set(value = 95)
 
     return(summ_data)
   })

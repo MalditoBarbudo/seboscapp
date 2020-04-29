@@ -5,8 +5,6 @@ navbarPageWithInputs <- function(..., inputs) {
   navbar <- shiny::navbarPage(...)
   form <- shiny::tags$form(class = "navbar-form", inputs)
 
-  # browser()
-
   navbar[[3]][[1]]$children[[1]]$children[[2]] <- htmltools::tagAppendChild(
     navbar[[3]][[1]]$children[[1]]$children[[2]], form
   )
@@ -72,35 +70,66 @@ translate_app <- function(id, lang) {
 translate_var <- function(id, version, scale, lang, variables_thesaurus) {
 
   if (scale != 'local') {
-    stat <- stringr::str_extract(id, 'mean$|se$|min$|max$|n$|q05$|q95$')
+    stat <- stringr::str_extract(id, '_mean$|_se$|_min$|_max$|_n$|_q05$|_q95$')
     id <- stringr::str_remove(id, '_mean$|_se$|_min$|_max$|_n$|_q05$|_q95$')
   } else {
-    stat <- ''
+    stat <- rep('', length(id))
   }
 
-  translation <-
+  id_translation <-
     id %>%
     purrr::map_chr(
       ~ variables_thesaurus %>%
         dplyr::filter(var_id == .x, var_table == version) %>% {
           data_filtered <- .
           if (nrow(data_filtered) < 1) {
-            message(glue::glue("{.x} not found in app thesaurus"))
+            message(glue::glue("{.x} not found in variable thesaurus"))
             .x
           } else {
-            glue::glue(
-              "{dplyr::pull(data_filtered, !! rlang::sym(glue::glue('translation_{lang}')))}",
-              " [{dplyr::pull(data_filtered, var_units)}]"
-            )
-
+            dplyr::pull(data_filtered, !! rlang::sym(glue::glue('translation_{lang}')))
           }
         }
     )
+  id_units <-
+    id %>%
+    purrr::map_chr(
+      ~ variables_thesaurus %>%
+        dplyr::filter(var_id == .x, var_table == version) %>% {
+          data_filtered <- .
+          if (nrow(data_filtered) < 1) {
+            ''
+          } else {
+            dplyr::pull(data_filtered, var_units)
+          }
+        }
+    ) %>%
+    stringr::str_replace('-', '') %>%
+    purrr::map_chr(
+      function(x) {
+        if (x == '') {
+          x
+        } else {
+          glue::glue(" [{x}]")
+        }
+      }
+    )
 
-  if (stat != '') {
-    translation <-
-      glue::glue("{translation} ({translate_app(stat, lang)})")
-  }
+  stat <- dplyr::case_when(
+    is.na(stat) ~ '',
+    TRUE ~ stat
+  )
+
+  translation <-
+    list(id = id_translation, units = id_units, stat = stat) %>%
+    purrr::pmap_chr(
+      function(id, units, stat) {
+        if (stringr::str_detect(stat, '_se$|_min$|_max$|_n$|_q05$|_q95$')) {
+          glue::glue("{id}{translate_app(stat, lang)}")
+        } else {
+          glue::glue("{id}{translate_app(stat, lang)}{units}")
+        }
+      }
+    )
 
   return(translation)
 
@@ -138,7 +167,6 @@ se_custom <- function(x) {
 # raw data grouping, for preset polys or custom ones
 raw_data_grouping <- function(raw_data, data_scale, custom_polygon) {
 
-  # browser()
   # if the scale is one of the presets, group by that and return it
   if (!data_scale %in% c('file', 'drawn_polygon')) {
     res <- raw_data %>%

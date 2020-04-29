@@ -56,8 +56,6 @@ mod_info <- function(
     # click info
     fes_map_shape_click <- map_reactives$fes_map_shape_click
 
-    # browser()
-
     temp_plot <- map_data %>%
       dplyr::rename(
         y_var = !! rlang::sym(viz_color),
