@@ -64,6 +64,9 @@ mod_dataTable <- function(
       shiny::need(table_data(), 'no data yet')
     )
 
+    data_version <- shiny::isolate(data_reactives$data_version)
+    data_scale <- shiny::isolate(data_reactives$data_scale)
+
     # DT
     table_data() %>%
       dplyr::mutate_if(
@@ -71,7 +74,9 @@ mod_dataTable <- function(
       ) %>%
       DT::datatable(
         rownames = FALSE,
-        colnames = translate_app(names(.), lang()),
+        colnames = translate_var(
+          names(.), data_version, data_scale, lang(), var_thes
+        ),
         class = 'hover order-column stripe nowrap',
         filter = list(position = 'top', clear = FALSE, plain = FALSE),
         # extensions = 'Buttons',

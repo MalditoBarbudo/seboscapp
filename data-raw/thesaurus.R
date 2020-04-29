@@ -293,6 +293,14 @@ app_translations <- tibble::tribble(
   'q05', 'Quartil 5', 'Quantile 5', 'Cuartil 5',
   'q95', 'Quartil 95', 'Quantile 95', 'Cuartil 95',
   'n', 'Nombre parcel·las', 'Plot number', 'Número de parcelas',
+  # _metric
+  # '_mean', 'Mitjana de ', 'Mean of ', 'Media de ',
+  # '_min', 'Minim de ', 'Minimum of ', 'Mínimo de ',
+  # '_max', 'Maxim de ', 'Maximum of ', 'Máximo de ',
+  # '_se', 'ES de ', 'SE of ', 'ES de ',
+  # '_q05', 'Quartil 5 de ', 'Quantile 5 of ', 'Cuartil 5 de ',
+  # '_q95', 'Quartil 95 de ', 'Quantile 95 of ', 'Cuartil 95 de ',
+  # '_n', 'Nombre parcel·las amb', 'Plot number with ', 'Número de parcelas con',
   # viz
   "h4_viz", "Visualització", "Visualization", "Visualización",
   "deselect-all-text", "Ningú", "None selected...", "Ninguno",
@@ -323,10 +331,4 @@ app_translations <- tibble::tribble(
   "admin_natura_network_2000_info_plot_title", "Àrea seleccionada comparada amb les altres àreas al mapa", "Clicked natural area compared to other natural areas in map", "Área seleccionada comparada con las otras áreas en el mapa",
   "admin_special_protection_natural_area_info_plot_title", "Àrea seleccionada comparada amb les altres àreas al mapa", "Clicked natural area compared to other natural areas in map", "Área seleccionada comparada con las otras áreas en el mapa",
   "admin_natural_interest_area_info_plot_title", "Àrea seleccionada comparada amb les altres àreas al mapa", "Clicked natural area compared to other natural areas in map", "Área seleccionada comparada con las otras áreas en el mapa"
-) %>%
-  # join the variables thesaurus
-  bind_rows(
-    variable_thesaurus %>%
-      select(text_id = var_id, translation_cat, translation_eng, translation_spa) %>%
-      distinct()
-  )
+)

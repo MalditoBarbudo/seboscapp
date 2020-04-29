@@ -44,14 +44,19 @@ mod_viz <- function(
 
     ns <- session$ns
 
+    data_version <- data_reactives$data_version
+    data_scale <- data_reactives$data_scale
+
     # precalculated choices
     color_choices <- var_thes %>%
-      dplyr::filter(var_table == data_reactives$data_version) %>%
+      dplyr::filter(var_table == data_version) %>%
       dplyr::pull(var_id) %>%
       magrittr::extract(
         stringr::str_detect(., pattern = '^admin_|^plot_', negate = TRUE)
       ) %>%
-      magrittr::set_names(translate_app(., lang()))
+      magrittr::set_names(
+        translate_var(., data_version, data_scale, lang(), var_thes)
+      )
     selected_color <- cache_selected_choice(
       color_choices, cache, 'selectedcol'
     )
@@ -96,7 +101,7 @@ mod_viz <- function(
             )
           ),
           {
-            if (data_reactives$data_scale == 'local') {
+            if (data_scale == 'local') {
               shinyjs::hidden(
                 shinyWidgets::pickerInput(
                   ns('viz_statistic'),

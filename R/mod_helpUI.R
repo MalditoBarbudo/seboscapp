@@ -39,7 +39,9 @@ mod_help <- function(
     var_choices <- var_thes %>%
       dplyr::filter(var_table == data_reactives$data_version) %>%
       dplyr::pull(var_id) %>%
-      magrittr::set_names(translate_app(., lang()))
+      magrittr::set_names(translate_var(
+        ., data_version, data_scale, lang(), var_thes
+      ))
     selected_choice <- viz_reactives$viz_color
 
     # tagList

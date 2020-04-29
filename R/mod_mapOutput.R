@@ -168,6 +168,7 @@ mod_map <- function(
         glue::glue("{viz_reactives$viz_color}_{viz_reactives$viz_statistic}")
         # glue::glue("{viz_reactives$viz_color}_mean")
     }
+    data_version <- shiny::isolate(data_reactives$data_version)
 
     # validate the viz color is in concordance with the data
     shiny::validate(
@@ -311,7 +312,9 @@ mod_map <- function(
       leaflet::addLegend(
         position = 'bottomright', pal = color_palette_legend,
         values = color_vector_legend,
-        title = translate_app(viz_color, lang()),
+        title = translate_var(
+          viz_color, data_version, data_scale, lang(), var_thes
+        ),
         layerId = 'color_legend', opacity = 1,
         na.label = '', className = 'info legend na_out',
         labFormat = leaflet::labelFormat(

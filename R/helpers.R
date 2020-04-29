@@ -64,12 +64,48 @@ translate_app <- function(id, lang) {
           }
         }
     )
-
-  # dplyr::tbl(db, 'app_translations_APP') %>%
-  #   dplyr::filter(text_id %in% id) %>%
-  #   dplyr::arrange(text_id) %>%
-  #   dplyr::pull(!! rlang::sym(glue::glue("translation_{lang}")))
 }
+
+#' translate variable function
+#'
+#' translate the variable based on the lang selected
+translate_var <- function(id, version, scale, lang, variables_thesaurus) {
+
+  if (scale != 'local') {
+    stat <- stringr::str_extract(id, 'mean$|se$|min$|max$|n$|q05$|q95$')
+    id <- stringr::str_remove(id, '_mean$|_se$|_min$|_max$|_n$|_q05$|_q95$')
+  } else {
+    stat <- ''
+  }
+
+  translation <-
+    id %>%
+    purrr::map_chr(
+      ~ variables_thesaurus %>%
+        dplyr::filter(var_id == .x, var_table == version) %>% {
+          data_filtered <- .
+          if (nrow(data_filtered) < 1) {
+            message(glue::glue("{.x} not found in app thesaurus"))
+            .x
+          } else {
+            glue::glue(
+              "{dplyr::pull(data_filtered, !! rlang::sym(glue::glue('translation_{lang}')))}",
+              " [{dplyr::pull(data_filtered, var_units)}]"
+            )
+
+          }
+        }
+    )
+
+  if (stat != '') {
+    translation <-
+      glue::glue("{translation} ({translate_app(stat, lang)})")
+  }
+
+  return(translation)
+
+}
+
 
 # cache_selected_choice
 # logic is as follows:

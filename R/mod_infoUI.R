@@ -42,6 +42,7 @@ mod_info <- function(
     # data, scale and color variable
     map_data <- map_reactives$map_data
     data_scale <- data_reactives$data_scale
+    data_version <- data_reactives$data_version
     viz_color <- viz_reactives$viz_color
     # necessary changes when local or not
     if (data_scale == 'local') {
@@ -91,7 +92,9 @@ mod_info <- function(
         ggplot2::scale_x_continuous(breaks = NULL) +
         ggplot2::labs(
           x = '',
-          y = translate_app(viz_color, lang())
+          y = translate_var(
+            viz_color, data_version, data_scale, lang(), var_thes
+          )
       ) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
@@ -120,6 +123,7 @@ mod_info <- function(
   output$plot_title <- shiny::renderText({
 
     data_scale <- data_reactives$data_scale
+    data_version <- data_reactives$data_version
     viz_color <- viz_reactives$viz_color
     # necessary changes when local or not
     if (data_scale == 'local') {
@@ -132,7 +136,7 @@ mod_info <- function(
     }
 
     glue::glue(
-      "{translate_app(viz_color, lang())} ",
+      "{translate_var(viz_color, data_version, data_scale, lang(), var_thes)} ",
       translate_app(glue::glue("{data_scale}_info_plot_title"), lang())
     )
   })
