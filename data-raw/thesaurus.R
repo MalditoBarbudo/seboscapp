@@ -1,3 +1,4 @@
+library(dplyr)
 library(tibble)
 # variable thesaurus
 variable_thesaurus <- tibble::tribble(
@@ -140,3 +141,81 @@ variable_thesaurus <- tibble::tribble(
   "Wood production", "Producción de madera", "Producció de fusta",
   "", "", ""
 )
+
+## code to prepare `app_translations` dataset goes here
+
+app_translations <- tibble::tribble(
+  ~text_id, ~translation_cat, ~translation_eng, ~translation_spa,
+  # data version choices
+  'h4_data_version', "Fixa l'escala", "Select the scale", "Selecciona la escala",
+  'data_version', "Escala temporal", "Temporal scale", "Escala temporal",
+  'static', 'Dades fixes', 'Static data', 'Datos fijos',
+  'dynamic', 'Dades dinamics', 'Dynamic data', 'Datos dinámicos',
+  'plot_nfi_2_results', "IFN 2 (~1990)", "NFI 2 (~1990)", "IFN 2 (~1990)",
+  'plot_nfi_3_results', "IFN 3 (~2000)", "NFI 3 (~2000)", "IFN 3 (~2000)",
+  'plot_nfi_4_results', "IFN 4 (~2014)", "NFI 4 (~2014)", "IFN 4 (~2014)",
+  'plot_nfi2_nfi3_results', "IFN 2 : IFN 3 (1990 ~ 2000)", "NFI 2 : NFI 3 (1990 ~ 2000)", "IFN 2 : IFN 3 (1990 ~ 2000)",
+  'plot_nfi3_nfi4_results', "IFN 3 : IFN 4 (2000 ~ 2014)", "NFI 3 : NFI 4 (2000 ~ 2014)", "IFN 3 : IFN 4 (2000 ~ 2014)",
+  'plot_nfi2_nfi4_results', "IFN 2 : IFN 4 (1990 ~ 2014)", "NFI 2 : NFI 4 (1990 ~ 2014)", "IFN 2 : IFN 4 (1990 ~ 2014)",
+  # data scale choices
+  'data_scale', 'Escala espacial', 'Spatial scale', 'Escala espacial',
+  'local', 'Local', 'Local', 'Local',
+  # admins vars already in variables thesaurus
+  # 'admin_province', 'Provincia', 'Province', 'Provincia',
+  # 'admin_region', 'Comarca', 'County', 'Comarca',
+  # 'admin_municipality', 'Municipi', 'Municipality', 'Municipio',
+  'drawn_polygon', "Polígon dibuxat", "Drawn polygon", "Polígono dibujado",
+  "file", "Arxiu de polìgons", "Polygon file", "Archivo de polígonos",
+  "poly_id", "ID polígon", "Polygon ID", "ID polígono",
+  # use file selection
+  "user_file_sel_label", "Selecciona l'arxiu a carregar", "Select the file to upload", "Selecciona el archivo a cargar",
+  "user_file_sel_buttonLabel", "Inspecciona...", "Browse...", "Inspecciona...",
+  "user_file_sel_placeholder", "Cap fitxer seleccionat", "No file selected", "Ningún archivo seleccionado",
+  "file_text", 'El fitxer pot ser un shapefile (comprimit en un fitxer zip) o un fitxer GeoPackage (.gpkg). Han de tenir un camp anomenat "poly_id" amb els identificadors dels polígons continguts.', 'File can be a shapefile (compressed in a zip file) or GeoPackage file (.gpkg). They must have a field called "poly_id" with the identifiers of the contained polygons.', 'El archivo puede ser un shapefile (comprimido en un archivo zip) o un archivo GeoPackage (.gpkg). Deben tener un campo llamado "poly_id" con los identificadores de los polígonos contenidos.',
+  # map
+  'Relief', 'Relleu (base)', 'Relief (base)', 'Relieve (base)',
+  'Imaginery', 'Satèl·lit (base)', 'Imaginery (base)', 'Satélite (base)',
+  "cite_div", "Dades elaborades pel CTFC i el CREAF.", "Data prepared by the CTFC and CREAF.", "Datos elaborados por el CTFC y el CREAF.",
+  # tabs translations
+  "main_tab_translation", "Explora", "Explore", "Explora",
+  "data_translation", "Dades", "Data", "Datos",
+  "save_translation", "Guardar", "Save", "Guardar",
+  "help_translation", "Ajuda", "Help", "Ayuda",
+  "map_translation", "Mapa", "Map", "Mapa",
+  "table_translation", "Taula", "Table", "Tabla",
+  # metric choices
+  'mean', 'Mitjana', 'Mean', 'Media',
+  'min', 'Minim', 'Minimum', 'Mínimo',
+  'max', 'Maxim', 'Maximum', 'Máximo',
+  'se', 'ES', 'SE', 'ES',
+  'q05', 'Quartil 5', 'Quantile 5', 'Cuartil 5',
+  'q95', 'Quartil 95', 'Quantile 95', 'Cuartil 95',
+  'n', 'Nombre parcel·las', 'Plot number', 'Número de parcelas',
+  # viz
+  "h4_viz", "Visualització", "Visualization", "Visualización",
+  "deselect-all-text", "Ningú", "None selected...", "Ninguno",
+  "select-all-text", "Tots", "All selected...", "Todos",
+  "count-selected-text-value", "{0} valors seleccionats (de {1})", "{0} values selected (of {1})", "{0} valores seleccionados (de {1})",
+  "viz_color_input", "Servei ecosistemic:", "Ecosystem service:", "Servicio ecositémico:",
+  "pal_high", "Discriminar valors alts", "Discriminate higher values", "Discriminar valores altos",
+  "pal_low", "Discriminar valors baixos", "Discriminate lower values", "Discriminar valores bajos",
+  "pal_normal", "Normal", "Normal", "Normal",
+  "viz_pal_config_input", "Configurar paleta", "Config palette", "Configurar paleta",
+  "viz_pal_reverse_input", "Invertir la paleta?", "Reverse the palette?", "¿Invertir la paleta?",
+  # save
+  'save_map_btn', "Guarda el map", "Save the map", "Guarda el mapa",
+  'save_table_btn', "Guarda la taula", "Save the table", "Guarda la tabla",
+  "csv", "Text (csv)", "Text (csv)", "Texto (csv)",
+  "xlsx", "MS Excel (xlsx)", "MS Excel (xlsx)", "MS Excel (xlsx)",
+  "table_output_options_input", "Selecciona el format", "Choose the output format", "Selecciona el formato",
+  "glossary_var_input", "Selecciona el servei a descriure", "Choose the service to describe", "Selecciona el servicio a describir",
+  "link_to_tutorials_text", "Per obtenir més informació, aneu al tutorial de l'aplicació aquí", "For more info, please go to the application tutorial here", "Para obtener más información, vaya al tutorial de la aplicación aquí.",
+  "var_description_title", "Descripció:", "Description:", "Descripción:",
+  "var_units_title", "Unitats:", "Units:", "Unidades:"
+) %>%
+  # join the variables thesaurus
+  bind_rows(
+    variable_thesaurus %>%
+      select(text_id = var_id, translation_cat, translation_eng, translation_spa) %>%
+      distinct()
+  )

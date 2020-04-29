@@ -93,7 +93,7 @@ municipalities <- sf::read_sf(
 ) %>%
   dplyr::select(municipality_id = CODIMUNI, admin_municipality = NOMMUNI, geometry) %>%
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
-counties <- sf::read_sf(
+regions <- sf::read_sf(
   '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpc1_20180101_0.shp'
 ) %>%
   dplyr::select(county_id = CODICOMAR, admin_region = NOMCOMAR, geometry) %>%
@@ -136,7 +136,7 @@ forescale_data <-
     municipalities, municipalities$admin_municipality, 'admin_municipality'
   ) %>%
   plot_to_poly_classificator(
-    counties, counties$admin_region, 'admin_region'
+    regions, regions$admin_region, 'admin_region'
   ) %>%
   plot_to_poly_classificator(
     provinces, provinces$admin_province, 'admin_province'
@@ -152,12 +152,12 @@ forescale_data <-
   ) %>%
   dplyr::select(plot_id, dplyr::everything())
 
-municipalities_simpl <- municipalities %>%
+municipalities <- municipalities %>%
   rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')
-counties_simpl <- counties %>%
+regions <- regions %>%
   rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')
-provinces_simpl <- provinces %>%
+provinces <- provinces %>%
   rmapshaper::ms_simplify(0.1) %>%
   sf::st_transform(crs = '+proj=longlat +datum=WGS84')

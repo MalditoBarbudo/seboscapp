@@ -57,6 +57,7 @@ translate_app <- function(id, lang) {
         dplyr::filter(text_id == .x) %>% {
           data_filtered <- .
           if (nrow(data_filtered) < 1) {
+            message(glue::glue("{.x} not found in app thesaurus"))
             .x
           } else {
             dplyr::pull(data_filtered, !! rlang::sym(glue::glue("translation_{lang}")))

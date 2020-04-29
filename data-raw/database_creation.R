@@ -87,3 +87,13 @@ dplyr::copy_to(
 )
 
 RPostgres::dbDisconnect(conn)
+
+# internal data for package
+usethis::use_data(
+  # local scale
+  municipalities, regions, provinces,
+  # app_translations
+  app_translations,
+
+  internal = TRUE, overwrite = TRUE
+)
