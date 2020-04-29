@@ -43,6 +43,8 @@ mod_mainData <- function(
     data_scale <- data_reactives$data_scale
     path_to_file <- data_reactives$user_file_sel$datapath
 
+    # browser()
+
     # file
     if (data_scale == 'file') {
       # check if there is user file
@@ -132,18 +134,7 @@ mod_mainData <- function(
     }
 
     summ_data <- raw_data() %>%
-      ##########################################################################
-      # abstract this in a function taking
-      #   - raw_data
-      #   - data_scale
-      #   - custom_polygon (if any)
-      # function should return
-      #   - tibble grouped by the polygon identifier
-      # dplyr::as_tibble() %>%
-      # dplyr::select(-geometry) %>%
-      # dplyr::group_by(!! rlang::sym(data_scale)) %>%
       raw_data_grouping(data_scale, custom_polygon) %>%
-      ##########################################################################
       dplyr::summarise_if(
         is.numeric,
         .funs = list(

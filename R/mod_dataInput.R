@@ -132,6 +132,7 @@ mod_data <- function(
   shiny::observe({
     data_reactives$data_version <- input$data_version
     data_reactives$data_scale <- input$data_scale
+    data_reactives$user_file_sel <- input$user_file_sel
   })
 
   return(data_reactives)
