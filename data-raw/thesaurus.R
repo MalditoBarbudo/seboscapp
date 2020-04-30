@@ -465,7 +465,8 @@ app_translations <- tibble::tribble(
   "csv", "Text (csv)", "Text (csv)", "Texto (csv)",
   "xlsx", "MS Excel (xlsx)", "MS Excel (xlsx)", "MS Excel (xlsx)",
   "table_output_options_input", "Selecciona el format", "Choose the output format", "Selecciona el formato",
-  "glossary_var_input", "Selecciona el servei a descriure", "Choose the service to describe", "Selecciona el servicio a describir",
+  # help module
+  "glossary_var_input", "Selecciona el indicador a descriure", "Choose the indicator to describe", "Selecciona el indicador a describir",
   "link_to_tutorials_text", "Per obtenir més informació, aneu al tutorial de l'aplicació aquí", "For more info, please go to the application tutorial here", "Para obtener más información, vaya al tutorial de la aplicación aquí.",
   "var_description_title", "Descripció:", "Description:", "Descripción:",
   "var_units_title", "Unitats:", "Units:", "Unidades:",

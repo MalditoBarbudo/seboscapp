@@ -37,7 +37,7 @@ mod_help <- function(
     data_scale <- shiny::isolate(data_reactives$data_scale)
 
     var_choices <- var_thes %>%
-      dplyr::filter(var_table == data_reactives$data_version) %>%
+      dplyr::filter(var_table == data_version) %>%
       dplyr::pull(var_id) %>%
       magrittr::set_names(translate_var(
         ., data_version, data_scale, lang(), var_thes
@@ -48,7 +48,7 @@ mod_help <- function(
     shiny::tagList(
       shiny::fluidRow(
         shiny::column(
-          8, align = 'center',
+          8, #align = 'center',
           shiny::br(),
           shinyWidgets::pickerInput(
             ns('glossary_var'),
@@ -62,7 +62,9 @@ mod_help <- function(
             )
           ),
           shiny::br(),
+          shiny::tags$strong(translate_app("var_description_title", lang())),
           shiny::textOutput(ns('var_description_panel')),
+          shiny::tags$strong(translate_app("var_units_title", lang())),
           shiny::textOutput(ns('var_units_panel'))
         ),
         shiny::column(
@@ -82,17 +84,20 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
+    data_version <- shiny::isolate(data_reactives$data_version)
+
     var_description <- var_thes %>%
-      dplyr::filter(var_id == input$glossary_var) %>%
+      dplyr::filter(
+        var_id == input$glossary_var,
+        var_table == data_version
+      ) %>%
       dplyr::select(tidyselect::any_of(
         c(glue::glue("var_description_{lang()}"))
       )) %>%
       purrr::flatten_chr() %>%
       unique()
-    c(
-      translate_app("var_description_title", lang()),
-      var_description
-    )
+
+    return(var_description)
   })
 
   output$var_units_panel <- shiny::renderText({
@@ -100,8 +105,13 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
+    data_version <- shiny::isolate(data_reactives$data_version)
+
     var_units <- var_thes %>%
-      dplyr::filter(var_id == input$glossary_var) %>%
+      dplyr::filter(
+        var_id == input$glossary_var,
+        var_table == data_version
+      ) %>%
       dplyr::select(tidyselect::any_of(c(
         glue::glue("var_units")
       ))) %>%
@@ -111,9 +121,7 @@ mod_help <- function(
       var_units <- '-'
     }
 
-    c(
-      translate_app("var_units_title", lang()), var_units
-    )
+    return(var_units)
   })
 
 }
