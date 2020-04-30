@@ -203,3 +203,4 @@ raw_data_grouping <- function(raw_data, data_scale, custom_polygon) {
     dplyr::filter(!is.na(poly_id)) %>%
     dplyr::group_by(poly_id)
 }
+

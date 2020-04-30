@@ -62,6 +62,8 @@ mod_help <- function(
             )
           ),
           shiny::br(),
+          shiny::tags$strong(translate_app("var_servei_title", lang())),
+          shiny::textOutput(ns('var_servei_panel')),
           shiny::tags$strong(translate_app("var_description_title", lang())),
           shiny::textOutput(ns('var_description_panel')),
           shiny::tags$strong(translate_app("var_units_title", lang())),
@@ -78,6 +80,27 @@ mod_help <- function(
       )
     ) # end of tagList
   }) # end of renderUI
+
+  output$var_servei_panel <- shiny::renderText({
+    shiny::validate(
+      shiny::need(input$glossary_var, 'no var selected yet')
+    )
+
+    data_version <- shiny::isolate(data_reactives$data_version)
+
+    var_servei <- var_thes %>%
+      dplyr::filter(
+        var_id == input$glossary_var,
+        var_table == data_version
+      ) %>%
+      dplyr::select(tidyselect::any_of(
+        c(glue::glue("var_service_{lang()}"))
+      )) %>%
+      purrr::flatten_chr() %>%
+      unique()
+
+    return(var_servei)
+  })
 
   output$var_description_panel <- shiny::renderText({
     shiny::validate(
