@@ -74,10 +74,10 @@ mod_viz <- function(
 
     # tagList ####
     shiny::tagList(
-      shiny::h4(translate_app('h4_viz', lang())),
       shiny::fluidRow(
         shiny::column(
           8,
+          shiny::h4(translate_app('h4_servei', lang())),
           shinyWidgets::pickerInput(
             ns('viz_color'),
             translate_app('viz_color_input', lang()),
@@ -99,10 +99,21 @@ mod_viz <- function(
               liveSearch = TRUE,
               tickIcon = 'glyphicon-tree-deciduous'
             )
-          ),
+          )
+        )
+      ),
+      shiny::br(),
+      shiny::fluidRow(
+        shiny::column(
+          8, shiny::h4(translate_app('h4_viz', lang()))
+        )
+      ),
+      shiny::fluidRow(
+        shiny::column(
+          6,
           {
             if (data_scale == 'local') {
-              shinyjs::hidden(
+              shinyjs::disabled(
                 shinyWidgets::pickerInput(
                   ns('viz_statistic'),
                   translate_app('viz_statistic_input', lang()),
@@ -153,7 +164,7 @@ mod_viz <- function(
           }
         ),
         shiny::column(
-          4,
+          6, align = 'center',
           # low, normal or high palette
           shinyWidgets::radioGroupButtons(
             ns('viz_pal_config'),
@@ -193,10 +204,10 @@ mod_viz <- function(
     if (data_reactives$data_scale == 'local') {
       shinyjs::reset('viz_statistic')
       shinyjs::disable('viz_statistic')
-      shinyjs::hide('viz_statistic')
+      # shinyjs::hide('viz_statistic')
     } else {
       shinyjs::enable('viz_statistic')
-      shinyjs::show('viz_statistic')
+      # shinyjs::show('viz_statistic')
     }
   })
   # update cache
