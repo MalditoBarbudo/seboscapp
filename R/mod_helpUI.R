@@ -33,8 +33,8 @@ mod_help <- function(
   output$help_container <- shiny::renderUI({
 
     ns <- session$ns
-    data_version <- shiny::isolate(data_reactives$data_version)
-    data_scale <- shiny::isolate(data_reactives$data_scale)
+    data_version <- data_reactives$data_version
+    data_scale <- data_reactives$data_scale
 
     var_choices <- var_thes %>%
       dplyr::filter(var_table == data_version) %>%
@@ -86,7 +86,7 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
-    data_version <- shiny::isolate(data_reactives$data_version)
+    data_version <- data_reactives$data_version
 
     var_servei <- var_thes %>%
       dplyr::filter(
@@ -107,7 +107,7 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
-    data_version <- shiny::isolate(data_reactives$data_version)
+    data_version <- data_reactives$data_version
 
     var_description <- var_thes %>%
       dplyr::filter(
@@ -128,7 +128,7 @@ mod_help <- function(
       shiny::need(input$glossary_var, 'no var selected yet')
     )
 
-    data_version <- shiny::isolate(data_reactives$data_version)
+    data_version <- data_reactives$data_version
 
     var_units <- var_thes %>%
       dplyr::filter(
