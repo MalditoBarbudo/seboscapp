@@ -199,19 +199,19 @@ forescale_data <-
 
 municipalities <- municipalities %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
 regions <- regions %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
 provinces <- provinces %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
 natural_interest_areas <- natural_interest_areas %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
 special_protection_natural_areas <- special_protection_natural_areas %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
 natura_network_2000s <- natura_network_2000s %>%
   rmapshaper::ms_simplify(0.1) %>%
-  sf::st_transform(crs = '+proj=longlat +datum=WGS84')
+  sf::st_transform(crs = 4326)
