@@ -58,7 +58,7 @@ mod_viz <- function(
         translate_var(., data_version, 'local', lang(), var_thes)
       )
     selected_color <- cache_selected_choice(
-      color_choices, cache, 'selectedcol'
+      color_choices, cache, 'selectedcol', 'mushrooms_production'
     )
 
     statistic_choices <- c(
