@@ -48,7 +48,7 @@ mod_map <- function(
 
     # we need data, and we need color var at least
     leaflet::leaflet() %>%
-      leaflet::setView(1.1, 41.70, zoom = 8) %>%
+      leaflet::setView(1.5, 41.70, zoom = 8) %>%
       leaflet::addProviderTiles(
         leaflet::providers$Esri.WorldShadedRelief, group = 'Relief'
       ) %>%
