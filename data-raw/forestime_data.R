@@ -69,7 +69,7 @@ all_together_data <-
   ) %>%
   select(
     plot_id, es_name = Servei, nfi = IFN, values,
-    admin_province, admin_region, admin_municipality,,
+    admin_province, admin_region, admin_municipality,
     admin_natural_interest_area, admin_special_protection_natural_area,
     admin_natura_network_2000,
     geometry
@@ -181,24 +181,25 @@ nfi_2_nfi_4_data <-
     by = c("plot_id", "admin_province", "admin_region", "admin_municipality"),
     suffix = c('_nfi_4', '_nfi_2')
   ) %>%
-  mutate(
-    carbon_sequestration_nfi_2 = nfi_3_data$carbon_sequestration,
-    carbon_sequestration_nfi_4 = carbon_sequestration,
-    wood_nfi_2 = nfi_3_data$wood,
-    wood_nfi_4 = wood
-  ) %>%
+  # mutate(
+  #   carbon_sequestration_nfi_2 = nfi_3_data$carbon_sequestration,
+  #   carbon_sequestration_nfi_4 = carbon_sequestration,
+  #   wood_nfi_2 = nfi_3_data$wood,
+  #   wood_nfi_4 = wood
+  # ) %>%
   select(-carbon_sequestration, -wood) %>%
   mutate(
-    carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_2,
+    # carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_2,
     erosion_mitigation = erosion_mitigation_nfi_4 - erosion_mitigation_nfi_2,
     mushrooms_production = mushrooms_production_nfi_4 - mushrooms_production_nfi_2,
-    exported_water = exported_water_nfi_4 - exported_water_nfi_2,
-    wood = wood_nfi_4 - wood_nfi_2,
+    exported_water = exported_water_nfi_4 - exported_water_nfi_2
+    # wood = wood_nfi_4 - wood_nfi_2,
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
-    carbon_sequestration, erosion_mitigation, mushrooms_production,
-    exported_water, wood
+    # carbon_sequestration, wood,
+    erosion_mitigation, mushrooms_production,
+    exported_water
   ) %>%
   left_join(
     nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality),
