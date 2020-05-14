@@ -555,6 +555,7 @@ app_translations <- tibble::tribble(
   "var_description_title", "Descripció:", "Description:", "Descripción:",
   "var_units_title", "Unitats:", "Units:", "Unidades:",
   "var_servei_title", "Servei:", "Service:", "Servicio:",
+  "dismiss", "Tancar", "Dismiss", "Cerrar",
   # info module
   "plot_id_info_plot_title", "Parcel·la seleccionada comparada amb les altres parcel·les al mapa", "Clicked plot compared to other plots in map", "Parcela seleccionada comparada con las otras parcelas en el mapa",
   "admin_region_info_plot_title", "Comarca seleccionada comparada amb les altres comarques al mapa", "Clicked region compared to other regions in map", "Comarca seleccionada comparada con las otras comarcas en el mapa",
