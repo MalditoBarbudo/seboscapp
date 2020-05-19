@@ -567,4 +567,7 @@ app_translations <- tibble::tribble(
   # progress bar
   "progress_message", "Obtenció de dades...", "Obtaining data...", "Obteniendo datos...",
   "progress_detail_initial", "Escalant les dades", "Data scaling", "Escalando los datos",
+  # map
+  "stats_unavailable_title", "No hi ha dades", "No data available", "No hay datos disponibles",
+  "stats_unavailable", "El polígon actual conté menys de 3 parcel·les, no es calcularan estadístiques", "The current polygon contains less than 3 plots, no statistics will be calculated", "El polígono actual contiene menos de 3 gráficos, no se calcularán estadísticas"
 )
