@@ -117,7 +117,11 @@ nfi_2_nfi_3_data <-
   select(-geometry) %>%
   left_join(
     nfi_2_data %>% as_tibble() %>% select(-geometry),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality"),
+    by = c(
+      "plot_id", "admin_province", "admin_region", "admin_municipality",
+      "admin_natural_interest_area", "admin_special_protection_natural_area",
+      "admin_natura_network_2000"
+    ),
     suffix = c('_nfi_3', '_nfi_2')
   ) %>%
   mutate(
@@ -136,12 +140,18 @@ nfi_2_nfi_3_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
+    admin_natural_interest_area, admin_special_protection_natural_area,
+    admin_natura_network_2000,
     erosion_mitigation, mushrooms_production,
     exported_water
   ) %>%
   left_join(
-    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality")
+    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+                          admin_natural_interest_area, admin_special_protection_natural_area,
+                          admin_natura_network_2000),
+    by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
+           "admin_natural_interest_area", "admin_special_protection_natural_area",
+           "admin_natura_network_2000")
   ) %>%
   sf::st_as_sf(sf_column_name = 'geometry')
 
@@ -151,7 +161,9 @@ nfi_3_nfi_4_data <-
   select(-geometry) %>%
   left_join(
     nfi_3_data %>% as_tibble() %>% select(-geometry),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality"),
+    by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
+           "admin_natural_interest_area", "admin_special_protection_natural_area",
+           "admin_natura_network_2000"),
     suffix = c('_nfi_4', '_nfi_3')
   ) %>%
   mutate(
@@ -163,12 +175,20 @@ nfi_3_nfi_4_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
+    admin_natural_interest_area, admin_special_protection_natural_area,
+    admin_natura_network_2000,
     carbon_sequestration, erosion_mitigation, mushrooms_production,
     exported_water, wood
   ) %>%
   left_join(
-    nfi_3_data %>% select(plot_id, admin_province, admin_region, admin_municipality),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality")
+    nfi_3_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+                          admin_natural_interest_area, admin_special_protection_natural_area,
+                          admin_natura_network_2000),
+    by = c(
+      "plot_id", "admin_province", "admin_region", "admin_municipality",
+      "admin_natural_interest_area", "admin_special_protection_natural_area",
+      "admin_natura_network_2000"
+    )
   ) %>%
   sf::st_as_sf(sf_column_name = 'geometry')
 
@@ -178,7 +198,9 @@ nfi_2_nfi_4_data <-
   select(-geometry) %>%
   left_join(
     nfi_2_data %>% as_tibble() %>% select(-geometry),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality"),
+    by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
+           "admin_natural_interest_area", "admin_special_protection_natural_area",
+           "admin_natura_network_2000"),
     suffix = c('_nfi_4', '_nfi_2')
   ) %>%
   # mutate(
@@ -197,12 +219,20 @@ nfi_2_nfi_4_data <-
   ) %>%
   select(
     plot_id, admin_province, admin_region, admin_municipality,
+    admin_natural_interest_area, admin_special_protection_natural_area,
+    admin_natura_network_2000,
     # carbon_sequestration, wood,
     erosion_mitigation, mushrooms_production,
     exported_water
   ) %>%
   left_join(
-    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality),
-    by = c("plot_id", "admin_province", "admin_region", "admin_municipality")
+    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+                          admin_natural_interest_area, admin_special_protection_natural_area,
+                          admin_natura_network_2000),
+    by = c(
+      "plot_id", "admin_province", "admin_region", "admin_municipality",
+      "admin_natural_interest_area", "admin_special_protection_natural_area",
+      "admin_natura_network_2000"
+    )
   ) %>%
   sf::st_as_sf(sf_column_name = 'geometry')
