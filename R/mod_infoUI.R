@@ -35,9 +35,19 @@ mod_info <- function(
   var_thes, lang
 ) {
 
+  ns <- session$ns
+
+  waiter_plot <- waiter::Waiter$new(
+    id = ns('info_plot'),
+    html = waiter::spin_timer(),
+    color = "#1C1C20"
+  )
+
   ## outputs ####
   # info plot output
   output$info_plot <- shiny::renderPlot({
+
+    waiter_plot$show()
 
     # data, scale and color variable
     map_data <- map_reactives$map_data

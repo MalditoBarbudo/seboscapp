@@ -68,3 +68,32 @@ table.dataTable tbody tr {
 .progressjs-theme-blueOverlayRadiusWithPercentBar {
   background-color: #E8EAEB;
 }
+
+.timer-loader:not(:required) {
+  border: 6px solid #83A24E;
+  border-top-color: #83A24E;
+  border-top-style: solid;
+  border-top-width: 6px;
+  border-right-color: #83A24E;
+  border-right-style: solid;
+  border-right-width: 6px;
+  border-bottom-color: #83A24E;
+  border-bottom-style: solid;
+  border-bottom-width: 6px;
+  border-left-color: #83A24E;
+  border-left-style: solid;
+  border-left-width: 6px;
+  border-image-source: initial;
+  border-image-slice: initial;
+  border-image-width: initial;
+  border-image-outset: initial;
+  border-image-repeat: initial;
+}
+
+.timer-loader:not(:required)::after {
+  background: #83A24E;
+}
+
+.timer-loader:not(:required)::before {
+  background: #83A24E;
+}

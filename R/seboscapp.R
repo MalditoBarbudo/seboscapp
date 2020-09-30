@@ -37,7 +37,8 @@ fes_app <- function() {
     # use shinyjs
     shinyjs::useShinyjs(),
 
-    # use waitress
+    # use waiter and waitress
+    waiter::use_waiter(spinners = 4),
     waiter::use_waitress(
       color = "#606064", percent_color = "#83A24E"
     ),
@@ -231,6 +232,7 @@ fes_app <- function() {
     shiny::observeEvent(
       eventExpr = map_reactives$fes_map_shape_click,
       handlerExpr = {
+
         shiny::showModal(
           shiny::modalDialog(
             mod_infoUI('mod_infoUI'),
