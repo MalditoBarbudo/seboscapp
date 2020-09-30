@@ -138,9 +138,8 @@ mod_mainData <- function(
     # progress
     waitress_summ$start(
       html = shiny::tagList(
-        # shiny::h3(translate_app("progress_message", lang())),
-        # shiny::p(translate_app("progress_detail_initial", lang()))
-        'summarise step'
+        shiny::h3(translate_app("progress_message", lang())),
+        shiny::p(translate_app("progress_detail_initial", lang()))
       ),
       background_color = "transparent", text_color = "#83A24E"
     )
