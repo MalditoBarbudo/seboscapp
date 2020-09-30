@@ -31,6 +31,16 @@ mod_mainData <- function(
   fesdb, lang
 ) {
 
+  ## waiter/hostess progress ####
+  # set a progress with waiter. We will use infinite TRUE, that way we dont
+  # need to calculate any steps durations
+  waitress_summ <- waiter::Waitress$new(
+    selector = '#mod_mapOutput-fes_map',
+    theme = "overlay-percent",
+    infinite = TRUE,
+    min = 80, max = 100
+  )
+
   # custom poly
   # custom polygon ####
   # we need to check if custom polygon, to retrieve it and build the data later
@@ -113,6 +123,7 @@ mod_mainData <- function(
     data_version <- data_reactives$data_version
     # table
     res <- fesdb$get_data(data_version, TRUE)
+    # return res
     return(res)
   })
 
@@ -124,10 +135,24 @@ mod_mainData <- function(
       shiny::need(raw_data(), 'no raw data yet')
     )
 
+    # progress
+    waitress_summ$start(
+      html = shiny::tagList(
+        # shiny::h3(translate_app("progress_message", lang())),
+        # shiny::p(translate_app("progress_detail_initial", lang()))
+        'summarise step'
+      ),
+      background_color = "transparent", text_color = "#83A24E"
+    )
+
     # scale
     data_scale <- data_reactives$data_scale
 
     if (data_scale == 'local') {
+      # close progress, we have to wait a little to be able to close correctly
+      # when data is cached
+      Sys.sleep(0.5)
+      waitress_summ$close()
       return(raw_data())
     }
 
@@ -160,6 +185,10 @@ mod_mainData <- function(
       )
 
     progress$set(value = 95)
+    # close progress, we have to wait a little to be able to close correctly
+    # when data is cached
+    Sys.sleep(0.5)
+    waitress_summ$close()
 
     return(summ_data)
   })

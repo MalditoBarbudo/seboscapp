@@ -58,3 +58,13 @@ table.dataTable tbody tr {
   background-color: var(--main-bg-color) !important;
   color: black;
 }
+
+/* waiter-waitress css custom */
+.waitress-overlay-content {
+  top: 5px;
+  right: 30%;
+}
+
+.progressjs-theme-blueOverlayRadiusWithPercentBar {
+  background-color: #E8EAEB;
+}

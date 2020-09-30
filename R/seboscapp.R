@@ -37,6 +37,11 @@ fes_app <- function() {
     # use shinyjs
     shinyjs::useShinyjs(),
 
+    # use waitress
+    waiter::use_waitress(
+      color = "#606064", percent_color = "#83A24E"
+    ),
+
     # navbar with inputs (custom function, see helpers.R)
     navbarPageWithInputs(
       # opts
