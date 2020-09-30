@@ -102,6 +102,18 @@ mod_viz <- function(
           )
         )
       ),
+      # visual aid for "differences of differences" services
+      shinyjs::hidden(
+        shiny::div(
+          id = ns('diff_of_diffs'),
+          shiny::fluidRow(
+            shiny::column(
+              8,
+              translate_app('diff_of_diffs', lang())
+            )
+          )
+        )
+      ),
       shiny::br(),
       shiny::fluidRow(
         shiny::column(
@@ -210,6 +222,23 @@ mod_viz <- function(
       # shinyjs::show('viz_statistic')
     }
   })
+  # make visible diff of diffs visual aid
+  shiny::observe({
+
+    shiny::validate(
+      shiny::need(data_reactives$data_version, 'no inputs yet')
+    )
+
+    if (
+      input$viz_color %in% c('carbon_sequestration', 'wood') &&
+      data_reactives$data_version %in% c('plot_nfi3_nfi4_results')
+    ) {
+      shinyjs::show('diff_of_diffs')
+    } else {
+      shinyjs::hide('diff_of_diffs')
+    }
+  })
+
   # update cache
   shiny::observe({
     shiny::validate(shiny::need(input$viz_color, 'no input yet'))

@@ -569,5 +569,7 @@ app_translations <- tibble::tribble(
   "progress_detail_initial", "Escalant les dades", "Data scaling", "Escalando los datos",
   # map
   "stats_unavailable_title", "No hi ha dades", "No data available", "No hay datos disponibles",
-  "stats_unavailable", "El polígon actual conté menys de 3 parcel·les, no es calcularan estadístiques", "The current polygon contains less than 3 plots, no statistics will be calculated", "El polígono actual contiene menos de 3 gráficos, no se calcularán estadísticas"
+  "stats_unavailable", "El polígon actual conté menys de 3 parcel·les, no es calcularan estadístiques", "The current polygon contains less than 3 plots, no statistics will be calculated", "El polígono actual contiene menos de 3 gráficos, no se calcularán estadísticas",
+  # visual_aids
+  "diff_of_diffs", "Aquest indicador és una diferència de diferències, atès que el valor per a l'IFN3 és la diferència entre el període IFN2 - IFN3, i el valor per al IFN4 és la diferència per al període IFN3 - IFN4. D'aquesta manera, el valor presentat aquí és l'increment en la taxa, no una taxa per se", "This indicator is a difference of differences, as the value for the NFI3 is the difference for the period NFI2 - NFI3, and the value for NFI4 is the difference for the period NFI3 - NFI4. This way the value presented here is the increment on the rate, not a rate per se.", "Este indicador es una diferencia de diferencias, dado que el valor para el IFN3 es la diferencia entre el período IFN2 - IFN3, y el valor para el IFN4 es la diferencia para el período IFN3 - IFN4. De esta manera, el valor presentado aquí es el incremento en la tasa, no una tasa per se"
 )
