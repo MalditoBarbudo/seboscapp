@@ -34,12 +34,18 @@ mod_mainData <- function(
   ## waiter/hostess progress ####
   # set a progress with waiter. We will use infinite TRUE, that way we dont
   # need to calculate any steps durations
-  waitress_summ <- waiter::Waitress$new(
-    selector = '#mod_mapOutput-fes_map',
-    theme = "overlay-percent",
-    infinite = TRUE,
-    min = 80, max = 100
+  # 1. hostess progress
+  hostess_progress <- waiter::Hostess$new(infinite = TRUE)
+  # 2. waiter overlay related to map id
+  waiter_overlay <- waiter::Waiter$new(
+    'mod_mapOutput-fes_map', color = '#E8EAEB'
   )
+  # waitress_summ <- waiter::Waitress$new(
+  #   selector = '#mod_mapOutput-fes_map',
+  #   theme = "overlay-percent",
+  #   infinite = TRUE,
+  #   min = 80, max = 100
+  # )
 
   # custom poly
   # custom polygon ####
@@ -136,13 +142,28 @@ mod_mainData <- function(
     )
 
     # progress
-    waitress_summ$start(
+    waiter_overlay$show()
+    waiter_overlay$update(
       html = shiny::tagList(
+        hostess_progress$get_loader(
+          svg = 'images/hostess_image.svg',
+          progress_type = 'fill',
+          fill_direction = 'btt'
+        ),
         shiny::h3(translate_app("progress_message", lang())),
         shiny::p(translate_app("progress_detail_initial", lang()))
-      ),
-      background_color = "transparent", text_color = "#83A24E"
+      )
     )
+    hostess_progress$start()
+    on.exit(hostess_progress$close())
+    on.exit(waiter_overlay$hide(), add = TRUE)
+    # waitress_summ$start(
+    #   html = shiny::tagList(
+    #     shiny::h3(translate_app("progress_message", lang())),
+    #     shiny::p(translate_app("progress_detail_initial", lang()))
+    #   ),
+    #   background_color = "transparent", text_color = "#83A24E"
+    # )
 
     # scale
     data_scale <- data_reactives$data_scale
@@ -151,7 +172,6 @@ mod_mainData <- function(
       # close progress, we have to wait a little to be able to close correctly
       # when data is cached
       Sys.sleep(0.5)
-      waitress_summ$close()
       return(raw_data())
     }
 
@@ -173,8 +193,6 @@ mod_mainData <- function(
     # close progress, we have to wait a little to be able to close correctly
     # when data is cached
     Sys.sleep(0.5)
-    waitress_summ$close()
-
     return(summ_data)
   })
 

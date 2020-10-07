@@ -270,7 +270,7 @@ mod_map <- function(
       polygon_label <- as.formula(glue::glue("~{data_scale}"))
     }
 
-    message(sf::st_crs(map_data_ready))
+    # message(sf::st_crs(map_data_ready))
 
     leaflet::leafletProxy('fes_map') %>%
       leaflet::clearGroup('plots') %>%

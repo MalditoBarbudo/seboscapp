@@ -39,9 +39,7 @@ fes_app <- function() {
 
     # use waiter and waitress
     waiter::use_waiter(spinners = 4),
-    waiter::use_waitress(
-      color = "#606064", percent_color = "#83A24E"
-    ),
+    waiter::use_hostess(),
 
     # navbar with inputs (custom function, see helpers.R)
     navbarPageWithInputs(
