@@ -127,8 +127,10 @@ mod_map <- function(
         "admin_natura_network_2000" = natura_network_2000s,
         'file' = custom_polygon,
         'drawn_polygon' = custom_polygon
-
       )
+
+      geom_column <- attr(polygon_data, 'sf_column')
+
       join_by <- switch(
         data_scale,
         'admin_municipality' = 'admin_municipality',
@@ -142,7 +144,7 @@ mod_map <- function(
       )
       res <- summ_data %>%
         dplyr::left_join(polygon_data, by = join_by) %>%
-        sf::st_as_sf(sf_column_name = 'geometry')
+        sf::st_as_sf(sf_column_name = geom_column)
     }
     return(res)
   })
