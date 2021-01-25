@@ -40,7 +40,7 @@ mod_techSpecs <- function(
       shiny::fluidPage(
         shiny::withMathJax(
           shiny::includeMarkdown(
-            system.file('resources', markdown_translated, package = 'catdroughtApp')
+            system.file('resources', markdown_translated, package = 'seboscapp')
           )
         )
       )
