@@ -514,6 +514,7 @@ app_translations <- tibble::tribble(
   "help_translation", "Ajuda", "Help", "Ayuda",
   "map_translation", "Mapa", "Map", "Mapa",
   "table_translation", "Taula", "Table", "Tabla",
+  "tech_specs_translation", "Especificacions tècniques", "Technical specifications", "Especificaciones técnicas",
   # metric choices
   'mean', 'Mitjana', 'Mean', 'Media',
   'min', 'Minim', 'Minimum', 'Mínimo',
