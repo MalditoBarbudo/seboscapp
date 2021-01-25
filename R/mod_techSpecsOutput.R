@@ -33,7 +33,7 @@ mod_techSpecs <- function(
   output$techSpecs <- shiny::renderUI({
 
     markdown_translated <- glue::glue(
-      "CatDrought_technical_specifications_{lang()}.md"
+      "fes_technical_specifications_{lang()}.md"
     )
 
     shiny::tagList(
