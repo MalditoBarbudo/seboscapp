@@ -3,7 +3,7 @@ Title: Shiny App for the FES Database
 Version: 0.0.1
 Authors@R: person("Victor", "Granda", email = "victorgrandagarcia@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0469-1991"))
 Description: Access the Forest Ecosystem Services data for Catalonia interactively
-  (<http://laboratoriforestal.creaf.uab.cat>). 
+  (<http://laboratoriforestal.creaf.cat>). 
 Depends: R (>= 3.6.1)
 License: What license is it under?
 Encoding: UTF-8
