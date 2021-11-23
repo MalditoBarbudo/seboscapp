@@ -177,16 +177,18 @@ mod_mainData <- function(
 
     summ_data <- raw_data() %>%
       raw_data_grouping(data_scale, custom_polygon) %>%
-      dplyr::summarise_if(
-        is.numeric,
-        .funs = list(
-          mean = ~ stat_capped(., mean, na.rm = TRUE),
-          se = ~ stat_capped(., se_custom),
-          min = ~ stat_capped(., min, na.rm = TRUE),
-          max = ~ stat_capped(., max, na.rm = TRUE),
-          q95 = ~ stat_capped(., quantile, prob = 0.95, na.rm = TRUE),
-          q05 = ~ stat_capped(., quantile, prob = 0.05, na.rm = TRUE),
-          n = ~ n() - sum(is.na(.))
+      dplyr::summarise(
+        dplyr::across(
+          tidyselect:::where(is.numeric),
+          list(
+            mean = ~ stat_capped(., mean, na.rm = TRUE),
+            se = ~ stat_capped(., se_custom),
+            min = ~ stat_capped(., min, na.rm = TRUE),
+            max = ~ stat_capped(., max, na.rm = TRUE),
+            q95 = ~ stat_capped(., quantile, prob = 0.95, na.rm = TRUE),
+            q05 = ~ stat_capped(., quantile, prob = 0.05, na.rm = TRUE),
+            n = ~ n() - sum(is.na(.))
+          )
         )
       )
 
