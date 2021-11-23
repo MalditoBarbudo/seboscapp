@@ -24,7 +24,7 @@ mod_vizInput <- function(id) {
 #' @param data_reactives reactives needed
 #' @param var_thes thesauruses
 #' @param lang lang value
-#' @param cache memoryCache object to store the selected col
+#' @param cache cache_mem object to store the selected col
 #'
 #' @export
 #'

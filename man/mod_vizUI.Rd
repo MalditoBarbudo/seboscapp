@@ -19,7 +19,7 @@ mod_viz(input, output, session, data_reactives, var_thes, lang, cache)
 
 \item{lang}{lang value}
 
-\item{cache}{memoryCache object to store the selected col}
+\item{cache}{cache_mem object to store the selected col}
 }
 \description{
 mod_viz server function

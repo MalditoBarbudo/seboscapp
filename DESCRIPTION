@@ -25,5 +25,6 @@ Imports:
     lfcdata,
     rlang,
     purrr,
-    htmltools
-RoxygenNote: 7.1.0
+    htmltools,
+    cachem
+RoxygenNote: 7.1.2
