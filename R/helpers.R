@@ -12,35 +12,89 @@ navbarPageWithInputs <- function(..., inputs) {
 }
 
 
+#' file_poly
+#'
+#' return the data calculated on-the-fly for the file loaded
+#'
+file_poly <- function(file, lang) {
+
+  shiny::validate(
+    shiny::need(file, 'no file yet')
+  )
+
+  # check for input file format (csv (wkt) not working as it does not store the
+  # crs)
+  if (stringr::str_detect(file$type, 'zip')) {
+    # shapefile
+    tmp_folder <- tempdir()
+    utils::unzip(file$datapath, exdir = tmp_folder)
+
+    user_polygons <- sf::st_read(
+      list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
+      as_tibble = TRUE
+    ) %>%
+      sf::st_transform(crs = 4326)
+
+  } else {
+    # gpkg
+    user_polygons <- sf::st_read(file$datapath, as_tibble = TRUE) %>%
+      sf::st_transform(crs = 4326)
+  }
+
+  # check for poly_id
+  if (!"poly_id" %in% names(user_polygons)) {
+    warning('No poly_id variable found in spatial file, using first variable found as id')
+    user_polygons$poly_id <- as.character(user_polygons[[1]])
+
+    shiny::showNotification(
+      ui = shiny::tagList(
+        shiny::h4(translate_app("poly_id_missing_title", lang))
+      ),
+      action = shiny::tagList(
+        translate_app("poly_id_missing_message", lang)
+      ),
+      duration = 15,
+      type = "warning"
+    )
+
+  } else {
+    # ensure polygon id is character (factors fuck it all)
+    user_polygons$poly_id <- as.character(user_polygons$poly_id)
+  }
+
+
+  return(user_polygons)
+}
+
 #' drawed_poly
 #'
 #' return the data calculated on-the-fly for the drawed poly from leaflet
-drawed_poly <- function(custom_polygon, points_data, lang) {
-
-  shiny::validate(
-    shiny::need(
-      custom_polygon, 'no custom poly'
-    )
-  )
-
-  custom_poly_sf <- custom_polygon[['features']][[1]][['geometry']][['coordinates']] %>%
-    purrr::flatten() %>%
-    purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) %>%
-    dplyr::bind_rows() %>%
-    {list(as.matrix(.))} %>%
-    sf::st_polygon() %>%
-    sf::st_sfc() %>%
-    sf::st_sf(crs = "+proj=longlat +datum=WGS84")
-
-  rows_to_maintain <- sf::st_contains(custom_poly_sf, points_data[['geometry']])
-
-  points_data %>%
-    dplyr::slice(purrr::flatten_int(rows_to_maintain)) %>%
-    dplyr::mutate(poly_id = 'custom_polygon') %>%
-    dplyr::as_tibble() %>%
-    dplyr::select(-geometry) %>%
-    dplyr::mutate(geometry = custom_poly_sf[['geometry']])
-}
+# drawed_poly <- function(custom_polygon, points_data, lang) {
+#
+#   shiny::validate(
+#     shiny::need(
+#       custom_polygon, 'no custom poly'
+#     )
+#   )
+#
+#   custom_poly_sf <- custom_polygon[['features']][[1]][['geometry']][['coordinates']] %>%
+#     purrr::flatten() %>%
+#     purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) %>%
+#     dplyr::bind_rows() %>%
+#     {list(as.matrix(.))} %>%
+#     sf::st_polygon() %>%
+#     sf::st_sfc() %>%
+#     sf::st_sf(crs = "+proj=longlat +datum=WGS84")
+#
+#   rows_to_maintain <- sf::st_contains(custom_poly_sf, points_data[['geometry']])
+#
+#   points_data %>%
+#     dplyr::slice(purrr::flatten_int(rows_to_maintain)) %>%
+#     dplyr::mutate(poly_id = 'custom_polygon') %>%
+#     dplyr::as_tibble() %>%
+#     dplyr::select(-geometry) %>%
+#     dplyr::mutate(geometry = custom_poly_sf[['geometry']])
+# }
 
 #' translate app function
 #'

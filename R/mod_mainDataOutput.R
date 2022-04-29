@@ -57,37 +57,44 @@ mod_mainData <- function(
     )
 
     data_scale <- data_reactives$data_scale
-    path_to_file <- data_reactives$user_file_sel$datapath
+    path_to_file <- data_reactives$user_file_sel
 
     # file
     if (data_scale == 'file') {
       # check if there is user file
-      if (is.null(path_to_file)) {
-        user_file_polygons <- NULL
-      } else {
-        # check if zip (shapefile) or gpkg to load the data
-        if (stringr::str_detect(path_to_file, 'zip')) {
-          tmp_folder <- tempdir()
-          utils::unzip(path_to_file, exdir = tmp_folder)
+      user_file_polygons <- NULL
 
-          user_file_polygons <- sf::st_read(
-            list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
-            as_tibble = TRUE
-          ) %>%
-            sf::st_transform(4326)
-        } else {
-          # gpkg
-          user_file_polygons <- sf::st_read(path_to_file) %>%
-            sf::st_transform(4326)
-        }
+      if(!is.null(path_to_file)) {
+        user_file_polygons <- file_poly(path_to_file, lang())
       }
+
+      # if (is.null(path_to_file)) {
+      #   user_file_polygons <- NULL
+      # } else {
+      #
+        # check if zip (shapefile) or gpkg to load the data
+        # if (stringr::str_detect(path_to_file, 'zip')) {
+        #   tmp_folder <- tempdir()
+        #   utils::unzip(path_to_file, exdir = tmp_folder)
+        #
+        #   user_file_polygons <- sf::st_read(
+        #     list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
+        #     as_tibble = TRUE
+        #   ) %>%
+        #     sf::st_transform(4326)
+        # } else {
+        #   # gpkg
+        #   user_file_polygons <- sf::st_read(path_to_file) %>%
+        #     sf::st_transform(4326)
+        # }
+      # }
 
       shiny::validate(
         shiny::need(user_file_polygons, 'no file provided')
       )
 
       # rename the poly_id
-      names(user_file_polygons)[1] <- 'poly_id'
+      # names(user_file_polygons)[1] <- 'poly_id'
 
       return(user_file_polygons)
     }
