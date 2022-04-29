@@ -36,16 +36,11 @@ mod_mainData <- function(
   # need to calculate any steps durations
   # 1. hostess progress
   hostess_progress <- waiter::Hostess$new(infinite = TRUE)
-  # 2. waiter overlay related to map id
-  waiter_overlay <- waiter::Waiter$new(
-    'mod_mapOutput-fes_map', color = '#E8EAEB'
-  )
-  # waitress_summ <- waiter::Waitress$new(
-  #   selector = '#mod_mapOutput-fes_map',
-  #   theme = "overlay-percent",
-  #   infinite = TRUE,
-  #   min = 80, max = 100
-  # )
+  hostess_progress$set_loader(waiter::hostess_loader(
+    svg = 'images/hostess_image.svg',
+    progress_type = 'fill',
+    fill_direction = 'btt'
+  ))
 
   # custom poly
   # custom polygon ####
@@ -68,33 +63,9 @@ mod_mainData <- function(
         user_file_polygons <- file_poly(path_to_file, lang())
       }
 
-      # if (is.null(path_to_file)) {
-      #   user_file_polygons <- NULL
-      # } else {
-      #
-        # check if zip (shapefile) or gpkg to load the data
-        # if (stringr::str_detect(path_to_file, 'zip')) {
-        #   tmp_folder <- tempdir()
-        #   utils::unzip(path_to_file, exdir = tmp_folder)
-        #
-        #   user_file_polygons <- sf::st_read(
-        #     list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
-        #     as_tibble = TRUE
-        #   ) %>%
-        #     sf::st_transform(4326)
-        # } else {
-        #   # gpkg
-        #   user_file_polygons <- sf::st_read(path_to_file) %>%
-        #     sf::st_transform(4326)
-        # }
-      # }
-
       shiny::validate(
         shiny::need(user_file_polygons, 'no file provided')
       )
-
-      # rename the poly_id
-      # names(user_file_polygons)[1] <- 'poly_id'
 
       return(user_file_polygons)
     }
@@ -148,29 +119,21 @@ mod_mainData <- function(
       shiny::need(raw_data(), 'no raw data yet')
     )
 
-    # progress
-    waiter_overlay$show()
-    waiter_overlay$update(
+    waiter_overlay <- waiter::Waiter$new(
+      id = 'mod_mapOutput-fes_map',
       html = shiny::tagList(
-        hostess_progress$get_loader(
-          svg = 'images/hostess_image.svg',
-          progress_type = 'fill',
-          fill_direction = 'btt'
-        ),
+        hostess_progress$get_loader(),
         shiny::h3(translate_app("progress_message", lang())),
         shiny::p(translate_app("progress_detail_initial", lang()))
-      )
+      ),
+      color = '#E8EAEB'
     )
+
+    # progress
+    waiter_overlay$show()
     hostess_progress$start()
-    on.exit(hostess_progress$close())
+    on.exit(hostess_progress$close(), add = TRUE)
     on.exit(waiter_overlay$hide(), add = TRUE)
-    # waitress_summ$start(
-    #   html = shiny::tagList(
-    #     shiny::h3(translate_app("progress_message", lang())),
-    #     shiny::p(translate_app("progress_detail_initial", lang()))
-    #   ),
-    #   background_color = "transparent", text_color = "#83A24E"
-    # )
 
     # scale
     data_scale <- data_reactives$data_scale
