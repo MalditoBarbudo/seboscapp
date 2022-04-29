@@ -27,7 +27,7 @@ c1_animals <- terra::rast('data-raw/local_scale/c1/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ',
     as_points = TRUE
   ) %>%
-  dplyr::rename(animals_presence = w001001) %>%
+  dplyr::rename(animals_presence = COUNT) %>%
   dplyr::filter(!is.na(animals_presence)) %>%
   dplyr::mutate(plot_id = dplyr::row_number(animals_presence)) %>%
   dplyr::as_tibble() %>%
@@ -63,7 +63,7 @@ r3_riparian <- terra::rast('data-raw/local_scale/r3/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ',
     as_points = TRUE
   ) %>%
-  dplyr::rename(riparian_forest_cover = w001001) %>%
+  dplyr::rename(riparian_forest_cover = COUNT) %>%
   dplyr::filter(!is.na(riparian_forest_cover)) %>%
   dplyr::mutate(plot_id = dplyr::row_number(riparian_forest_cover)) %>%
   dplyr::as_tibble() %>%
@@ -82,7 +82,7 @@ r4_erosion <- terra::rast('data-raw/local_scale/r4/w001001.adf') %>%
     crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ',
     as_points = TRUE
   ) %>%
-  dplyr::rename(slope_forest_cover = w001001) %>%
+  dplyr::rename(slope_forest_cover = COUNT) %>%
   dplyr::filter(!is.na(slope_forest_cover)) %>%
   dplyr::mutate(plot_id = dplyr::row_number(slope_forest_cover)) %>%
   dplyr::as_tibble() %>%
