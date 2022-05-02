@@ -1,0 +1,363 @@
+{
+  "input": {
+    "lang": "cat",
+    "main_panel_tabset": "map_panel",
+    "mod_dataInput-data_scale": "local",
+    "mod_dataInput-data_version": "static",
+    "mod_dataInput-user_file_sel": null,
+    "mod_mapOutput-fes_map_bounds": {
+      "north": 42.9202292273379,
+      "east": 3.22998046875,
+      "south": 40.459486898372,
+      "west": 0.2142333984375
+    },
+    "mod_mapOutput-fes_map_center": {
+      "lng": 1.72,
+      "lat": 41.7
+    },
+    "mod_mapOutput-fes_map_groups": [
+      "Relief",
+      "drawn_polygon"
+    ],
+    "mod_mapOutput-fes_map_zoom": 8,
+    "mod_vizInput-shinyjs-resettable-mod_vizInput-viz_statistic": {
+
+    },
+    "nav": "<div id=\"main_tab_translation-tab_title_translated\" class=\"shiny-html-output\"><\/div>",
+    "sidebar_tabset": "data_inputs_panel"
+  },
+  "output": {
+    "data_translation-tab_title_translated": {
+      "html": "Dades",
+      "deps": [
+
+      ]
+    },
+    "help_translation-tab_title_translated": {
+      "html": "Ajuda",
+      "deps": [
+
+      ]
+    },
+    "main_tab_translation-tab_title_translated": {
+      "html": "Explora",
+      "deps": [
+
+      ]
+    },
+    "map_translation-tab_title_translated": {
+      "html": "Mapa",
+      "deps": [
+
+      ]
+    },
+    "mod_dataInput-mod_data_container": {
+      "html": "<h4>Fixa l'escala<\/h4>\n<div class=\"row\">\n  <div class=\"col-sm-6\">\n    <div class=\"form-group shiny-input-container\">\n      <label class=\"control-label\" for=\"mod_dataInput-data_version\">Escala temporal<\/label>\n      <select id=\"mod_dataInput-data_version\" class=\"selectpicker form-control\"><optgroup label=\"Dades estàtics\">\n<option value=\"static\" selected>Dades estàtics<\/option>\n<\/optgroup>\n<optgroup label=\"Dades dinamics\">\n<option value=\"plot_nfi_2_results\">IFN 2 (~1988-92)<\/option>\n<option value=\"plot_nfi_3_results\">IFN 3 (~2000-01)<\/option>\n<option value=\"plot_nfi_4_results\">IFN 4 (~2014-17)<\/option>\n<option value=\"plot_nfi2_nfi3_results\">Diferències IFN 2 : IFN 3 (1990 ~ 2000)<\/option>\n<option value=\"plot_nfi3_nfi4_results\">Diferències IFN 3 : IFN 4 (2000 ~ 2015)<\/option>\n<option value=\"plot_nfi2_nfi4_results\">Diferències IFN 2 : IFN 4 (1990 ~ 2015)<\/option>\n<\/optgroup><\/select>\n    <\/div>\n  <\/div>\n  <div class=\"col-sm-6\">\n    <div class=\"form-group shiny-input-container\">\n      <label class=\"control-label\" for=\"mod_dataInput-data_scale\">Escala espacial<\/label>\n      <select id=\"mod_dataInput-data_scale\" class=\"selectpicker form-control\"><option value=\"local\" selected>Local<\/option>\n<option value=\"admin_municipality\">Municipi<\/option>\n<option value=\"admin_region\">Comarca<\/option>\n<option value=\"admin_province\">Provincia<\/option>\n<option value=\"admin_natural_interest_area\">Àrees d'interès natural<\/option>\n<option value=\"admin_special_protection_natural_area\">Àrees naturals de protecció especial<\/option>\n<option value=\"admin_natura_network_2000\">Xarxa Natura 2000<\/option>\n<option value=\"drawn_polygon\">Polígon dibuxat<\/option>\n<option value=\"file\">Arxiu de polìgons<\/option><\/select>\n    <\/div>\n  <\/div>\n<\/div>\n<div id=\"mod_dataInput-file_upload_panel\" class=\"shinyjs-hide\">\n  <div class=\"row\">\n    <div class=\"col-sm-7\" align=\"center\">\n      <div class=\"form-group shiny-input-container\">\n        <label class=\"control-label\" id=\"mod_dataInput-user_file_sel-label\" for=\"mod_dataInput-user_file_sel\">Selecciona l'arxiu a carregar<\/label>\n        <div class=\"input-group\">\n          <label class=\"input-group-btn input-group-prepend\">\n            <span class=\"btn btn-default btn-file\">\n              Inspecciona...\n              <input id=\"mod_dataInput-user_file_sel\" name=\"mod_dataInput-user_file_sel\" type=\"file\" style=\"position: absolute !important; top: -99999px !important; left: -99999px !important;\" accept=\"zip,gpkg\"/>\n            <\/span>\n          <\/label>\n          <input type=\"text\" class=\"form-control\" placeholder=\"Cap fitxer seleccionat\" readonly=\"readonly\"/>\n        <\/div>\n        <div id=\"mod_dataInput-user_file_sel_progress\" class=\"progress active shiny-file-input-progress\">\n          <div class=\"progress-bar\"><\/div>\n        <\/div>\n      <\/div>\n    <\/div>\n    <div class=\"col-sm-5\" align=\"center\">\n      <p>El fitxer pot ser un shapefile (comprimit en un fitxer zip) o un fitxer GeoPackage (.gpkg). Han de tenir un camp anomenat \"poly_id\" amb els identificadors dels polígons continguts.<\/p>\n    <\/div>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "shinyWidgets",
+          "version": "0.6.4",
+          "src": {
+            "href": "shinyWidgets"
+          },
+          "meta": null,
+          "script": "shinyWidgets-bindings.min.js",
+          "stylesheet": "shinyWidgets.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "bootstrap-select",
+          "version": "1.13.8",
+          "src": {
+            "href": "shinyWidgets/bootstrap-select"
+          },
+          "meta": null,
+          "script": "js/bootstrap-select.min.js",
+          "stylesheet": "css/bootstrap-select.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "mod_mapOutput-fes_map": {
+      "x": {
+        "options": {
+          "crs": {
+            "crsClass": "L.CRS.EPSG3857",
+            "code": null,
+            "proj4def": null,
+            "projectedBounds": null,
+            "options": {
+
+            }
+          }
+        },
+        "setView": [
+          [
+            41.7,
+            1.72
+          ],
+          8,
+          [
+
+          ]
+        ],
+        "calls": [
+          {
+            "method": "addProviderTiles",
+            "args": [
+              "Esri.WorldShadedRelief",
+              null,
+              "Relief",
+              {
+                "errorTileUrl": "",
+                "noWrap": false,
+                "detectRetina": false
+              }
+            ]
+          },
+          {
+            "method": "addProviderTiles",
+            "args": [
+              "Esri.WorldImagery",
+              null,
+              "Imaginery",
+              {
+                "errorTileUrl": "",
+                "noWrap": false,
+                "detectRetina": false
+              }
+            ]
+          },
+          {
+            "method": "createMapPane",
+            "args": [
+              "admin_divs",
+              410
+            ]
+          },
+          {
+            "method": "createMapPane",
+            "args": [
+              "plots",
+              420
+            ]
+          },
+          {
+            "method": "addLayersControl",
+            "args": [
+              [
+                "Relief",
+                "Imaginery"
+              ],
+              [
+
+              ],
+              {
+                "collapsed": true,
+                "autoZIndex": true,
+                "position": "topright"
+              }
+            ]
+          },
+          {
+            "method": "addDrawToolbar",
+            "args": [
+              null,
+              "drawn_polygon",
+              {
+                "position": "topleft",
+                "draw": {
+                  "polyline": false,
+                  "polygon": {
+                    "showArea": false,
+                    "metric": true,
+                    "shapeOptions": {
+                      "stroke": true,
+                      "color": "#03f",
+                      "weight": 1,
+                      "opacity": 1,
+                      "fill": true,
+                      "fillColor": "#03f",
+                      "fillOpacity": 0.4,
+                      "clickable": true,
+                      "smoothFactor": 1,
+                      "noClip": true
+                    },
+                    "repeatMode": false
+                  },
+                  "circle": false,
+                  "rectangle": false,
+                  "marker": false,
+                  "circlemarker": false,
+                  "singleFeature": true
+                },
+                "edit": {
+                  "edit": true,
+                  "remove": true,
+                  "allowIntersection": true
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "evals": [
+
+      ],
+      "jsHooks": [
+
+      ],
+      "deps": [
+        {
+          "name": "leaflet-providers",
+          "version": "1.9.0",
+          "src": {
+            "href": "leaflet-providers-1.9.0"
+          },
+          "meta": null,
+          "script": "leaflet-providers_1.9.0.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": false
+        },
+        {
+          "name": "leaflet-providers-plugin",
+          "version": "2.1.1",
+          "src": {
+            "href": "leaflet-providers-plugin-2.1.1"
+          },
+          "meta": null,
+          "script": "leaflet-providers-plugin.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "lfx-draw",
+          "version": "1.0.2",
+          "src": {
+            "href": "lfx-draw-1.0.2"
+          },
+          "meta": null,
+          "script": [
+            "lfx-draw-prod.js",
+            "lfx-draw-bindings.js"
+          ],
+          "stylesheet": "lfx-draw-prod.css",
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        },
+        {
+          "name": "lfx-draw-drag",
+          "version": "1.0.2",
+          "src": {
+            "href": "lfx-draw-drag-1.0.2"
+          },
+          "meta": null,
+          "script": "lfx-draw-drag-prod.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "package": null,
+          "all_files": true
+        }
+      ]
+    },
+    "mod_mapOutput-map_container": {
+      "html": "<div id=\"cite\">Dades elaborades pel CTFC i el CREAF.<\/div>",
+      "deps": [
+
+      ]
+    },
+    "mod_vizInput-mod_viz_panel": {
+      "html": "<div class=\"row\">\n  <div class=\"col-sm-8\">\n    <h4>Fixa el servei<\/h4>\n    <div class=\"form-group shiny-input-container\">\n      <label class=\"control-label\" for=\"mod_vizInput-viz_color\">Indicador:<\/label>\n      <select data-actions-box=\"false\" data-count-selected-text=\"{0} valors seleccionats (de {1})\" data-live-search=\"true\" data-none-selected-text=\"Ningú\" data-select-all-text=\"Tots\" data-selected-text-format=\"count\" data-size=\"10\" data-tick-icon=\"glyphicon-tree-deciduous\" id=\"mod_vizInput-viz_color\" class=\"selectpicker form-control\"><option value=\"animals_presence\">Observació de fauna [count]<\/option>\n<option value=\"mushrooms_production\" selected>Producció de bolets [kg/ha/year]<\/option>\n<option value=\"exported_water\">Aigua exportada [l/m2/year]<\/option>\n<option value=\"carbon_sequestration\">Carboni segrestat [t/ha/year]<\/option>\n<option value=\"soil_organic_carbon\">Carboni orgànic del sòl [t/ha]<\/option>\n<option value=\"riparian_forest_cover\">Cobertura de boscos de ribera [%]<\/option>\n<option value=\"slope_forest_cover\">Cobertura de boscos en pendent [%]<\/option><\/select>\n    <\/div>\n  <\/div>\n<\/div>\n<div id=\"mod_vizInput-diff_of_diffs\" class=\"shinyjs-hide\">\n  <div class=\"row\">\n    <div class=\"col-sm-8\">Aquest indicador és una diferència de diferències, atès que el valor per a l'IFN3 és la diferència entre el període IFN2 - IFN3, i el valor per al IFN4 és la diferència per al període IFN3 - IFN4. D'aquesta manera, el valor presentat aquí és l'increment en la taxa, no una taxa per se<\/div>\n  <\/div>\n<\/div>\n<br/>\n<div class=\"row\">\n  <div class=\"col-sm-8\">\n    <h4>Visualització<\/h4>\n  <\/div>\n<\/div>\n<div class=\"row\">\n  <div class=\"col-sm-6\">\n    <div class=\"form-group shiny-input-container shinyjs-disabled\">\n      <label class=\"control-label\" for=\"mod_vizInput-viz_statistic\">Estadístic:<\/label>\n      <select data-actions-box=\"false\" data-count-selected-text=\"{0} valors seleccionats (de {1})\" data-live-search=\"true\" data-none-selected-text=\"Ningú\" data-select-all-text=\"Tots\" data-selected-text-format=\"count\" data-size=\"10\" data-tick-icon=\"glyphicon-tree-deciduous\" id=\"mod_vizInput-viz_statistic\" class=\"selectpicker form-control\"><option value=\"mean\" selected>Mitjana<\/option>\n<option value=\"se\">ES<\/option>\n<option value=\"min\">Minim<\/option>\n<option value=\"max\">Maxim<\/option>\n<option value=\"q05\">Quartil 5<\/option>\n<option value=\"q95\">Quartil 95<\/option>\n<option value=\"n\">Nombre parcel·las<\/option><\/select>\n    <\/div>\n  <\/div>\n  <div class=\"col-sm-6\" align=\"center\">\n    <div class=\"form-group shiny-input-container shiny-input-radiogroup shiny-input-container-inline\">\n      <label id=\"mod_vizInput-viz_pal_config-label\" class=\"control-label\" for=\"mod_vizInput-viz_pal_config\">Configurar paleta<\/label>\n      <br/>\n      <div id=\"mod_vizInput-viz_pal_config\" class=\"radio-group-buttons\">\n        <div aria-labelledby=\"mod_vizInput-viz_pal_config-label\" class=\"btn-group-vertical btn-group-sm btn-group-container-sw\" data-toggle=\"buttons\" role=\"group\">\n          <div class=\"btn-group btn-group-toggle btn-group-sm\" role=\"group\">\n            <button class=\"btn radiobtn btn-lfc_radiogroupbuttons\">\n              <span class=\"radio-btn-icon-yes\">\n                <i aria-label=\"tree-deciduous icon\" class=\"glyphicon glyphicon-tree-deciduous\" role=\"presentation\"><\/i>\n              <\/span>\n              <span class=\"radio-btn-icon-no\"><\/span>\n              <input type=\"radio\" autocomplete=\"off\" name=\"mod_vizInput-viz_pal_config\" value=\"high\"/>\n              Discriminar valors alts\n            <\/button>\n          <\/div>\n          <div class=\"btn-group btn-group-toggle btn-group-sm\" role=\"group\">\n            <button class=\"btn radiobtn btn-lfc_radiogroupbuttons active\">\n              <span class=\"radio-btn-icon-yes\">\n                <i aria-label=\"tree-deciduous icon\" class=\"glyphicon glyphicon-tree-deciduous\" role=\"presentation\"><\/i>\n              <\/span>\n              <span class=\"radio-btn-icon-no\"><\/span>\n              <input type=\"radio\" autocomplete=\"off\" name=\"mod_vizInput-viz_pal_config\" value=\"normal\" checked=\"checked\"/>\n              Normal\n            <\/button>\n          <\/div>\n          <div class=\"btn-group btn-group-toggle btn-group-sm\" role=\"group\">\n            <button class=\"btn radiobtn btn-lfc_radiogroupbuttons\">\n              <span class=\"radio-btn-icon-yes\">\n                <i aria-label=\"tree-deciduous icon\" class=\"glyphicon glyphicon-tree-deciduous\" role=\"presentation\"><\/i>\n              <\/span>\n              <span class=\"radio-btn-icon-no\"><\/span>\n              <input type=\"radio\" autocomplete=\"off\" name=\"mod_vizInput-viz_pal_config\" value=\"low\"/>\n              Discriminar valors baixos\n            <\/button>\n          <\/div>\n        <\/div>\n      <\/div>\n    <\/div>\n    <div class=\"form-group shiny-input-container\">\n      <div class=\"awesome-checkbox checkbox-info\">\n        <input id=\"mod_vizInput-viz_pal_reverse\" type=\"checkbox\"/>\n        <label style=\"cursor: pointer;\" for=\"mod_vizInput-viz_pal_reverse\">Invertir la paleta?<\/label>\n      <\/div>\n    <\/div>\n  <\/div>\n<\/div>",
+      "deps": [
+        {
+          "name": "shinyWidgets",
+          "version": "0.6.4",
+          "src": {
+            "href": "shinyWidgets"
+          },
+          "meta": null,
+          "script": "shinyWidgets-bindings.min.js",
+          "stylesheet": "shinyWidgets.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "bootstrap-select",
+          "version": "1.13.8",
+          "src": {
+            "href": "shinyWidgets/bootstrap-select"
+          },
+          "meta": null,
+          "script": "js/bootstrap-select.min.js",
+          "stylesheet": "css/bootstrap-select.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "awesome-bootstrap",
+          "version": "0.3.7",
+          "src": {
+            "href": "shinyWidgets/awesome-bootstrap-checkbox"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "awesome-bootstrap-checkbox.min.css",
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        },
+        {
+          "name": "font-awesome",
+          "version": "5.15.3",
+          "src": {
+            "href": "font-awesome-5.15.3"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": [
+            "css/all.min.css",
+            "css/v4-shims.min.css"
+          ],
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        }
+      ]
+    },
+    "save_translation-tab_title_translated": {
+      "html": "Guardar",
+      "deps": [
+
+      ]
+    },
+    "table_translation-tab_title_translated": {
+      "html": "Taula",
+      "deps": [
+
+      ]
+    },
+    "tech_specs_translation-tab_title_translated": {
+      "html": "Especificacions tècniques",
+      "deps": [
+
+      ]
+    }
+  },
+  "export": {
+
+  }
+}
