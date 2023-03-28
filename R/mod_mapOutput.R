@@ -222,24 +222,37 @@ mod_map <- function(
       color_vector_legend <- color_vector
     }
 
+    # viridis_pal_name <- switch(
+    #   viz_reactives$viz_color,
+    #   "animals_presence" = viridis::mako,
+    #   "mushrooms_production" = ,
+    #   "exported_water",
+    #   "carbon_sequestration",
+    #   "soil_organic_carbon",
+    #   "riparian_forest_cover",
+    #   "slope_forest_cover",
+    #   "erosion_mitigation",
+    #   "wood"
+    # )
+
     color_palette <- switch(
       viz_reactives$viz_pal_config,
       "low" = leaflet::colorNumeric(
         scales::gradient_n_pal(
-          viridis::plasma(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+          viridis::mako(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
         color_vector, reverse = viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "high" = leaflet::colorNumeric(
         scales::gradient_n_pal(
-          viridis::plasma(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+          viridis::mako(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
         color_vector, reverse = viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "normal" = leaflet::colorNumeric(
-        'plasma', color_vector, reverse = viz_reactives$viz_pal_reverse,
+        viridis::mako(256), color_vector, reverse = viz_reactives$viz_pal_reverse,
         na.color = 'black'
       )
     )
@@ -248,20 +261,20 @@ mod_map <- function(
       viz_reactives$viz_pal_config,
       "low" = leaflet::colorNumeric(
         scales::gradient_n_pal(
-          viridis::plasma(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+          viridis::mako(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
         color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "high" = leaflet::colorNumeric(
         scales::gradient_n_pal(
-          viridis::plasma(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+          viridis::mako(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
         color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       ),
       "normal" = leaflet::colorNumeric(
-        'plasma', color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
+        viridis::mako(256), color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
         na.color = 'black'
       )
     )
