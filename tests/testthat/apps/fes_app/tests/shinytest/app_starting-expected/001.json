@@ -1,5 +1,6 @@
 {
   "input": {
+    "alive_count": 0,
     "lang": "cat",
     "main_panel_tabset": "map_panel",
     "mod_dataInput-data_scale": "local",
