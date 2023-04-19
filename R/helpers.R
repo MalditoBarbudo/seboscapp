@@ -32,12 +32,12 @@ file_poly <- function(file, lang) {
     user_polygons <- sf::st_read(
       list.files(tmp_folder, '.shp', recursive = TRUE, full.names = TRUE),
       as_tibble = TRUE
-    ) %>%
+    ) |>
       sf::st_transform(crs = 4326)
 
   } else {
     # gpkg
-    user_polygons <- sf::st_read(file$datapath, as_tibble = TRUE) %>%
+    user_polygons <- sf::st_read(file$datapath, as_tibble = TRUE) |>
       sf::st_transform(crs = 4326)
   }
 
@@ -66,62 +66,50 @@ file_poly <- function(file, lang) {
   return(user_polygons)
 }
 
-#' drawed_poly
-#'
-#' return the data calculated on-the-fly for the drawed poly from leaflet
-# drawed_poly <- function(custom_polygon, points_data, lang) {
-#
-#   shiny::validate(
-#     shiny::need(
-#       custom_polygon, 'no custom poly'
-#     )
-#   )
-#
-#   custom_poly_sf <- custom_polygon[['features']][[1]][['geometry']][['coordinates']] %>%
-#     purrr::flatten() %>%
-#     purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) %>%
-#     dplyr::bind_rows() %>%
-#     {list(as.matrix(.))} %>%
-#     sf::st_polygon() %>%
-#     sf::st_sfc() %>%
-#     sf::st_sf(crs = "+proj=longlat +datum=WGS84")
-#
-#   rows_to_maintain <- sf::st_contains(custom_poly_sf, points_data[['geometry']])
-#
-#   points_data %>%
-#     dplyr::slice(purrr::flatten_int(rows_to_maintain)) %>%
-#     dplyr::mutate(poly_id = 'custom_polygon') %>%
-#     dplyr::as_tibble() %>%
-#     dplyr::select(-geometry) %>%
-#     dplyr::mutate(geometry = custom_poly_sf[['geometry']])
-# }
-
 #' translate app function
 #'
 #' translate the app based on the lang selected
 translate_app <- function(id, lang) {
 
-  app_translations
-
-  id %>%
-    purrr::map_chr(
-      ~ app_translations %>%
-        dplyr::filter(text_id == .x) %>% {
-          data_filtered <- .
-          if (nrow(data_filtered) < 1) {
-            message(glue::glue("{.x} not found in app thesaurus"))
-            .x
-          } else {
-            dplyr::pull(data_filtered, !! rlang::sym(glue::glue("translation_{lang}")))
-          }
-        }
+  # recursive call for vectors
+  if (length(id) > 1) {
+    res <- purrr::map_chr(
+      id,
+      .f = \(.id) {
+        translate_app(.id, lang)
+      }
     )
+    return(res)
+  }
+
+  # get id translations
+  id_row <- app_translations |>
+    dplyr::filter(text_id == id)
+
+  # return raw id if no matching id found
+  if (nrow(id_row) < 1) {
+    return(id)
+  }
+
+  # get the lang translation
+  return(dplyr::pull(id_row, glue::glue("translation_{lang}")))
 }
 
 #' translate variable function
 #'
 #' translate the variable based on the lang selected
 translate_var <- function(id, version, scale, lang, variables_thesaurus) {
+
+  # recursive call for vectors
+  if (length(id) > 1) {
+    res <- purrr::map_chr(
+      id,
+      .f = \(.id) {
+        translate_var(.id, version, scale, lang, variables_thesaurus)
+      }
+    )
+    return(res)
+  }
 
   if (scale != 'local') {
     stat <- stringr::str_extract(id, '_mean$|_se$|_min$|_max$|_n$|_q05$|_q95$')
@@ -130,62 +118,33 @@ translate_var <- function(id, version, scale, lang, variables_thesaurus) {
     stat <- rep('', length(id))
   }
 
-  id_translation <-
-    id %>%
-    purrr::map_chr(
-      ~ variables_thesaurus %>%
-        dplyr::filter(var_id == .x, var_table == version) %>% {
-          data_filtered <- .
-          if (nrow(data_filtered) < 1) {
-            message(glue::glue("{.x} not found in variable thesaurus"))
-            .x
-          } else {
-            dplyr::pull(data_filtered, !! rlang::sym(glue::glue('translation_{lang}')))
-          }
-        }
-    )
-  id_units <-
-    id %>%
-    purrr::map_chr(
-      ~ variables_thesaurus %>%
-        dplyr::filter(var_id == .x, var_table == version) %>% {
-          data_filtered <- .
-          if (nrow(data_filtered) < 1) {
-            ''
-          } else {
-            dplyr::pull(data_filtered, var_units)
-          }
-        }
-    ) %>%
-    stringr::str_replace('-', '') %>%
-    purrr::map_chr(
-      function(x) {
-        if (x == '') {
-          x
-        } else {
-          glue::glue(" [{x}]")
-        }
-      }
-    )
+  # get id translations
+  id_row <- variables_thesaurus |>
+    dplyr::filter(var_id == id, var_table == version)
 
-  stat <- dplyr::case_when(
-    is.na(stat) ~ '',
-    TRUE ~ stat
-  )
+  # default values
+  id_translation <- id
+  id_units <- ""
 
-  translation <-
-    list(id = id_translation, units = id_units, stat = stat) %>%
-    purrr::pmap_chr(
-      function(id, units, stat) {
-        if (stringr::str_detect(stat, '_se$|_min$|_max$|_n$|_q05$|_q95$')) {
-          glue::glue("{id}{translate_app(stat, lang)}")
-        } else {
-          glue::glue("{id}{translate_app(stat, lang)}{units}")
-        }
-      }
+  # if there is id, modify default values to translations
+  if (nrow(id_row) > 0) {
+    id_translation <- id_row |>
+      dplyr::pull(glue::glue("translation_{lang}"))
+
+    id_units <- id_row |>
+      dplyr::pull("var_units") |>
+      stringr::str_replace("-", "")
+    if (id_units != "") {
+      id_units <- glue::glue(" [{id_units}]")
+    }
+
+    stat <- dplyr::case_when(
+      is.na(stat) ~ '',
+      TRUE ~ stat
     )
+  }
 
-  return(translation)
+  return(glue::glue("{id_translation}{translate_app(stat, lang)}{id_units}"))
 
 }
 
@@ -223,9 +182,9 @@ raw_data_grouping <- function(raw_data, data_scale, custom_polygon) {
 
   # if the scale is one of the presets, group by that and return it
   if (!data_scale %in% c('file', 'drawn_polygon')) {
-    res <- raw_data %>%
-      dplyr::as_tibble() %>%
-      dplyr::select(-geometry) %>%
+    res <- raw_data |>
+      dplyr::as_tibble() |>
+      dplyr::select(-geometry) |>
       dplyr::group_by(!! rlang::sym(data_scale))
     return(res)
   }
@@ -243,18 +202,18 @@ raw_data_grouping <- function(raw_data, data_scale, custom_polygon) {
   #   - use that indexes to extract the poly_id from the custom poly
   #   - create a new column in the main data with the poly_id to summarise
   #     later
-  indexes <- sf::st_intersects(raw_data, custom_poly) %>%
+  indexes <- sf::st_intersects(raw_data, custom_poly) |>
     as.numeric()
-  polys_names <- custom_poly %>%
-    dplyr::pull(poly_id) %>%
-    as.character() %>%
+  polys_names <- custom_poly |>
+    dplyr::pull(poly_id) |>
+    as.character() |>
     magrittr::extract(indexes)
 
-  res <- raw_data %>%
-    dplyr::as_tibble() %>%
-    dplyr::select(-geometry) %>%
-    dplyr::mutate(poly_id = polys_names) %>%
-    dplyr::filter(!is.na(poly_id)) %>%
+  res <- raw_data |>
+    dplyr::as_tibble() |>
+    dplyr::select(-geometry) |>
+    dplyr::mutate(poly_id = polys_names) |>
+    dplyr::filter(!is.na(poly_id)) |>
     dplyr::group_by(poly_id)
 }
 

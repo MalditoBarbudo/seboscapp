@@ -56,11 +56,8 @@ mod_save <- function(
           shinyWidgets::prettyRadioButtons(
             ns('table_output_options'),
             label = translate_app('table_output_options_input', lang()),
-            choices = c('csv', 'xlsx') %>%
-              magrittr::set_names(c(
-                translate_app('csv', lang()),
-                translate_app('xlsx', lang())
-              )),
+            choices = c('csv', 'xlsx') |>
+              purrr::set_names(translate_app(c('csv', 'xlsx'), lang())),
             status = 'success', fill = TRUE, shape = 'round'
           )
         )

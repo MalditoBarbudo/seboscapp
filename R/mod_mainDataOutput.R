@@ -82,15 +82,19 @@ mod_mainData <- function(
         shiny::need(length(drawn_polygon[['features']]) != 0, 'removed poly')
       )
 
+      to_matrix_list <- function(data) {
+        list(as.matrix(data))
+      }
+
       res <-
-        drawn_polygon[['features']][[1]][['geometry']][['coordinates']] %>%
-        purrr::flatten() %>%
-        purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) %>%
-        dplyr::bind_rows() %>%
-        {list(as.matrix(.))} %>%
-        sf::st_polygon() %>%
-        sf::st_sfc() %>%
-        sf::st_sf(crs = 4326) %>%
+        drawn_polygon[['features']][[1]][['geometry']][['coordinates']] |>
+        purrr::flatten() |>
+        purrr::modify_depth(1, purrr::set_names, nm = c('long', 'lat')) |>
+        dplyr::bind_rows() |>
+        to_matrix_list() |>
+        sf::st_polygon() |>
+        sf::st_sfc() |>
+        sf::st_sf(crs = 4326) |>
         dplyr::mutate(poly_id = 'drawn_polygon')
       return(res)
     }
@@ -145,8 +149,8 @@ mod_mainData <- function(
       return(raw_data())
     }
 
-    summ_data <- raw_data() %>%
-      raw_data_grouping(data_scale, custom_polygon) %>%
+    summ_data <- raw_data() |>
+      raw_data_grouping(data_scale, custom_polygon) |>
       dplyr::summarise(
         dplyr::across(
           tidyselect:::where(is.numeric),

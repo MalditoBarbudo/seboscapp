@@ -66,11 +66,11 @@ mod_info <- function(
     # click info
     fes_map_shape_click <- map_reactives$fes_map_shape_click
 
-    temp_plot <- map_data %>%
+    temp_plot <- map_data |>
       dplyr::rename(
         y_var = !! rlang::sym(viz_color),
         label_var = !! rlang::sym(data_scale)
-      ) %>%
+      ) |>
       ggplot2::ggplot(ggplot2::aes(x = 0, y = y_var))
 
     # case 1 row, for gray points to not appear. Like for example file or

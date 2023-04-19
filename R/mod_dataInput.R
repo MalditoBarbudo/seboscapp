@@ -38,18 +38,24 @@ mod_data <- function(
 
     ## preacalculated choices
     version_choices <- list(
-      'static' %>%
-        magrittr::set_names(translate_app(., lang())),
+      'static' |>
+        purrr::set_names(translate_app('static', lang())),
       c(
         # base_data
         'plot_nfi_2_results', 'plot_nfi_3_results', 'plot_nfi_4_results',
         # comparisions
         'plot_nfi2_nfi3_results', 'plot_nfi3_nfi4_results',
         'plot_nfi2_nfi4_results'
-      ) %>%
-        magrittr::set_names(translate_app(., lang()))
-    ) %>%
-      magrittr::set_names(translate_app(c('static', 'dynamic'), lang()))
+      ) |>
+        purrr::set_names(translate_app(c(
+          # base_data
+          'plot_nfi_2_results', 'plot_nfi_3_results', 'plot_nfi_4_results',
+          # comparisions
+          'plot_nfi2_nfi3_results', 'plot_nfi3_nfi4_results',
+          'plot_nfi2_nfi4_results'
+        ), lang()))
+    ) |>
+      purrr::set_names(translate_app(c('static', 'dynamic'), lang()))
 
     scale_choices <- c(
       # preset scales
@@ -58,8 +64,15 @@ mod_data <- function(
       "admin_natura_network_2000",
       # custom scales
       'drawn_polygon', 'file'
-    ) %>%
-      magrittr::set_names(translate_app(., lang()))
+    ) |>
+      purrr::set_names(translate_app(c(
+        # preset scales
+        'local', 'admin_municipality', 'admin_region', 'admin_province',
+        "admin_natural_interest_area","admin_special_protection_natural_area",
+        "admin_natura_network_2000",
+        # custom scales
+        'drawn_polygon', 'file'
+      ), lang()))
 
     # tagList
     shiny::tagList(

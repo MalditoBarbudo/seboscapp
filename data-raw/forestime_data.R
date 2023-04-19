@@ -4,8 +4,8 @@ library(lfcdata)
 
 nfidb <- nfi()
 ifn_plots_data <-
-  nfidb$get_data('plots', TRUE) %>%
-  filter(presence_NFI_2, presence_NFI_3, presence_NFI_4) %>%
+  nfidb$get_data('plots', TRUE) |>
+  filter(presence_NFI_2, presence_NFI_3, presence_NFI_4) |>
   select(
     plot_id,
     coords_utm_x_ETRS89, coords_utm_y_ETRS89,
@@ -14,21 +14,21 @@ ifn_plots_data <-
     admin_natural_interest_area, admin_special_protection_natural_area,
     admin_natura_network_2000
   )
-dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t') %>%
+dynamic_data <- read_delim('data-raw/completa5.txt', delim = '\t') |>
   select(-AguaIFN2, -AguaIFN4)
 erosion_water_data <- read_delim('data-raw/ErosionAgua.txt', delim = '\t')
 
 # join all togheter, nfi plots to get the plot_id and also know which plots
 # remain at the end
 joined_data <-
-  dynamic_data %>%
-  full_join(erosion_water_data, by = c('PLOTS' = 'plot', 'X', 'Y')) %>%
+  dynamic_data |>
+  full_join(erosion_water_data, by = c('PLOTS' = 'plot', 'X', 'Y')) |>
   # remove the duplicated 251187 plots
-  filter(!ID %in% c(2894, 2899)) %>%
+  filter(!ID %in% c(2894, 2899)) |>
   mutate(
     PLOTS = as.character(PLOTS),
     PLOTS = stringr::str_replace(PLOTS, '^8', '08')
-  ) %>%
+  ) |>
   rename(
     # coords_utm_x_ETRS89 = X,
     # coords_utm_y_ETRS89 = Y,
@@ -43,37 +43,37 @@ joined_data <-
     WaterIFN4 = Water4,
     MaderaIFN3 = MaderaIFN23,
     MaderaIFN4 = MaderaIFN34
-  ) %>%
+  ) |>
   left_join(
     ifn_plots_data,
     by = c("old_idparcela"),
     # by = c("old_idparcela", 'coords_utm_x_ETRS89', "coords_utm_y_ETRS89")
-  ) %>%
+  ) |>
   select(
     plot_id, everything(), -ID, -old_idparcela,
     -coords_utm_x_ETRS89, -coords_utm_y_ETRS89, -X, -Y
-  ) %>%
+  ) |>
   # eliminamos aquellas de erosión que no están en los tres ifns
   filter(!is.na(plot_id))
 
 # data treatment
 all_together_data <-
-  joined_data %>%
+  joined_data |>
   pivot_longer(
     cols = SetasIFN2:WaterIFN4, names_to = 'serveiIFN', values_to = 'values'
-  ) %>%
-  separate(serveiIFN, c('Servei', 'IFN'), sep = 'I', remove = TRUE) %>%
-  mutate(IFN = paste0('I', IFN)) %>%
+  ) |>
+  separate(serveiIFN, c('Servei', 'IFN'), sep = 'I', remove = TRUE) |>
+  mutate(IFN = paste0('I', IFN)) |>
   arrange(
     plot_id, Servei, IFN, values
-  ) %>%
+  ) |>
   select(
     plot_id, es_name = Servei, nfi = IFN, values,
     admin_province, admin_region, admin_municipality,
     admin_natural_interest_area, admin_special_protection_natural_area,
     admin_natura_network_2000,
     geometry
-  ) %>%
+  ) |>
   mutate(
     nfi = case_when(
       nfi == 'IFN2' ~ 'NFI_2',
@@ -90,98 +90,98 @@ all_together_data <-
   )
 
 nfi_2_data <-
-  all_together_data %>%
-  filter(nfi == 'NFI_2') %>%
-  pivot_wider(names_from = es_name, values_from = values) %>%
-  select(-nfi) %>%
+  all_together_data |>
+  filter(nfi == 'NFI_2') |>
+  pivot_wider(names_from = es_name, values_from = values) |>
+  select(-nfi) |>
   sf::st_as_sf(sf_column_name = 'geometry')
 
 
 nfi_3_data <-
-  all_together_data %>%
-  filter(nfi == 'NFI_3') %>%
-  pivot_wider(names_from = es_name, values_from = values) %>%
-  select(-nfi) %>%
+  all_together_data |>
+  filter(nfi == 'NFI_3') |>
+  pivot_wider(names_from = es_name, values_from = values) |>
+  select(-nfi) |>
   sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_4_data <-
-  all_together_data %>%
-  filter(nfi == 'NFI_4') %>%
-  pivot_wider(names_from = es_name, values_from = values) %>%
-  select(-nfi) %>%
+  all_together_data |>
+  filter(nfi == 'NFI_4') |>
+  pivot_wider(names_from = es_name, values_from = values) |>
+  select(-nfi) |>
   sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_2_nfi_3_data <-
-  nfi_3_data %>%
-  as_tibble() %>%
-  select(-geometry) %>%
+  nfi_3_data |>
+  as_tibble() |>
+  select(-geometry) |>
   left_join(
-    nfi_2_data %>% as_tibble() %>% select(-geometry),
+    nfi_2_data |> as_tibble() |> select(-geometry),
     by = c(
       "plot_id", "admin_province", "admin_region", "admin_municipality",
       "admin_natural_interest_area", "admin_special_protection_natural_area",
       "admin_natura_network_2000"
     ),
     suffix = c('_nfi_3', '_nfi_2')
-  ) %>%
+  ) |>
   mutate(
     carbon_sequestration_nfi_2 = NA,
     carbon_sequestration_nfi_3 = carbon_sequestration,
     wood_nfi_2 = NA,
     wood_nfi_3 = wood
-  ) %>%
-  select(-carbon_sequestration, -wood) %>%
+  ) |>
+  select(-carbon_sequestration, -wood) |>
   mutate(
     carbon_sequestration = carbon_sequestration_nfi_3 - carbon_sequestration_nfi_2,
     erosion_mitigation = erosion_mitigation_nfi_3 - erosion_mitigation_nfi_2,
     mushrooms_production = mushrooms_production_nfi_3 - mushrooms_production_nfi_2,
     exported_water = exported_water_nfi_3 - exported_water_nfi_2,
     wood = wood_nfi_3 - wood_nfi_2,
-  ) %>%
+  ) |>
   select(
     plot_id, admin_province, admin_region, admin_municipality,
     admin_natural_interest_area, admin_special_protection_natural_area,
     admin_natura_network_2000,
     erosion_mitigation, mushrooms_production,
     exported_water
-  ) %>%
+  ) |>
   left_join(
-    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+    nfi_2_data |> select(plot_id, admin_province, admin_region, admin_municipality,
                           admin_natural_interest_area, admin_special_protection_natural_area,
                           admin_natura_network_2000),
     by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
            "admin_natural_interest_area", "admin_special_protection_natural_area",
            "admin_natura_network_2000")
-  ) %>%
+  ) |>
   sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_3_nfi_4_data <-
-  nfi_4_data %>%
-  as_tibble() %>%
-  select(-geometry) %>%
+  nfi_4_data |>
+  as_tibble() |>
+  select(-geometry) |>
   left_join(
-    nfi_3_data %>% as_tibble() %>% select(-geometry),
+    nfi_3_data |> as_tibble() |> select(-geometry),
     by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
            "admin_natural_interest_area", "admin_special_protection_natural_area",
            "admin_natura_network_2000"),
     suffix = c('_nfi_4', '_nfi_3')
-  ) %>%
+  ) |>
   mutate(
     carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_3,
     erosion_mitigation = erosion_mitigation_nfi_4 - erosion_mitigation_nfi_3,
     mushrooms_production = mushrooms_production_nfi_4 - mushrooms_production_nfi_3,
     exported_water = exported_water_nfi_4 - exported_water_nfi_3,
     wood = wood_nfi_4 - wood_nfi_3,
-  ) %>%
+  ) |>
   select(
     plot_id, admin_province, admin_region, admin_municipality,
     admin_natural_interest_area, admin_special_protection_natural_area,
     admin_natura_network_2000,
     carbon_sequestration, erosion_mitigation, mushrooms_production,
     exported_water, wood
-  ) %>%
+  ) |>
   left_join(
-    nfi_3_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+    nfi_3_data |> select(plot_id, admin_province, admin_region, admin_municipality,
                           admin_natural_interest_area, admin_special_protection_natural_area,
                           admin_natura_network_2000),
     by = c(
@@ -189,34 +189,34 @@ nfi_3_nfi_4_data <-
       "admin_natural_interest_area", "admin_special_protection_natural_area",
       "admin_natura_network_2000"
     )
-  ) %>%
+  ) |>
   sf::st_as_sf(sf_column_name = 'geometry')
 
 nfi_2_nfi_4_data <-
-  nfi_4_data %>%
-  as_tibble() %>%
-  select(-geometry) %>%
+  nfi_4_data |>
+  as_tibble() |>
+  select(-geometry) |>
   left_join(
-    nfi_2_data %>% as_tibble() %>% select(-geometry),
+    nfi_2_data |> as_tibble() |> select(-geometry),
     by = c("plot_id", "admin_province", "admin_region", "admin_municipality",
            "admin_natural_interest_area", "admin_special_protection_natural_area",
            "admin_natura_network_2000"),
     suffix = c('_nfi_4', '_nfi_2')
-  ) %>%
+  ) |>
   # mutate(
   #   carbon_sequestration_nfi_2 = nfi_3_data$carbon_sequestration,
   #   carbon_sequestration_nfi_4 = carbon_sequestration,
   #   wood_nfi_2 = nfi_3_data$wood,
   #   wood_nfi_4 = wood
-  # ) %>%
-  select(-carbon_sequestration, -wood) %>%
+  # ) |>
+  select(-carbon_sequestration, -wood) |>
   mutate(
     # carbon_sequestration = carbon_sequestration_nfi_4 - carbon_sequestration_nfi_2,
     erosion_mitigation = erosion_mitigation_nfi_4 - erosion_mitigation_nfi_2,
     mushrooms_production = mushrooms_production_nfi_4 - mushrooms_production_nfi_2,
     exported_water = exported_water_nfi_4 - exported_water_nfi_2
     # wood = wood_nfi_4 - wood_nfi_2,
-  ) %>%
+  ) |>
   select(
     plot_id, admin_province, admin_region, admin_municipality,
     admin_natural_interest_area, admin_special_protection_natural_area,
@@ -224,9 +224,9 @@ nfi_2_nfi_4_data <-
     # carbon_sequestration, wood,
     erosion_mitigation, mushrooms_production,
     exported_water
-  ) %>%
+  ) |>
   left_join(
-    nfi_2_data %>% select(plot_id, admin_province, admin_region, admin_municipality,
+    nfi_2_data |> select(plot_id, admin_province, admin_region, admin_municipality,
                           admin_natural_interest_area, admin_special_protection_natural_area,
                           admin_natura_network_2000),
     by = c(
@@ -234,5 +234,5 @@ nfi_2_nfi_4_data <-
       "admin_natural_interest_area", "admin_special_protection_natural_area",
       "admin_natura_network_2000"
     )
-  ) %>%
+  ) |>
   sf::st_as_sf(sf_column_name = 'geometry')

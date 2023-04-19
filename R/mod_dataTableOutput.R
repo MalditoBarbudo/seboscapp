@@ -47,8 +47,8 @@ mod_dataTable <- function(
 
     # if local scale, then the raw data is ok
     if (data_scale == 'local') {
-      res <- main_data_reactives$raw_data %>%
-        dplyr::as_tibble() %>%
+      res <- main_data_reactives$raw_data |>
+        dplyr::as_tibble() |>
         dplyr::select(-geometry)
     } else {
       res <- main_data_reactives$summ_data
@@ -68,14 +68,14 @@ mod_dataTable <- function(
     data_scale <- shiny::isolate(data_reactives$data_scale)
 
     # DT
-    table_data() %>%
+    table_data() |>
       dplyr::mutate_if(
         is.numeric, round, 3
-      ) %>%
+      ) |>
       DT::datatable(
         rownames = FALSE,
         colnames = translate_var(
-          names(.), data_version, data_scale, lang(), var_thes
+          names(table_data()), data_version, data_scale, lang(), var_thes
         ),
         class = 'hover order-column stripe nowrap',
         filter = list(position = 'top', clear = FALSE, plain = FALSE),

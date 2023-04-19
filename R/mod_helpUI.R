@@ -36,12 +36,15 @@ mod_help <- function(
     data_version <- data_reactives$data_version
     data_scale <- data_reactives$data_scale
 
-    var_choices <- var_thes %>%
-      dplyr::filter(var_table == data_version) %>%
-      dplyr::pull(var_id) %>%
-      magrittr::set_names(translate_var(
-        ., data_version, data_scale, lang(), var_thes
-      ))
+    var_choices_temp <- var_thes |>
+      dplyr::filter(var_table == data_version) |>
+      dplyr::pull(var_id)
+    var_choices <- purrr::set_names(
+      var_choices_temp,
+      translate_var(
+        var_choices_temp, data_version, data_scale, lang(), var_thes
+      )
+    )
     selected_choice <- viz_reactives$viz_color
 
     # tagList
@@ -88,15 +91,15 @@ mod_help <- function(
 
     data_version <- data_reactives$data_version
 
-    var_servei <- var_thes %>%
+    var_servei <- var_thes |>
       dplyr::filter(
         var_id == input$glossary_var,
         var_table == data_version
-      ) %>%
+      ) |>
       dplyr::select(tidyselect::any_of(
         c(glue::glue("var_service_{lang()}"))
-      )) %>%
-      purrr::flatten_chr() %>%
+      )) |>
+      purrr::flatten_chr() |>
       unique()
 
     return(var_servei)
@@ -109,15 +112,15 @@ mod_help <- function(
 
     data_version <- data_reactives$data_version
 
-    var_description <- var_thes %>%
+    var_description <- var_thes |>
       dplyr::filter(
         var_id == input$glossary_var,
         var_table == data_version
-      ) %>%
+      ) |>
       dplyr::select(tidyselect::any_of(
         c(glue::glue("var_description_{lang()}"))
-      )) %>%
-      purrr::flatten_chr() %>%
+      )) |>
+      purrr::flatten_chr() |>
       unique()
 
     return(var_description)
@@ -130,15 +133,15 @@ mod_help <- function(
 
     data_version <- data_reactives$data_version
 
-    var_units <- var_thes %>%
+    var_units <- var_thes |>
       dplyr::filter(
         var_id == input$glossary_var,
         var_table == data_version
-      ) %>%
+      ) |>
       dplyr::select(tidyselect::any_of(c(
         glue::glue("var_units")
-      ))) %>%
-      purrr::flatten_chr() %>%
+      ))) |>
+      purrr::flatten_chr() |>
       unique()
     if (length(var_units) < 1) {
       var_units <- '-'

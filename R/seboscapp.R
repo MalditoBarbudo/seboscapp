@@ -1,7 +1,5 @@
 #' function to launch the fes app
 #'
-#' @importFrom magrittr %>%
-#'
 #' @export
 fes_app <- function() {
 

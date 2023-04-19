@@ -47,20 +47,29 @@ mod_map <- function(
   output$fes_map <- leaflet::renderLeaflet({
 
     # we need data, and we need color var at least
-    leaflet::leaflet() %>%
-      leaflet::setView(1.72, 41.70, zoom = 8) %>%
+    leaflet::leaflet() |>
+      leaflet::setView(1.72, 41.70, zoom = 8) |>
       leaflet::addProviderTiles(
         leaflet::providers$Esri.WorldShadedRelief, group = 'Relief'
-      ) %>%
+      ) |>
       leaflet::addProviderTiles(
         leaflet::providers$Esri.WorldImagery, group = 'Imaginery'
-      ) %>%
-      leaflet::addMapPane('admin_divs', zIndex = 410) %>%
-      leaflet::addMapPane('plots', zIndex = 420) %>%
+      ) |>
+      leaflet::addProviderTiles(
+        leaflet::providers$OpenStreetMap, group = 'OSM'
+      ) |>
+      leaflet::addProviderTiles(
+        leaflet::providers$Esri.WorldGrayCanvas, group = 'WorldGrayCanvas'
+      ) |>
+      leaflet::addProviderTiles(
+        leaflet::providers$CartoDB.PositronNoLabels, group = 'PositronNoLabels'
+      ) |>
+      leaflet::addMapPane('admin_divs', zIndex = 410) |>
+      leaflet::addMapPane('plots', zIndex = 420) |>
       leaflet::addLayersControl(
-        baseGroups = c('Relief', 'Imaginery'),
+        baseGroups = c('Relief', 'Imaginery', 'OSM', 'WorldGrayCanvas', 'PositronNoLabels'),
         options = leaflet::layersControlOptions(collapsed = TRUE)
-      ) %>%
+      ) |>
       # leaflet.extras plugins
       leaflet.extras::addDrawToolbar(
         targetGroup = 'drawn_polygon',
@@ -142,8 +151,8 @@ mod_map <- function(
         'file' = 'poly_id',
         'drawn_polygon' = 'poly_id'
       )
-      res <- summ_data %>%
-        dplyr::left_join(polygon_data, by = join_by) %>%
+      res <- summ_data |>
+        dplyr::left_join(polygon_data, by = join_by) |>
         sf::st_as_sf(sf_column_name = geom_column)
     }
     return(res)
@@ -180,7 +189,7 @@ mod_map <- function(
     )
 
     # data (remove NAs and Inf)
-    map_data_ready <- map_data() %>%
+    map_data_ready <- map_data() |>
       dplyr::filter(
         !is.na(!! rlang::sym(viz_color)),
         # min and max creates Inf when all vector values are NAs, remove them
@@ -209,7 +218,7 @@ mod_map <- function(
     )
 
     # palette configuration
-    color_vector <- map_data_ready %>%
+    color_vector <- map_data_ready |>
       dplyr::pull(!! rlang::sym(viz_color))
 
     if (length(color_vector) < 2) {
@@ -287,44 +296,44 @@ mod_map <- function(
 
     # message(sf::st_crs(map_data_ready))
 
-    leaflet::leafletProxy('fes_map') %>%
-      leaflet::clearGroup('plots') %>%
-      leaflet::clearGroup('polys') %>%
-      leaflet::clearGroup('drawn_polygon') %>%
-      {
-        temp <- .
-        if (data_scale == 'local') {
-          temp %>%
-            leaflet::addCircles(
-              data = map_data_ready,
-              group = 'plots', label = ~plot_id, layerId = ~plot_id,
-              stroke = FALSE, fillOpacity = 0.7,
-              fillColor = color_palette(color_vector),
-              radius = base_size(),
-              options = leaflet::pathOptions(pane = 'plots')
-            )
-        } else {
-          temp %>%
-            leaflet::addPolygons(
-              data = map_data_ready,
-              group = 'polys',
-              label = polygon_label,
-              layerId = polygon_label,
-              weight = 1, smoothFactor = 1,
-              opacity = 1.0, fill = TRUE,
-              color = '#6C7A89FF',
-              fillColor = color_palette(color_vector),
-              fillOpacity = 0.7,
-              highlightOptions = leaflet::highlightOptions(
-                color = "#CF000F", weight = 2,
-                bringToFront = FALSE
-              ),
-              options = leaflet::pathOptions(
-                pane = 'admin_divs'
-              )
-            )
-        }
-      } %>%
+    temp_proxy <- leaflet::leafletProxy('fes_map') |>
+      leaflet::clearGroup('plots') |>
+      leaflet::clearGroup('polys') |>
+      leaflet::clearGroup('drawn_polygon')
+
+    if (data_scale == 'local') {
+      temp_proxy <- temp_proxy |>
+        leaflet::addCircles(
+          data = map_data_ready,
+          group = 'plots', label = ~plot_id, layerId = ~plot_id,
+          stroke = FALSE, fillOpacity = 0.7,
+          fillColor = color_palette(color_vector),
+          radius = base_size(),
+          options = leaflet::pathOptions(pane = 'plots')
+        )
+    } else {
+      temp_proxy <- temp_proxy |>
+        leaflet::addPolygons(
+          data = map_data_ready,
+          group = 'polys',
+          label = polygon_label,
+          layerId = polygon_label,
+          weight = 1, smoothFactor = 1,
+          opacity = 1.0, fill = TRUE,
+          color = '#6C7A89FF',
+          fillColor = color_palette(color_vector),
+          fillOpacity = 0.7,
+          highlightOptions = leaflet::highlightOptions(
+            color = "#CF000F", weight = 2,
+            bringToFront = FALSE
+          ),
+          options = leaflet::pathOptions(
+            pane = 'admin_divs'
+          )
+        )
+    }
+
+    temp_proxy |>
       leaflet::addLegend(
         position = 'bottomright', pal = color_palette_legend,
         values = color_vector_legend,

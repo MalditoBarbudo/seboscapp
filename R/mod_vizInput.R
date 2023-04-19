@@ -48,23 +48,26 @@ mod_viz <- function(
     data_scale <- data_reactives$data_scale
 
     # precalculated choices
-    color_choices <- var_thes %>%
-      dplyr::filter(var_table == data_version) %>%
-      dplyr::pull(var_id) %>%
+    color_choices_temp <- var_thes |>
+      dplyr::filter(var_table == data_version) |>
+      dplyr::pull(var_id)
+
+    color_choices_temp <- color_choices_temp |>
       magrittr::extract(
-        stringr::str_detect(., pattern = '^admin_|^plot_', negate = TRUE)
-      ) %>%
-      magrittr::set_names(
-        translate_var(., data_version, 'local', lang(), var_thes)
+        stringr::str_detect(color_choices_temp, pattern = '^admin_|^plot_', negate = TRUE)
       )
+    color_choices <- color_choices_temp |>
+      purrr::set_names(translate_var(color_choices_temp, data_version, 'local', lang(), var_thes))
     selected_color <- cache_selected_choice(
       color_choices, cache, 'selectedcol', 'mushrooms_production'
     )
 
     statistic_choices <- c(
       'mean', 'se', 'min', 'max', 'q05', 'q95', 'n'
-    ) %>%
-      magrittr::set_names(translate_app(., lang()))
+    ) |>
+      purrr::set_names(translate_app(c(
+        'mean', 'se', 'min', 'max', 'q05', 'q95', 'n'
+      ), lang()))
     selected_statistic <- cache_selected_choice(
       statistic_choices, cache, 'selectedstatistic', 'mean'
     )
@@ -182,12 +185,8 @@ mod_viz <- function(
             ns('viz_pal_config'),
             translate_app('viz_pal_config_input', lang()),
             size = 'sm',
-            choices = c('high', 'normal', 'low') %>%
-              magrittr::set_names(c(
-                translate_app('pal_high', lang()),
-                translate_app('pal_normal', lang()),
-                translate_app('pal_low', lang())
-              )),
+            choices = c('high', 'normal', 'low') |>
+              purrr::set_names(translate_app(c('pal_high', 'pal_normal', 'pal_low'), lang())),
             selected = selected_pal_config, direction = 'vertical',
             checkIcon = list(
               yes = shiny::icon('tree-deciduous', lib = 'glyphicon')
