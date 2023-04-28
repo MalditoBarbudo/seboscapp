@@ -26,5 +26,6 @@ Imports:
     rlang,
     purrr,
     htmltools,
-    cachem
+    cachem,
+    waiter
 RoxygenNote: 7.2.3
