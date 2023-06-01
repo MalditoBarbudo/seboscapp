@@ -40,7 +40,7 @@ mod_info <- function(
   waiter_plot <- waiter::Waiter$new(
     id = ns('info_plot'),
     html = waiter::spin_timer(),
-    color = "#1C1C20"
+    color = "#444444"
   )
 
   ## outputs ####
@@ -79,7 +79,7 @@ mod_info <- function(
       temp_plot <- temp_plot +
         ggplot2::geom_point(
           data = ~ dplyr::filter(.x, label_var != fes_map_shape_click$id),
-          colour = '#606064', size = 4, alpha = 0.5,
+          colour = '#606060', size = 4, alpha = 0.5,
           position = ggplot2::position_jitter(
             width = .2, height = 0, seed = 25
           )
@@ -95,7 +95,7 @@ mod_info <- function(
     temp_plot +
       ggplot2::geom_point(
         data = ~ dplyr::filter(.x, label_var == fes_map_shape_click$id),
-        colour = '#83A24E', size = 6
+        colour = '#22B0C6', size = 6
       ) +
         ggplot2::scale_x_continuous(breaks = NULL) +
         ggplot2::labs(
@@ -106,24 +106,24 @@ mod_info <- function(
       ) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
-        text = ggplot2::element_text(size = 14, color = '#647a8d'),
-        axis.text = ggplot2::element_text(color = '#647a8d'),
-        strip.text = ggplot2::element_text(color = '#647a8d'),
+        text = ggplot2::element_text(size = 14, color = '#606060'),
+        axis.text = ggplot2::element_text(color = '#606060'),
+        strip.text = ggplot2::element_text(color = '#606060'),
         panel.background = ggplot2::element_rect(
-          fill = '#c8cac8', colour = NA
+          fill = '#F8F9FA', colour = NA
         ),
         plot.background = ggplot2::element_rect(
-          fill = '#c8cac8', colour = NA
+          fill = '#F8F9FA', colour = NA
         ),
         strip.background = ggplot2::element_rect(
-          fill = '#c8cac8', colour = NA
+          fill = '#F8F9FA', colour = NA
         ),
-        panel.grid = ggplot2::element_line(colour = '#647a8d'),
+        panel.grid = ggplot2::element_line(colour = '#606060'),
         panel.grid.minor.x = ggplot2::element_blank(),
         panel.grid.major.x = ggplot2::element_blank(),
         panel.grid.minor.y = ggplot2::element_blank(),
         panel.grid.major.y = ggplot2::element_line(
-          size = ggplot2::rel(0.5), colour = '#647a8d'
+          size = ggplot2::rel(0.5), colour = '#606060'
         )
       )
   })

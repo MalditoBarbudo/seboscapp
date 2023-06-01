@@ -58,7 +58,7 @@ mod_save <- function(
             label = translate_app('table_output_options_input', lang()),
             choices = c('csv', 'xlsx') |>
               purrr::set_names(translate_app(c('csv', 'xlsx'), lang())),
-            status = 'success', fill = TRUE, shape = 'round'
+            status = 'info', fill = TRUE, shape = 'round'
           )
         )
       )

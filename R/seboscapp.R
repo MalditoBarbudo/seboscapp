@@ -78,6 +78,20 @@ $(document).on('shiny:disconnected', function(event) {
         )
       ),
 
+      # footer
+      footer = shiny::tags$footer(
+        shiny::fluidRow(
+          shiny::column(
+            width = 12, align = "right",
+            shiny::HTML(glue::glue(
+              '<img src="images/emf_white_logo.svg" width="120px" class="d-inline-block" alt="" loading="lazy">
+              <img src="images/creaf_white_logo.svg" width="135px" class="d-inline-block" alt="" loading="lazy">
+              <span>({lubridate::year(Sys.Date())})</span>'
+            ))
+          )
+        )
+      ),
+
       # main tab
       shiny::tabPanel(
         title = mod_tab_translateOutput('main_tab_translation'),
@@ -100,7 +114,7 @@ $(document).on('shiny:disconnected', function(event) {
           position = 'left', fluid = TRUE,
           ## sidebar panel
           sidebarPanel = shiny::sidebarPanel(
-            width = 5,
+            width = 4,
             # this is gonna be a tabsetPanel, for data selection, save and help.
             # tabset panel
             shiny::tabsetPanel(
@@ -130,7 +144,7 @@ $(document).on('shiny:disconnected', function(event) {
           ),
           ## main panel
           mainPanel = shiny::mainPanel(
-            width = 7,
+            width = 8,
             shiny::tabsetPanel(
               id = 'main_panel_tabset', type = 'pills',
               shiny::tabPanel(
