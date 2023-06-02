@@ -99,13 +99,13 @@ $(document).on('shiny:disconnected', function(event) {
         shiny::tags$head(
           # js script,
           shiny::tags$script(keep_alive_script),
-          # custom css
-          shiny::includeCSS(
-            system.file('resources', 'seboscapp.css', package = 'seboscapp')
-          ),
           # corporative image css
           shiny::includeCSS(
-            system.file('resources', 'corp_image.css', package = 'seboscapp')
+            system.file('apps_css', 'corp_image.css', package = 'lfcdata')
+          ),
+          # custom css
+          shiny::includeCSS(
+            system.file('apps_css', 'seboscapp.css', package = 'lfcdata')
           )
         ),
         # Sidebar layout
