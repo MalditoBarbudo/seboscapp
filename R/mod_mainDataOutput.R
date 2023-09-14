@@ -126,7 +126,7 @@ mod_mainData <- function(
     waiter_overlay <- waiter::Waiter$new(
       id = 'mod_mapOutput-fes_map',
       html = shiny::tagList(
-        hostess_progress$get_loader(),
+        # hostess_progress$get_loader(),
         shiny::h3(translate_app("progress_message", lang())),
         shiny::p(translate_app("progress_detail_initial", lang()))
       ),
@@ -135,8 +135,8 @@ mod_mainData <- function(
 
     # progress
     waiter_overlay$show()
-    hostess_progress$start()
-    on.exit(hostess_progress$close(), add = TRUE)
+    # hostess_progress$start()
+    # on.exit(hostess_progress$close(), add = TRUE)
     on.exit(waiter_overlay$hide(), add = TRUE)
 
     # scale
@@ -145,7 +145,7 @@ mod_mainData <- function(
     if (data_scale == 'local') {
       # close progress, we have to wait a little to be able to close correctly
       # when data is cached
-      Sys.sleep(0.5)
+      # Sys.sleep(0.5)
       return(raw_data())
     }
 
@@ -168,7 +168,7 @@ mod_mainData <- function(
 
     # close progress, we have to wait a little to be able to close correctly
     # when data is cached
-    Sys.sleep(0.5)
+    # Sys.sleep(0.5)
     return(summ_data)
   })
 
