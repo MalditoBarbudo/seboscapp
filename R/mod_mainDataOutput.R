@@ -107,6 +107,24 @@ mod_mainData <- function(
       shiny::need(data_reactives$data_version, 'no inputs yet')
     )
 
+    waiter_overlay <- waiter::Waiter$new(
+      id = 'mod_mapOutput-fes_map',
+      html = shiny::tagList(
+        # hostess_progress$get_loader(),
+        shiny::br(), shiny::br(),
+        waiter::spin_flowers(),
+        shiny::h3(translate_app("progress_message", lang())),
+        shiny::p(translate_app("progress_detail_initial", lang()))
+      ),
+      color = '#E8EAEB'
+    )
+
+    # progress
+    waiter_overlay$show()
+    # hostess_progress$start()
+    # on.exit(hostess_progress$close(), add = TRUE)
+    on.exit(waiter_overlay$hide(), add = TRUE)
+
     # data version
     data_version <- data_reactives$data_version
     # table
@@ -127,6 +145,8 @@ mod_mainData <- function(
       id = 'mod_mapOutput-fes_map',
       html = shiny::tagList(
         # hostess_progress$get_loader(),
+        shiny::br(), shiny::br(),
+        waiter::spin_flowers(),
         shiny::h3(translate_app("progress_message", lang())),
         shiny::p(translate_app("progress_detail_initial", lang()))
       ),
@@ -145,7 +165,7 @@ mod_mainData <- function(
     if (data_scale == 'local') {
       # close progress, we have to wait a little to be able to close correctly
       # when data is cached
-      # Sys.sleep(0.5)
+      # Sys.sleep(5)
       return(raw_data())
     }
 
@@ -168,7 +188,7 @@ mod_mainData <- function(
 
     # close progress, we have to wait a little to be able to close correctly
     # when data is cached
-    # Sys.sleep(0.5)
+    # Sys.sleep(5)
     return(summ_data)
   })
 
