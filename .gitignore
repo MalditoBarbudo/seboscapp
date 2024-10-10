@@ -1,3 +1,5 @@
 .Rproj.user
-data-raw/local_scale/*
 .Rhistory
+.Renviron
+.vscode
+data-raw/local_scale/*

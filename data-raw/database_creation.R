@@ -10,8 +10,11 @@ source("data-raw/thesaurus.R")
 # connection
 conn <- RPostgres::dbConnect(
   RPostgres::Postgres(),
-  'ifn', 'laboratoriforestal.creaf.cat', 5432, rstudioapi::askForPassword(),
-  'ifn'
+  dbname = 'ifn',
+  host = Sys.getenv("DB_HOST"),
+  port = Sys.getenv("DB_PORT"),
+  password = Sys.getenv("DB_PASS"),
+  user = Sys.getenv("DB_ADMIN")
 )
 
 # create database and activate postgis
@@ -42,8 +45,11 @@ RPostgres::dbExecute(conn, sql_table_creation_3)
 RPostgres::dbDisconnect(conn)
 conn <- RPostgres::dbConnect(
   RPostgres::Postgres(),
-  'forestecoserv', 'laboratoriforestal.creaf.cat',
-  5432, rstudioapi::askForPassword(), 'ifn'
+  dbname = 'forestecoserv',
+  host = Sys.getenv("DB_HOST"),
+  port = Sys.getenv("DB_PORT"),
+  password = Sys.getenv("DB_PASS"),
+  user = Sys.getenv("DB_ADMIN")
 )
 
 sql_guest_activation_1 <- glue::glue_sql(

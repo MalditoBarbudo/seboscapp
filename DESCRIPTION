@@ -28,5 +28,7 @@ Imports:
     htmltools,
     cachem,
     waiter,
-    lubridate
+    lubridate,
+    mapdeck,
+    colourvalues
 RoxygenNote: 7.2.3
