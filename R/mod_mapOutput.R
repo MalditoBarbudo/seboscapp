@@ -9,7 +9,8 @@ mod_mapOutput <- function(id) {
   # ns
   ns <- shiny::NS(id)
   shiny::tagList(
-    leaflet::leafletOutput(ns("fes_map"), height = 600),
+    # leaflet::leafletOutput(ns("fes_map"), height = 600),
+    mapdeck::mapdeckOutput(ns("fes_map"), height = 600),
     shiny::uiOutput(ns('map_container'))
   )
 }
@@ -43,67 +44,76 @@ mod_map <- function(
     )
   }) # end of renderUI
 
-  ## leaflet output (empty map) ####
-  output$fes_map <- leaflet::renderLeaflet({
+  ## mapdeck output (empty map) ####
+  output$fes_map <- mapdeck::renderMapdeck({
+    mapdeck::mapdeck(
+      # style = mapdeck::mapdeck_style('dark'),
+      style = "https://raw.githubusercontent.com/CartoDB/basemap-styles/refs/heads/master/mapboxgl/dark-matter-nolabels.json",
+      location = c(1.744, 41.726), zoom = 7, pitch = 0
+    )
+  }) # end of mapdeck output (empty map)
 
-    # we need data, and we need color var at least
-    leaflet::leaflet() |>
-      leaflet::setView(1.72, 41.70, zoom = 8) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$Esri.WorldShadedRelief, group = 'Relief'
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$Esri.WorldImagery, group = 'Imaginery'
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$OpenStreetMap, group = 'OSM'
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$Esri.WorldGrayCanvas, group = 'WorldGrayCanvas'
-      ) |>
-      leaflet::addProviderTiles(
-        leaflet::providers$CartoDB.PositronNoLabels, group = 'PositronNoLabels'
-      ) |>
-      leaflet::addMapPane('admin_divs', zIndex = 410) |>
-      leaflet::addMapPane('plots', zIndex = 420) |>
-      leaflet::addLayersControl(
-        baseGroups = c('Relief', 'Imaginery', 'OSM', 'WorldGrayCanvas', 'PositronNoLabels'),
-        options = leaflet::layersControlOptions(collapsed = TRUE)
-      ) |>
-      # leaflet.extras plugins
-      leaflet.extras::addDrawToolbar(
-        targetGroup = 'drawn_polygon',
-        position = 'topleft',
-        polylineOptions = FALSE, circleOptions = FALSE,
-        rectangleOptions = FALSE, markerOptions = FALSE,
-        circleMarkerOptions = FALSE,
-        polygonOptions = leaflet.extras::drawPolygonOptions(
-          shapeOptions = leaflet.extras::drawShapeOptions()
-        ),
-        editOptions = leaflet.extras::editToolbarOptions(
-          edit = TRUE, remove = TRUE
-        ),
-        singleFeature = TRUE
-      )
-  }) # end of leaflet output (empty map)
+
+  # output$fes_map <- leaflet::renderLeaflet({
+
+  #   # we need data, and we need color var at least
+  #   leaflet::leaflet() |>
+  #     leaflet::setView(1.72, 41.70, zoom = 8) |>
+  #     leaflet::addProviderTiles(
+  #       leaflet::providers$Esri.WorldShadedRelief, group = 'Relief'
+  #     ) |>
+  #     leaflet::addProviderTiles(
+  #       leaflet::providers$Esri.WorldImagery, group = 'Imaginery'
+  #     ) |>
+  #     leaflet::addProviderTiles(
+  #       leaflet::providers$OpenStreetMap, group = 'OSM'
+  #     ) |>
+  #     leaflet::addProviderTiles(
+  #       leaflet::providers$Esri.WorldGrayCanvas, group = 'WorldGrayCanvas'
+  #     ) |>
+  #     leaflet::addProviderTiles(
+  #       leaflet::providers$CartoDB.PositronNoLabels, group = 'PositronNoLabels'
+  #     ) |>
+  #     leaflet::addMapPane('admin_divs', zIndex = 410) |>
+  #     leaflet::addMapPane('plots', zIndex = 420) |>
+  #     leaflet::addLayersControl(
+  #       baseGroups = c('Relief', 'Imaginery', 'OSM', 'WorldGrayCanvas', 'PositronNoLabels'),
+  #       options = leaflet::layersControlOptions(collapsed = TRUE)
+  #     ) |>
+  #     # leaflet.extras plugins
+  #     leaflet.extras::addDrawToolbar(
+  #       targetGroup = 'drawn_polygon',
+  #       position = 'topleft',
+  #       polylineOptions = FALSE, circleOptions = FALSE,
+  #       rectangleOptions = FALSE, markerOptions = FALSE,
+  #       circleMarkerOptions = FALSE,
+  #       polygonOptions = leaflet.extras::drawPolygonOptions(
+  #         shapeOptions = leaflet.extras::drawShapeOptions()
+  #       ),
+  #       editOptions = leaflet.extras::editToolbarOptions(
+  #         edit = TRUE, remove = TRUE
+  #       ),
+  #       singleFeature = TRUE
+  #     )
+  # }) # end of leaflet output (empty map)
 
   ## reactives ####
   # zoom-size transformation. Logic is as follows:
   #   - In closer zooms (10) go to the base size of 750. In far zooms increase
   #     accordingly, until zoom 7 and further, with a max size of 1500
-  base_size <- shiny::reactive({
-    current_zoom <- input$fes_map_zoom
-    if (current_zoom <= 7) {
-      current_zoom <- 7
-    }
-    if (current_zoom >= 10) {
-      current_zoom <- 10
-    }
+  # base_size <- shiny::reactive({
+  #   current_zoom <- input$fes_map_zoom
+  #   if (current_zoom <= 7) {
+  #     current_zoom <- 7
+  #   }
+  #   if (current_zoom >= 10) {
+  #     current_zoom <- 10
+  #   }
 
-    size_transformed <- 750 + ((10 - current_zoom) * 250)
+  #   size_transformed <- 750 + ((10 - current_zoom) * 250)
 
-    return(size_transformed)
-  })
+  #   return(size_transformed)
+  # })
 
   # reactive to buid the map data
   map_data <- shiny::reactive({
@@ -153,7 +163,8 @@ mod_map <- function(
       )
       res <- summ_data |>
         dplyr::left_join(polygon_data, by = join_by) |>
-        sf::st_as_sf(sf_column_name = geom_column)
+        sf::st_as_sf(sf_column_name = geom_column) |>
+        sf::st_cast("MULTIPOLYGON")
     }
     return(res)
   })
@@ -233,7 +244,7 @@ mod_map <- function(
 
     # viridis_pal_name <- switch(
     #   viz_reactives$viz_color,
-    #   "animals_presence" = viridis::mako,
+    #   "animals_presence" = viridis::ag_GrnYl,
     #   "mushrooms_production" = ,
     #   "exported_water",
     #   "carbon_sequestration",
@@ -246,45 +257,51 @@ mod_map <- function(
 
     color_palette <- switch(
       viz_reactives$viz_pal_config,
-      "low" = leaflet::colorNumeric(
+      "low" = scales::col_numeric(
         scales::gradient_n_pal(
-          viridis::mako(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
-        color_vector, reverse = viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = !viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
-      "high" = leaflet::colorNumeric(
+      "high" = scales::col_numeric(
         scales::gradient_n_pal(
-          viridis::mako(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
-        color_vector, reverse = viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = !viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
-      "normal" = leaflet::colorNumeric(
-        viridis::mako(256), color_vector, reverse = viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+      "normal" = scales::col_numeric(
+        hcl.colors(256, "ag_GrnYl", alpha = 0.8),
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = !viz_reactives$viz_pal_reverse, alpha = TRUE
       )
     )
 
     color_palette_legend <- switch(
       viz_reactives$viz_pal_config,
-      "low" = leaflet::colorNumeric(
+      "low" = scales::col_numeric(
         scales::gradient_n_pal(
-          viridis::mako(9), c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
+          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
-        color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
-      "high" = leaflet::colorNumeric(
+      "high" = scales::col_numeric(
         scales::gradient_n_pal(
-          viridis::mako(9), c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
+          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
-        color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
-      "normal" = leaflet::colorNumeric(
-        viridis::mako(256), color_vector_legend, reverse = !viz_reactives$viz_pal_reverse,
-        na.color = 'black'
+      "normal" = scales::col_numeric(
+        hcl.colors(256, "ag_GrnYl", alpha = 0.8),
+        c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
+        na.color = "#FFFFFF00", reverse = viz_reactives$viz_pal_reverse, alpha = TRUE
       )
     )
     # labels
@@ -294,64 +311,129 @@ mod_map <- function(
       polygon_label <- as.formula(glue::glue("~{data_scale}"))
     }
 
-    # message(sf::st_crs(map_data_ready))
+    # custom legend (to be able to show in natural order, high values up)
+    legend_js <- mapdeck::legend_element(
+      variables = rev(round(seq(
+        min(color_vector, na.rm = TRUE),
+        max(color_vector, na.rm = TRUE),
+        length.out = 10
+      ), 3)),
+      colours = color_palette_legend(seq(
+        min(color_vector, na.rm = TRUE),
+        max(color_vector, na.rm = TRUE),
+        length.out = 10
+      )),
+      colour_type = "fill", variable_type = "gradient",
+      title = translate_var(
+        viz_color, data_version, data_scale, lang(), var_thes
+      )
+    ) |>
+      mapdeck::mapdeck_legend()
+    
+    if (data_scale == "local") {
+      # create mapdeck vars needed
+      map_data_ready <- map_data_ready |>
+        dplyr::mutate(
+          hex = color_palette(color_vector),
+          tooltip = paste0(
+            "<p>", plot_id, ": ", round(.data[[viz_color]], 2), "</p>"
+          )
+        )
 
-    temp_proxy <- leaflet::leafletProxy('fes_map') |>
-      leaflet::clearGroup('plots') |>
-      leaflet::clearGroup('polys') |>
-      leaflet::clearGroup('drawn_polygon')
-
-    if (data_scale == 'local') {
-      temp_proxy <- temp_proxy |>
-        leaflet::addCircles(
+      mapdeck::mapdeck_update(map_id = session$ns("fes_map")) |>
+        mapdeck::clear_polygon(layer_id = "polys") |>
+        mapdeck::clear_scatterplot(layer_id = "plots") |>
+        mapdeck::add_scatterplot(
           data = map_data_ready,
-          group = 'plots', label = ~plot_id, layerId = ~plot_id,
-          stroke = FALSE, fillOpacity = 0.7,
-          fillColor = color_palette(color_vector),
-          radius = base_size(),
-          options = leaflet::pathOptions(pane = 'plots')
+          fill_colour = "hex", fill_opacity = 0.8,
+          stroke_colour = "hex", stroke_opacity = 0.8,
+          id = "plot_id", layer_id = "plots",
+          update_view = FALSE, focus_layer = FALSE,
+          tooltip = "tooltip",
+          legend = legend_js,
+          radius = 750
         )
     } else {
-      temp_proxy <- temp_proxy |>
-        leaflet::addPolygons(
-          data = map_data_ready,
-          group = 'polys',
-          label = polygon_label,
-          layerId = polygon_label,
-          weight = 1, smoothFactor = 1,
-          opacity = 1.0, fill = TRUE,
-          color = '#6C7A89FF',
-          fillColor = color_palette(color_vector),
-          fillOpacity = 0.7,
-          highlightOptions = leaflet::highlightOptions(
-            color = "#CF000F", weight = 2,
-            bringToFront = FALSE
-          ),
-          options = leaflet::pathOptions(
-            pane = 'admin_divs'
+      # create mapdeck vars needed
+      map_data_ready <- map_data_ready |>
+        dplyr::select(dplyr::all_of(c(viz_color, labels(terms(polygon_label))))) |>
+        dplyr::mutate(
+          hex = color_palette(color_vector),
+          tooltip = paste0(
+            "<p>", .data[[labels(terms(polygon_label))]], ": ", round(.data[[viz_color]], 2), "</p>"
           )
+        )
+      mapdeck::mapdeck_update(map_id = session$ns("fes_map")) |>
+        mapdeck::clear_polygon(layer_id = "polys") |>
+        mapdeck::clear_scatterplot(layer_id = "plots") |>
+        mapdeck::add_polygon(
+          data = map_data_ready,
+          fill_colour = "hex", fill_opacity = 0.8,
+          id = labels(terms(polygon_label)), layer_id = "polys",
+          update_view = FALSE, focus_layer = FALSE,
+          tooltip = "tooltip",
+          legend = legend_js
         )
     }
 
-    temp_proxy |>
-      leaflet::addLegend(
-        position = 'bottomright', pal = color_palette_legend,
-        values = color_vector_legend,
-        title = translate_var(
-          viz_color, data_version, data_scale, lang(), var_thes
-        ),
-        layerId = 'color_legend', opacity = 1,
-        na.label = '', className = 'info legend na_out',
-        labFormat = leaflet::labelFormat(
-          transform = function(x) {sort(x, decreasing = TRUE)}
-        )
-      )
+  #   temp_proxy <- leaflet::leafletProxy('fes_map') |>
+  #     leaflet::clearGroup('plots') |>
+  #     leaflet::clearGroup('polys') |>
+  #     leaflet::clearGroup('drawn_polygon')
+
+  #   if (data_scale == 'local') {
+  #     temp_proxy <- temp_proxy |>
+  #       leaflet::addCircles(
+  #         data = map_data_ready,
+  #         group = 'plots', label = ~plot_id, layerId = ~plot_id,
+  #         stroke = FALSE, fillOpacity = 0.7,
+  #         fillColor = color_palette(color_vector),
+  #         radius = base_size(),
+  #         options = leaflet::pathOptions(pane = 'plots')
+  #       )
+  #   } else {
+  #     temp_proxy <- temp_proxy |>
+  #       leaflet::addPolygons(
+  #         data = map_data_ready,
+  #         group = 'polys',
+  #         label = polygon_label,
+  #         layerId = polygon_label,
+  #         weight = 1, smoothFactor = 1,
+  #         opacity = 1.0, fill = TRUE,
+  #         color = '#6C7A89FF',
+  #         fillColor = color_palette(color_vector),
+  #         fillOpacity = 0.7,
+  #         highlightOptions = leaflet::highlightOptions(
+  #           color = "#CF000F", weight = 2,
+  #           bringToFront = FALSE
+  #         ),
+  #         options = leaflet::pathOptions(
+  #           pane = 'admin_divs'
+  #         )
+  #       )
+  #   }
+
+  #   temp_proxy |>
+  #     leaflet::addLegend(
+  #       position = 'bottomright', pal = color_palette_legend,
+  #       values = color_vector_legend,
+  #       title = translate_var(
+  #         viz_color, data_version, data_scale, lang(), var_thes
+  #       ),
+  #       layerId = 'color_legend', opacity = 1,
+  #       na.label = '', className = 'info legend na_out',
+  #       labFormat = leaflet::labelFormat(
+  #         transform = function(x) {sort(x, decreasing = TRUE)}
+  #       )
+  #     )
   })
 
   map_reactives <- shiny::reactiveValues()
   shiny::observe({
     map_reactives$map_data <- map_data()
-    map_reactives$fes_map_shape_click <- input$fes_map_shape_click
+    # map_reactives$fes_map_shape_click <- input$fes_map_shape_click
+    map_reactives$fes_map_plot_click <- input$fes_map_scatterplot_click
+    map_reactives$fes_map_poly_click <- input$fes_map_polygon_click
     map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
   })
   return(map_reactives)

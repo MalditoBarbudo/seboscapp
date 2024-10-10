@@ -213,9 +213,14 @@ $(document).on('shiny:disconnected', function(event) {
     )
     # info
     shiny::callModule(
-      mod_info, 'mod_infoUI',
+      mod_info, 'mod_infoUI_plot',
       map_reactives, data_reactives, viz_reactives,
-      var_thes, lang
+      var_thes, lang, "plot"
+    )
+    shiny::callModule(
+      mod_info, 'mod_infoUI_poly',
+      map_reactives, data_reactives, viz_reactives,
+      var_thes, lang, "poly"
     )
     # save
     shiny::callModule(
@@ -272,12 +277,27 @@ $(document).on('shiny:disconnected', function(event) {
     ## observers ####
     # modal observer
     shiny::observeEvent(
-      eventExpr = map_reactives$fes_map_shape_click,
+      eventExpr = map_reactives$fes_map_plot_click,
       handlerExpr = {
 
         shiny::showModal(
           shiny::modalDialog(
-            mod_infoUI('mod_infoUI'),
+            mod_infoUI('mod_infoUI_plot'),
+            footer = shiny::modalButton(
+              translate_app('dismiss', lang())
+            ),
+            size = 'm', easyClose = TRUE
+          )
+        )
+      }
+    )
+    shiny::observeEvent(
+      eventExpr = map_reactives$fes_map_poly_click,
+      handlerExpr = {
+
+        shiny::showModal(
+          shiny::modalDialog(
+            mod_infoUI('mod_infoUI_poly'),
             footer = shiny::modalButton(
               translate_app('dismiss', lang())
             ),

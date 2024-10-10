@@ -32,7 +32,7 @@ mod_infoUI <- function(id) {
 mod_info <- function(
   input, output, session,
   map_reactives, data_reactives, viz_reactives,
-  var_thes, lang
+  var_thes, lang, type = c("plot", "poly")
 ) {
 
   ns <- session$ns
@@ -50,7 +50,6 @@ mod_info <- function(
     waiter_plot$show()
 
     # data, scale and color variable
-    map_data <- map_reactives$map_data
     data_scale <- data_reactives$data_scale
     data_version <- data_reactives$data_version
     viz_color <- viz_reactives$viz_color
@@ -63,8 +62,22 @@ mod_info <- function(
         data_scale <- 'poly_id'
       }
     }
+    map_data <- map_reactives$map_data |>
+      dplyr::filter(
+        !is.na(!! rlang::sym(viz_color)),
+        # min and max creates Inf when all vector values are NAs, remove them
+        !is.infinite(!! rlang::sym(viz_color))
+      )
     # click info
-    fes_map_shape_click <- map_reactives$fes_map_shape_click
+    if (type == "plot") {
+      # remember that deckgl is 0 indexed, so we add 1 to the declared index
+      fes_map_shape_click <-
+        jsonlite::fromJSON(shiny::req(map_reactives$fes_map_plot_click))$index + 1
+    } else {
+      fes_map_shape_click <- which(
+        map_data[[data_scale]] == jsonlite::fromJSON(shiny::req(map_reactives$fes_map_poly_click))$object$properties$id
+      )
+    }
 
     temp_plot <- map_data |>
       dplyr::rename(
@@ -78,7 +91,7 @@ mod_info <- function(
     if (nrow(map_data) > 1) {
       temp_plot <- temp_plot +
         ggplot2::geom_point(
-          data = ~ dplyr::filter(.x, label_var != fes_map_shape_click$id),
+          data = ~ dplyr::slice(.x, -fes_map_shape_click),
           colour = '#606060', size = 4, alpha = 0.5,
           position = ggplot2::position_jitter(
             width = .2, height = 0, seed = 25
@@ -94,7 +107,7 @@ mod_info <- function(
 
     temp_plot +
       ggplot2::geom_point(
-        data = ~ dplyr::filter(.x, label_var == fes_map_shape_click$id),
+        data = ~ dplyr::slice(.x, fes_map_shape_click),
         colour = '#22B0C6', size = 6
       ) +
         ggplot2::scale_x_continuous(breaks = NULL) +

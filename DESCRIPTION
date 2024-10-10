@@ -30,5 +30,6 @@ Imports:
     waiter,
     lubridate,
     mapdeck,
-    colourvalues
+    colourvalues,
+    jsonlite
 RoxygenNote: 7.2.3
