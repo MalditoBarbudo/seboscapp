@@ -12,8 +12,6 @@ Imports:
     sf,
     DT,
     shiny,
-    leaflet,
-    leaflet.extras,
     dplyr,
     magrittr,
     shinyjs,

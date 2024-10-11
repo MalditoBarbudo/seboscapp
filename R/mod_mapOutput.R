@@ -9,7 +9,6 @@ mod_mapOutput <- function(id) {
   # ns
   ns <- shiny::NS(id)
   shiny::tagList(
-    # leaflet::leafletOutput(ns("fes_map"), height = 600),
     mapdeck::mapdeckOutput(ns("fes_map"), height = 600),
     shiny::uiOutput(ns('map_container'))
   )
@@ -53,68 +52,7 @@ mod_map <- function(
     )
   }) # end of mapdeck output (empty map)
 
-
-  # output$fes_map <- leaflet::renderLeaflet({
-
-  #   # we need data, and we need color var at least
-  #   leaflet::leaflet() |>
-  #     leaflet::setView(1.72, 41.70, zoom = 8) |>
-  #     leaflet::addProviderTiles(
-  #       leaflet::providers$Esri.WorldShadedRelief, group = 'Relief'
-  #     ) |>
-  #     leaflet::addProviderTiles(
-  #       leaflet::providers$Esri.WorldImagery, group = 'Imaginery'
-  #     ) |>
-  #     leaflet::addProviderTiles(
-  #       leaflet::providers$OpenStreetMap, group = 'OSM'
-  #     ) |>
-  #     leaflet::addProviderTiles(
-  #       leaflet::providers$Esri.WorldGrayCanvas, group = 'WorldGrayCanvas'
-  #     ) |>
-  #     leaflet::addProviderTiles(
-  #       leaflet::providers$CartoDB.PositronNoLabels, group = 'PositronNoLabels'
-  #     ) |>
-  #     leaflet::addMapPane('admin_divs', zIndex = 410) |>
-  #     leaflet::addMapPane('plots', zIndex = 420) |>
-  #     leaflet::addLayersControl(
-  #       baseGroups = c('Relief', 'Imaginery', 'OSM', 'WorldGrayCanvas', 'PositronNoLabels'),
-  #       options = leaflet::layersControlOptions(collapsed = TRUE)
-  #     ) |>
-  #     # leaflet.extras plugins
-  #     leaflet.extras::addDrawToolbar(
-  #       targetGroup = 'drawn_polygon',
-  #       position = 'topleft',
-  #       polylineOptions = FALSE, circleOptions = FALSE,
-  #       rectangleOptions = FALSE, markerOptions = FALSE,
-  #       circleMarkerOptions = FALSE,
-  #       polygonOptions = leaflet.extras::drawPolygonOptions(
-  #         shapeOptions = leaflet.extras::drawShapeOptions()
-  #       ),
-  #       editOptions = leaflet.extras::editToolbarOptions(
-  #         edit = TRUE, remove = TRUE
-  #       ),
-  #       singleFeature = TRUE
-  #     )
-  # }) # end of leaflet output (empty map)
-
   ## reactives ####
-  # zoom-size transformation. Logic is as follows:
-  #   - In closer zooms (10) go to the base size of 750. In far zooms increase
-  #     accordingly, until zoom 7 and further, with a max size of 1500
-  # base_size <- shiny::reactive({
-  #   current_zoom <- input$fes_map_zoom
-  #   if (current_zoom <= 7) {
-  #     current_zoom <- 7
-  #   }
-  #   if (current_zoom >= 10) {
-  #     current_zoom <- 10
-  #   }
-
-  #   size_transformed <- 750 + ((10 - current_zoom) * 250)
-
-  #   return(size_transformed)
-  # })
-
   # reactive to buid the map data
   map_data <- shiny::reactive({
 
@@ -242,19 +180,6 @@ mod_map <- function(
       color_vector_legend <- color_vector
     }
 
-    # viridis_pal_name <- switch(
-    #   viz_reactives$viz_color,
-    #   "animals_presence" = viridis::ag_GrnYl,
-    #   "mushrooms_production" = ,
-    #   "exported_water",
-    #   "carbon_sequestration",
-    #   "soil_organic_carbon",
-    #   "riparian_forest_cover",
-    #   "slope_forest_cover",
-    #   "erosion_mitigation",
-    #   "wood"
-    # )
-
     color_palette <- switch(
       viz_reactives$viz_pal_config,
       "low" = scales::col_numeric(
@@ -375,57 +300,6 @@ mod_map <- function(
           legend = legend_js
         )
     }
-
-  #   temp_proxy <- leaflet::leafletProxy('fes_map') |>
-  #     leaflet::clearGroup('plots') |>
-  #     leaflet::clearGroup('polys') |>
-  #     leaflet::clearGroup('drawn_polygon')
-
-  #   if (data_scale == 'local') {
-  #     temp_proxy <- temp_proxy |>
-  #       leaflet::addCircles(
-  #         data = map_data_ready,
-  #         group = 'plots', label = ~plot_id, layerId = ~plot_id,
-  #         stroke = FALSE, fillOpacity = 0.7,
-  #         fillColor = color_palette(color_vector),
-  #         radius = base_size(),
-  #         options = leaflet::pathOptions(pane = 'plots')
-  #       )
-  #   } else {
-  #     temp_proxy <- temp_proxy |>
-  #       leaflet::addPolygons(
-  #         data = map_data_ready,
-  #         group = 'polys',
-  #         label = polygon_label,
-  #         layerId = polygon_label,
-  #         weight = 1, smoothFactor = 1,
-  #         opacity = 1.0, fill = TRUE,
-  #         color = '#6C7A89FF',
-  #         fillColor = color_palette(color_vector),
-  #         fillOpacity = 0.7,
-  #         highlightOptions = leaflet::highlightOptions(
-  #           color = "#CF000F", weight = 2,
-  #           bringToFront = FALSE
-  #         ),
-  #         options = leaflet::pathOptions(
-  #           pane = 'admin_divs'
-  #         )
-  #       )
-  #   }
-
-  #   temp_proxy |>
-  #     leaflet::addLegend(
-  #       position = 'bottomright', pal = color_palette_legend,
-  #       values = color_vector_legend,
-  #       title = translate_var(
-  #         viz_color, data_version, data_scale, lang(), var_thes
-  #       ),
-  #       layerId = 'color_legend', opacity = 1,
-  #       na.label = '', className = 'info legend na_out',
-  #       labFormat = leaflet::labelFormat(
-  #         transform = function(x) {sort(x, decreasing = TRUE)}
-  #       )
-  #     )
   })
 
   map_reactives <- shiny::reactiveValues()
@@ -434,7 +308,7 @@ mod_map <- function(
     # map_reactives$fes_map_shape_click <- input$fes_map_shape_click
     map_reactives$fes_map_plot_click <- input$fes_map_scatterplot_click
     map_reactives$fes_map_poly_click <- input$fes_map_polygon_click
-    map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
+    # map_reactives$fes_map_draw_all_features <- input$fes_map_draw_all_features
   })
   return(map_reactives)
 }

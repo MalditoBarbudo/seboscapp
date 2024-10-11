@@ -63,7 +63,8 @@ mod_data <- function(
       "admin_natural_interest_area","admin_special_protection_natural_area",
       "admin_natura_network_2000",
       # custom scales
-      'drawn_polygon', 'file'
+      # 'drawn_polygon',
+      'file'
     ) |>
       purrr::set_names(translate_app(c(
         # preset scales
@@ -71,7 +72,8 @@ mod_data <- function(
         "admin_natural_interest_area","admin_special_protection_natural_area",
         "admin_natura_network_2000",
         # custom scales
-        'drawn_polygon', 'file'
+        # 'drawn_polygon',
+        'file'
       ), lang()))
 
     # tagList
