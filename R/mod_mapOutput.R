@@ -287,7 +287,8 @@ mod_map <- function(
           tooltip = paste0(
             "<p>", .data[[labels(terms(polygon_label))]], ": ", round(.data[[viz_color]], 2), "</p>"
           ),
-          fake_elevation = 20000 * color_vector / max(color_vector, na.rm = TRUE)
+          fake_elevation = 20000 * (color_vector + abs(min(color_vector, na.rm = TRUE))) /
+            max((color_vector + abs(min(color_vector, na.rm = TRUE))), na.rm = TRUE)
         )
       mapdeck::mapdeck_update(map_id = session$ns("fes_map")) |>
         mapdeck::clear_polygon(layer_id = "polys") |>
