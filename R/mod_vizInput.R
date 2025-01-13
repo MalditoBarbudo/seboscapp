@@ -200,7 +200,10 @@ mod_viz <- function(
             value = selected_pal_reverse, status = 'info'
           )
         )
-      ) # end of fluidRow
+      ),
+      shiny::fluidRow(
+        shiny::column(8, shiny::p(translate_app('using_3d', lang())))
+      ) # end of fluidRows
     ) # end of tagList
   }) # end of renderUI
 

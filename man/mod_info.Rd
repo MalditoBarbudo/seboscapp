@@ -12,7 +12,8 @@ mod_info(
   data_reactives,
   viz_reactives,
   var_thes,
-  lang
+  lang,
+  type = c("plot", "poly")
 )
 }
 \arguments{

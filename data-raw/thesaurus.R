@@ -544,6 +544,7 @@ app_translations <- tibble::tribble(
   "pal_normal", "Normal", "Normal", "Normal",
   "viz_pal_config_input", "Configurar paleta", "Config palette", "Configurar paleta",
   "viz_pal_reverse_input", "Invertir la paleta?", "Reverse the palette?", "¿Invertir la paleta?",
+  "using_3d", "Per modificar l'angle de visió mantenir apretat Ctrl mentre s'arrossega amb el ratolí", 'To modify the viewing angle, hold down Ctrl while dragging with the mouse', 'Para modificar el ángulo de visión mantener apretado Ctrl mientras se arrastra con el ratón',
   # save
   'save_map_btn', "Guarda el map", "Save the map", "Guarda el mapa",
   'save_table_btn', "Guarda la taula", "Save the table", "Guarda la tabla",

@@ -172,9 +172,9 @@ mod_map <- function(
 
     if (length(color_vector) < 2) {
       color_vector_legend <- c(
-        color_vector - (color_vector*0.05),
+        color_vector - (color_vector * 0.05),
         color_vector,
-        color_vector + (color_vector*0.05)
+        color_vector + (color_vector * 0.05)
       )
     } else {
       color_vector_legend <- color_vector
@@ -184,7 +184,7 @@ mod_map <- function(
       viz_reactives$viz_pal_config,
       "low" = scales::col_numeric(
         scales::gradient_n_pal(
-          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          hcl.colors(9, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
           c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
@@ -192,14 +192,14 @@ mod_map <- function(
       ),
       "high" = scales::col_numeric(
         scales::gradient_n_pal(
-          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          hcl.colors(9, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
           c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
         na.color = "#FFFFFF00", reverse = !viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
       "normal" = scales::col_numeric(
-        hcl.colors(256, "ag_GrnYl", alpha = 0.8),
+        hcl.colors(256, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
         na.color = "#FFFFFF00", reverse = !viz_reactives$viz_pal_reverse, alpha = TRUE
       )
@@ -209,7 +209,7 @@ mod_map <- function(
       viz_reactives$viz_pal_config,
       "low" = scales::col_numeric(
         scales::gradient_n_pal(
-          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          hcl.colors(9, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
           c(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.35, 0.55, 1)
         ),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
@@ -217,14 +217,14 @@ mod_map <- function(
       ),
       "high" = scales::col_numeric(
         scales::gradient_n_pal(
-          hcl.colors(9, "ag_GrnYl", alpha = 0.8),
+          hcl.colors(9, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
           c(0, 0.45, 0.65, 0.75, 0.8, 0.85, 0.9, 0.95, 1)
         ),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
         na.color = "#FFFFFF00", reverse = viz_reactives$viz_pal_reverse, alpha = TRUE
       ),
       "normal" = scales::col_numeric(
-        hcl.colors(256, "ag_GrnYl", alpha = 0.8),
+        hcl.colors(256, "ag_GrnYl", alpha = ifelse(data_scale == "local", 0.8, 1)),
         c(min(color_vector, na.rm = TRUE), max(color_vector, na.rm = TRUE)),
         na.color = "#FFFFFF00", reverse = viz_reactives$viz_pal_reverse, alpha = TRUE
       )
@@ -270,8 +270,8 @@ mod_map <- function(
         mapdeck::clear_scatterplot(layer_id = "plots") |>
         mapdeck::add_scatterplot(
           data = map_data_ready,
-          fill_colour = "hex", fill_opacity = 0.8,
-          stroke_colour = "hex", stroke_opacity = 0.8,
+          fill_colour = "hex",
+          stroke_colour = "hex",
           id = "plot_id", layer_id = "plots",
           update_view = FALSE, focus_layer = FALSE,
           tooltip = "tooltip",
@@ -286,17 +286,19 @@ mod_map <- function(
           hex = color_palette(color_vector),
           tooltip = paste0(
             "<p>", .data[[labels(terms(polygon_label))]], ": ", round(.data[[viz_color]], 2), "</p>"
-          )
+          ),
+          fake_elevation = 20000 * color_vector / max(color_vector, na.rm = TRUE)
         )
       mapdeck::mapdeck_update(map_id = session$ns("fes_map")) |>
         mapdeck::clear_polygon(layer_id = "polys") |>
         mapdeck::clear_scatterplot(layer_id = "plots") |>
         mapdeck::add_polygon(
           data = map_data_ready,
-          fill_colour = "hex", fill_opacity = 0.8,
+          fill_colour = "hex", fill_opacity = 1,
           id = labels(terms(polygon_label)), layer_id = "polys",
           update_view = FALSE, focus_layer = FALSE,
           tooltip = "tooltip",
+          elevation = "fake_elevation", elevation_scale = 1,
           legend = legend_js
         )
     }

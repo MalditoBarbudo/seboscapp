@@ -93,24 +93,24 @@ r4_erosion <- terra::rast('data-raw/local_scale/r4/w001001.adf') |>
   dplyr::select(slope_forest_cover, x, y)
 
 municipalities <- sf::read_sf(
-  '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp',
+  '../../01_nfi_app/nfiApp/data-raw/shapefiles/bm5mv20sh0tpm1_20180101_0.shp',
 ) |>
   dplyr::select(municipality_id = CODIMUNI, admin_municipality = NOMMUNI, geometry) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 regions <- sf::read_sf(
-  '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpc1_20180101_0.shp'
+  '../../01_nfi_app/nfiApp/data-raw/shapefiles/bm5mv20sh0tpc1_20180101_0.shp'
 ) |>
   dplyr::select(county_id = CODICOMAR, admin_region = NOMCOMAR, geometry) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 provinces <- sf::read_sf(
-  '../../01_nfi_app/NFIappkg/data-raw/shapefiles/bm5mv20sh0tpp1_20180101_0.shp'
+  '../../01_nfi_app/nfiApp/data-raw/shapefiles/bm5mv20sh0tpp1_20180101_0.shp'
 ) |>
   dplyr::select(province_id = CODIPROV, admin_province = NOMPROV, geometry) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ')
 
 # enpe_polygons
 natural_interest_areas <-
-  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/enpe_2017.shp') |>
+  sf::read_sf('../../01_nfi_app/nfiApp/data-raw/shapefiles/enpe_2017.shp') |>
   # rmapshaper::ms_simplify(0.01) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') |>
   dplyr::select(admin_natural_interest_area = nom, geometry) |>
@@ -122,7 +122,7 @@ natural_interest_areas <-
 
 # peins
 special_protection_natural_areas <-
-  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/pein_2017.shp') |>
+  sf::read_sf('../../01_nfi_app/nfiApp/data-raw/shapefiles/pein_2017.shp') |>
   # rmapshaper::ms_simplify(0.01) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') |>
   dplyr::select(admin_special_protection_natural_area = nom, geometry) |>
@@ -134,7 +134,7 @@ special_protection_natural_areas <-
 
 # xn2000_polyogns
 natura_network_2000s <-
-  sf::read_sf('../../01_nfi_app/NFIappkg/data-raw/shapefiles/xn2000_2017.shp') |>
+  sf::read_sf('../../01_nfi_app/nfiApp/data-raw/shapefiles/xn2000_2017.shp') |>
   # rmapshaper::ms_simplify(0.01) |>
   sf::st_transform(crs = '+proj=utm +zone=31 +ellps=GRS80 +units=m +no_defs ') |>
   dplyr::select(admin_natura_network_2000 = nom_n2, geometry) |>

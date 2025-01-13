@@ -8,41 +8,41 @@ source("data-raw/forestime_data.R")
 source("data-raw/thesaurus.R")
 
 # connection
-conn <- RPostgres::dbConnect(
-  RPostgres::Postgres(),
-  dbname = 'ifn',
-  host = Sys.getenv("DB_HOST"),
-  port = Sys.getenv("DB_PORT"),
-  password = Sys.getenv("DB_PASS"),
-  user = Sys.getenv("DB_ADMIN")
-)
+# conn <- RPostgres::dbConnect(
+#   RPostgres::Postgres(),
+#   dbname = 'ifn',
+#   host = Sys.getenv("DB_HOST"),
+#   port = Sys.getenv("DB_PORT"),
+#   password = Sys.getenv("DB_PASS"),
+#   user = Sys.getenv("DB_ADMIN")
+# )
 
 # create database and activate postgis
-sql_table_creation_1 <- glue::glue_sql(
-  .con = conn,
-  "
-  CREATE DATABASE forestecoserv;
-  "
-)
-sql_table_creation_2 <- glue::glue_sql(
-  .con = conn,
-  "
-  GRANT ALL PRIVILEGES ON DATABASE forestecoserv TO ifn;
-  "
-)
-sql_table_creation_3 <- glue::glue_sql(
-  .con = conn,
-  "
-  GRANT CONNECT ON DATABASE forestecoserv TO guest;
-  "
-)
+# sql_table_creation_1 <- glue::glue_sql(
+#   .con = conn,
+#   "
+#   CREATE DATABASE forestecoserv;
+#   "
+# )
+# sql_table_creation_2 <- glue::glue_sql(
+#   .con = conn,
+#   "
+#   GRANT ALL PRIVILEGES ON DATABASE forestecoserv TO ifn;
+#   "
+# )
+# sql_table_creation_3 <- glue::glue_sql(
+#   .con = conn,
+#   "
+#   GRANT CONNECT ON DATABASE forestecoserv TO guest;
+#   "
+# )
 
-RPostgres::dbExecute(conn, sql_table_creation_1)
-RPostgres::dbExecute(conn, sql_table_creation_2)
-RPostgres::dbExecute(conn, sql_table_creation_3)
+# RPostgres::dbExecute(conn, sql_table_creation_1)
+# RPostgres::dbExecute(conn, sql_table_creation_2)
+# RPostgres::dbExecute(conn, sql_table_creation_3)
 
+# RPostgres::dbDisconnect(conn)
 # change conn
-RPostgres::dbDisconnect(conn)
 conn <- RPostgres::dbConnect(
   RPostgres::Postgres(),
   dbname = 'forestecoserv',
@@ -99,7 +99,7 @@ usethis::use_data(
   # local scale
   municipalities, regions, provinces,
   natural_interest_areas, special_protection_natural_areas, natura_network_2000s,
-  # app_translations
+  # translations
   app_translations,
 
   internal = TRUE, overwrite = TRUE
